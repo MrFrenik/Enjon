@@ -38,28 +38,24 @@ namespace Enjon
 	{
 		// Add default mesh and material for renderable
 		AssetManager* am = EngineSubsystem( AssetManager );
-		mRenderable.SetMesh( am->GetDefaultAsset< Mesh >( ) );
-
-		// Set default materials for all material elements
-		for ( u32 i = 0; i < mRenderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
-		{
-			mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
-		} 
 
 		// Get graphics scene from world graphics context
-		World* world = GetEntity()->GetWorld( )->ConstCast< World >( );
+		Entity* ent = GetEntity( );
+		World* world = ent->GetWorld( )->ConstCast< World >( ); 
 		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
 
-		// Add renderable to scene
-		gs->AddStaticMeshRenderable( &mRenderable );
-
-		// Set id of renderable to entity id
-		mRenderable.SetRenderableID( GetEntity()->GetID( ) ); 
-
-		// Hate doing this. For real. Fucking hate it.
-		u32 handle = gs->AllocateStaticMeshRenderable( GetEntity()->GetID( ) ); 
-		mRenderableHandle = handle;
+		// Allocate new static mesh renderable and capture handle
+		mRenderableHandle = gs->AllocateStaticMeshRenderable( ent->GetID() ); 
 		mGraphicsScene = gs;
+
+		// Set default mesh for renderable
+		mRenderableHandle->SetMesh( am->GetDefaultAsset< Mesh >( ) ); 
+
+		// Set default materials for all material elements
+		for ( u32 i = 0; i < mRenderableHandle->GetMesh( )->GetSubMeshCount( ); ++i ) 
+		{
+			mRenderableHandle->SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
+		} 
 	}
 
 	//==================================================================== 
@@ -86,134 +82,111 @@ namespace Enjon
 		{
 			mRenderable.GetGraphicsScene( )->RemoveStaticMeshRenderable( &mRenderable );
 		} 
-	}
-
-	void StaticMeshComponent::Update( )
-	{
-		mRenderable.SetTransform(mEntity->GetWorldTransform());
-	}
+	} 
 	
 	//====================================================================
 		
 	Vec3 StaticMeshComponent::GetPosition() const
 	{ 
-		return mRenderable.GetPosition(); 
+		return mRenderableHandle->GetPosition(); 
 	}
 	
 	//====================================================================
 
 	Vec3 StaticMeshComponent::GetScale() const
 	{ 
-		return mRenderable.GetScale(); 
+		return mRenderableHandle->GetScale(); 
 	}
 
 	//====================================================================
 
 	Quaternion StaticMeshComponent::GetRotation() const 
 	{ 
-		return mRenderable.GetRotation(); 
+		return mRenderableHandle->GetRotation(); 
 	}
 
 	//====================================================================
 
 	AssetHandle< Material > StaticMeshComponent::GetMaterial( const u32& idx ) const
 	{ 
-		return mRenderable.GetMaterial( idx ); 
+		return mRenderableHandle->GetMaterial( idx ); 
 	}
 
 	//====================================================================
 
 	AssetHandle<Mesh> StaticMeshComponent::GetMesh() const
 	{ 
-		return mRenderable.GetMesh(); 
+		return mRenderableHandle->GetMesh(); 
 	}
 
 	//====================================================================
 
 	GraphicsScene* StaticMeshComponent::GetGraphicsScene() const
 	{ 
-		return mRenderable.GetGraphicsScene(); 
+		return mRenderableHandle->GetGraphicsScene(); 
 	}
 
 	//====================================================================
 
 	Transform StaticMeshComponent::GetTransform() const 
 	{ 
-		return mRenderable.GetTransform(); 
+		return mRenderableHandle->GetTransform(); 
 	} 
 
 	//====================================================================
 
 	StaticMeshRenderable* StaticMeshComponent::GetRenderable()
 	{ 
-		return &mRenderable; 
+		return &( *mRenderableHandle ); 
 	}
+
+	//====================================================================
 	
-	/* Sets world transform */
 	void StaticMeshComponent::SetTransform( const Transform& transform )
 	{
-		mRenderable.SetTransform( transform );
+		mRenderableHandle->SetTransform( transform );
 	}
 
 	//====================================================================
 
 	void StaticMeshComponent::SetPosition(const Vec3& position)
 	{
-		mRenderable.SetPosition(position);
+		mRenderableHandle->SetPosition(position);
 	}
 
 	//====================================================================
 
 	void StaticMeshComponent::SetScale(const Vec3& scale)
 	{
-		mRenderable.SetScale(scale);
+		mRenderableHandle->SetScale(scale);
 	}
 
 	//====================================================================
 
 	void StaticMeshComponent::SetScale(const f32& scale)
 	{
-		mRenderable.SetScale(scale);
+		mRenderableHandle->SetScale(scale);
 	}
 
 	//====================================================================
 
 	void StaticMeshComponent::SetRotation(const Quaternion& rotation)
 	{
-		mRenderable.SetRotation(rotation);
+		mRenderableHandle->SetRotation( rotation );
 	}
  
 	//====================================================================
 
 	void StaticMeshComponent::SetMaterial( const AssetHandle< Material >& material, const u32& idx ) 
-	{
-		mRenderable.SetMaterial( material, idx );
-
-		// Get graphics scene from world graphics context
-		World* world = GetEntity()->GetWorld( )->ConstCast< World >( );
-		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
-
-		gs->SetStaticMeshRenderableMaterial( GetEntity()->GetID( ), material, idx ); 
+	{ 
+		mRenderableHandle->SetMaterial( material, idx ); 
 	}
 
 	//====================================================================
 
 	void StaticMeshComponent::SetMesh( const AssetHandle<Mesh>& mesh)
 	{
-		mRenderable.SetMesh( mesh );
- 
-		// Get graphics scene from world graphics context
-		World* world = GetEntity()->GetWorld( )->ConstCast< World >( );
-		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
-
-		gs->SetStaticMeshRenderableMesh( GetEntity()->GetID( ), mesh ); 
-	}
-
-	//==================================================================== 
-
-	void StaticMeshComponent::SetGraphicsScene(GraphicsScene* scene)
-	{
-		mRenderable.SetGraphicsScene(scene);
+		mRenderableHandle->SetMesh( mesh );
 	} 
 
 	//====================================================================
@@ -221,13 +194,13 @@ namespace Enjon
 	Result StaticMeshComponent::SerializeData( ByteBuffer* buffer ) const
 	{
 		// Write uuid of mesh
-		buffer->Write< UUID >( mRenderable.GetMesh( )->GetUUID( ) );
+		buffer->Write< UUID >( mRenderableHandle->GetMesh( )->GetUUID( ) );
 
 		// Write out renderable material size
-		buffer->Write< u32 >( mRenderable.GetMaterialsCount( ) );
+		buffer->Write< u32 >( mRenderableHandle->GetMaterialsCount( ) );
 
 		// Write uuid of materials in renderable
-		for ( auto& mat : mRenderable.GetMaterials( ) )
+		for ( auto& mat : mRenderableHandle->GetMaterials( ) )
 		{
 			buffer->Write< UUID >( mat.Get()->GetUUID( ) );
 		}
@@ -243,7 +216,7 @@ namespace Enjon
 		AssetManager* am = EngineSubsystem( AssetManager );
 
 		// Set mesh
-		mRenderable.SetMesh( am->GetAsset< Mesh >( buffer->Read< UUID >( ) ) );
+		mRenderableHandle->SetMesh( am->GetAsset< Mesh >( buffer->Read< UUID >( ) ) );
 
 		// Get count of materials
 		u32 matCount = buffer->Read< u32 >( );
@@ -255,7 +228,7 @@ namespace Enjon
 			AssetHandle< Material > mat = am->GetAsset< Material >( buffer->Read< UUID >( ) );
 
 			// Set material in renderable at index
-			mRenderable.SetMaterial( mat, i );
+			mRenderableHandle->SetMaterial( mat, i );
 		} 
 
 		return Result::SUCCESS;
@@ -268,15 +241,14 @@ namespace Enjon
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 		EntityManager* em = EngineSubsystem( EntityManager );
 
-		// Grab renderable from graphics subsystem
-		GraphicsScene* gs = em->GetRawEntity( mEntityID )->GetWorld( )->ConstCast< World >( )->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
-		StaticMeshRenderable* rend = gs->GetStaticMeshRenderable( mRenderableHandle ); 
+		// Grab renderable from handle
+		StaticMeshRenderable& rend = *mRenderableHandle;
 
 		// Debug dump renderable
-		igm->InspectObject( rend );
+		igm->InspectObject( &rend );
 
-		// Reset renderable mesh
-		rend->SetMesh( rend->GetMesh( ) );
+		// HACK(): Reset renderable mesh
+		rend.SetMesh( rend.GetMesh( ) );
 
 		return Result::SUCCESS;
 	}
@@ -291,10 +263,10 @@ namespace Enjon
 		IComponentInstanceData* data = EngineSubsystem( EntityManager )->GetIComponentInstanceData< StaticMeshComponent >( ); 
 
 		// Or do a lambda which captures this with its member function
-		data->RegisterPostConstructionCallback( [ & ]( const u32& id, IComponentInstanceData* d ) 
-		{
-			return PostComponentConstruction( id, d );
-		} );
+		//data->RegisterPostConstructionCallback( [ & ]( const u32& id, IComponentInstanceData* d ) 
+		//{
+		//	return PostComponentConstruction( id, d );
+		//} );
 	}
 
 	//==================================================================== 
@@ -312,12 +284,11 @@ namespace Enjon
 		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
 
 		// Should probably be a reference instead...
-		ComponentHandle< StaticMeshComponent >& smc = data->GetComponentHandle< StaticMeshComponent >( id );
+		//ComponentHandle< StaticMeshComponent >& smc = data->GetComponentHandle< StaticMeshComponent >( id );
 
 		// Allocate new renderable handle
-		u32 handle = gs->AllocateStaticMeshRenderable( ent->GetID( ) ); 
-		smc->mRenderableHandle = handle;
-		smc->mGraphicsScene = gs;
+		//smc->mRenderableHandle = gs->AllocateStaticMeshRenderable( ent->GetID( ) );;
+		//smc->mGraphicsScene = gs;
 			
 		// I still like this syntax
 		//data->SetValue( id, &StaticMeshComponent::mRenderableHandle, handle ); 
@@ -335,13 +306,12 @@ namespace Enjon
 
 		ComponentInstanceData< StaticMeshComponent >* iData = em->GetIComponentInstanceData< StaticMeshComponent >( );
 		StaticMeshComponent* compData = iData->GetComponentData( )->ConstCast< StaticMeshComponent >( );
-		const Vector< u32 >& eids = iData->GetEntityIDs();
 
 		// Update all data
-		for ( usize i = 0; i < iData->GetCount( ); ++i )
+		for ( usize i = 0; i < iData->GetDataSize( ); ++i )
 		{
-			Entity* ent = em->GetRawEntity( eids.at( i ) );		// Getting raw entity isn't terrible, but the cache is killed by loading up an entity that has a UUID associated with it. Need to store these elsewhere ( probably just in the EntityMangager itself ); 
-			compData[ i ].mGraphicsScene->SetStaticMeshRenderableTransform( compData[ i ].mRenderableHandle, ent->GetWorldTransform( ) ); 
+			StaticMeshComponent& smc = compData[ i ];
+			smc.mRenderableHandle->SetTransform( smc.GetEntity()->GetWorldTransform( ) );
 		} 
 	} 
 

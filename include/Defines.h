@@ -16,12 +16,14 @@
 #define EP		Enjon::Physics
 #define EGUI	Enjon::GUI 
 
+#include "System/Containers.h"
+
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
-#include <stack>
+#include <stack> 
 
 namespace Enjon
 {
@@ -49,7 +51,13 @@ namespace Enjon
 	using Queue = std::queue<T>;
 
 	template <typename T>
-	using Stack = std::stack<T>;
+	using Stack = std::stack<T>; 
+
+	template <typename T>
+	using SlotArray = slot_array<T>;
+
+	template <typename T>
+	using ResourceHandle = typename slot_array< T >::handle;
 }
 
 #endif

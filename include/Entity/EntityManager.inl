@@ -29,7 +29,8 @@ ComponentInstanceData< T >* EntityManager::RegisterIComponent( )
 	u32 cId = static_cast< u32 >( cls->GetTypeId( ) );
 	if ( mComponentInstanceDataMap.find( cId ) == mComponentInstanceDataMap.end( ) )
 	{
-		mComponentInstanceDataMap[ cId ] = ( ComponentInstanceData< T >* )( IComponentInstanceData::ConstructComponentInstanceData< T >( ) );
+		mComponentInstanceDataMap[ cId ] = new ComponentInstanceData< T >( );
+		//mComponentInstanceDataMap[ cId ] = ( ComponentInstanceData< T >* )( IComponentInstanceData::ConstructComponentInstanceData< T >( ) );
 	}
 	return ( ComponentInstanceData< T >* )( mComponentInstanceDataMap[ cId ] );
 }
@@ -51,7 +52,7 @@ ComponentHandle< T >& EntityManager::AddComponent(const Enjon::EntityHandle& han
 	IComponentInstanceData* data = GetIComponentInstanceData< T >( ); 
 	u32 cId = static_cast< u32 >( Object::GetClass< T >()->GetTypeId( ) );
 	auto cData = ( ComponentInstanceData< T >* )( mComponentInstanceDataMap[ cId ] );
-	return cData->GetComponentHandle< T >( handle.GetID( ) );
+	return cData->GetHandle( handle.GetID( ) );
 }
 
 //--------------------------------------------------------------------------
@@ -80,7 +81,7 @@ ComponentHandle< T >& EntityManager::GetComponent(Entity* entity)
 	IComponentInstanceData* data = GetIComponentInstanceData< T >( ); 
 	u32 cId = static_cast< u32 >( Object::GetClass< T >()->GetTypeId( ) );
 	auto cData = ( ComponentInstanceData< T >* )( mComponentInstanceDataMap[ cId ] );
-	return cData->GetComponentHandle< T >( eid ); 
+	return cData->GetHandle( eid ); 
 }
 
 //=======================================================================================

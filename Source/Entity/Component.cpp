@@ -146,14 +146,7 @@ namespace Enjon
 				return;
 			}
 		} 
-	}
-
-	//=========================================================================
-
-	void IComponentInstanceData::SetEntity( Component* cmp, const u32& eid )
-	{
-		cmp->SetEntity( EngineSubsystem( EntityManager )->GetRawEntity( eid ) );
-	}
+	} 
 
 	//=========================================================================
 }

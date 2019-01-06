@@ -663,13 +663,13 @@ namespace Enjon
 				{
 					case ArraySizeType::Dynamic:
 					{ 
-						return ( T* )( &( ( ( Vector< T >* )( usize( object ) + mOffset ) )->front() ) );
+						return ( T* )( ( &( ( Vector< T >* )( ( u8* )( object ) + mOffset ) )->front() ) );
 					} break;
 
 					default:
 					case ArraySizeType::Fixed:
 					{
-						return ( reinterpret_cast< T* >( usize( object ) + mOffset ) );
+						return ( reinterpret_cast< T* >( ( u8* )( object ) + mOffset ) );
 					} break;
 				}
 			}

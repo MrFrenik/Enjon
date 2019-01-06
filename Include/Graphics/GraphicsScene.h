@@ -8,9 +8,7 @@
 #include "Graphics/Camera.h"
 #include "Graphics/StaticMeshRenderable.h"
 #include "Base/Object.h"
-
-#include <set>
-#include <vector>
+#include "System/Containers.h" 
 
 namespace Enjon 
 { 
@@ -22,7 +20,7 @@ namespace Enjon
 	class SpotLight;
 	class QuadBatch;
 
-	#define INVALID_RESOURCE_HANDLE		0
+	#define INVALID_RESOURCE_HANDLE		0 
 
 	enum class RenderableSortType
 	{
@@ -62,8 +60,6 @@ namespace Enjon
 		private:
 			u32 mLastUsedHandle = 1;
 	};
-
-	using RenderableID = u32;
 
 	ENJON_CLASS( )
 	class GraphicsScene : public Enjon::Object
@@ -220,33 +216,30 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			u32 AllocateStaticMeshRenderable( const u32& id );
+			ResourceHandle< StaticMeshRenderable > AllocateStaticMeshRenderable( const u32& entityID );
 
 			/*
 			* @brief
 			*/
-			void SetStaticMeshRenderableMesh( const u32& handle, const AssetHandle< Mesh >& mesh ); 
+			void SetStaticMeshRenderableMesh( const ResourceHandle< StaticMeshRenderable >& handle, const AssetHandle< Mesh >& mesh );
 
 			/*
 			* @brief
 			*/
-			void SetStaticMeshRenderableMaterial( const u32& handle, const AssetHandle< Material >& material, const u32& matIdx ); 
+			void SetStaticMeshRenderableMaterial( const ResourceHandle< StaticMeshRenderable >& handle, const AssetHandle< Material >& material, const u32& matIdx ); 
 			
 			/*
 			* @brief
 			*/
-			void SetStaticMeshRenderableTransform( const u32& handle, const Transform& wt ); 
+			void SetStaticMeshRenderableTransform( const ResourceHandle< StaticMeshRenderable >& handle, const Transform& wt ); 
 
 			/*
 			* @brief
 			*/
 			Vector< StaticMeshRenderable >* GetStaticMeshRenderableArray()
 			{
-				return ( &mStaticMeshRenderableResourceArray.mResource );
-			}
-
-			// HACK
-			StaticMeshRenderable* GetStaticMeshRenderable( const u32& handle );
+				return ( mStaticMeshRenderableSlotArray.data() );
+			} 
 
 		private: 
 
@@ -286,9 +279,8 @@ namespace Enjon
 			HashSet<PointLight*> mPointLights;
 			HashSet<SpotLight*> mSpotLights; 
 			AmbientSettings mAmbientSettings; 
-
-			// Want a resource data system for renderables
-			ResourceArray< StaticMeshRenderable > mStaticMeshRenderableResourceArray;
+ 
+			SlotArray< StaticMeshRenderable > mStaticMeshRenderableSlotArray;
 
 			// Not sure that I like this "solution"
 			Camera* mActiveCamera = nullptr;

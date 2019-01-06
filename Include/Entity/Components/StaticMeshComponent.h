@@ -36,11 +36,6 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void Update( ) override; 
-
-			/*
-			* @brief
-			*/
 			virtual Result OnEditorUI( ) override;
 
 			/*
@@ -126,12 +121,7 @@ namespace Enjon
 			/* 
 			* @brief Set mesh of renderable 
 			*/
-			void SetMesh(const AssetHandle<Mesh>& mesh);
-
-			/* 
-			* @brief Set scene of renderable 
-			*/
-			void SetGraphicsScene(GraphicsScene* scene); 
+			void SetMesh(const AssetHandle<Mesh>& mesh); 
 
 			/*
 			* @brief
@@ -148,10 +138,9 @@ namespace Enjon
 		public: 
 			
 			ENJON_PROPERTY( )
-			StaticMeshRenderable mRenderable;
+			StaticMeshRenderable mRenderable; 
 
-			ENJON_PROPERTY( NonSerializeable, HideInEditor )
-			u32 mRenderableHandle = INVALID_RESOURCE_HANDLE;
+			ResourceHandle< StaticMeshRenderable > mRenderableHandle;
 
 			GraphicsScene* mGraphicsScene;
 	};

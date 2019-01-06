@@ -6,6 +6,7 @@
 #include "Math/Transform.h"
 #include "System/Types.h"
 #include "Base/Object.h"
+#include "Defines.h"
 
 #include <assert.h>
 #include <array>
@@ -312,217 +313,151 @@ namespace Enjon
 
 	class IComponentInstanceData;
 	using PostConstructionComponentCallback = std::function< Result( const u32&, IComponentInstanceData* ) >;
+ 
+	class IComponentInstanceData;
 
-	template < typename T >	
-	struct ComponentHandle 
+	struct IComponentHandle 
 	{ 
 		public:
-			T* Get( )
-			{
-				return mComponent;
-			}
 
-			T* operator ->( )
-			{
-				return Get();
-			} 
+			~IComponentHandle( ) = default;
+			IComponentHandle( ) = default;
 
-			T* operator *( )
+			virtual Component* operator ->( )
 			{
 				return Get( );
 			}
 
-			bool operator !( )
-			{
-				return ( Get( ) == nullptr );
+			virtual Component* Get( ) = 0;
+
+		protected:
+
+			IComponentHandle( const IComponentInstanceData* data )
+				: mInstanceData( data )
+			{ 
 			}
 
-			T* mComponent; 
+		protected:
+			const IComponentInstanceData* mInstanceData = nullptr; 
+	};
+
+	template <typename T>
+	struct ComponentHandle : public IComponentHandle
+	{
+		friend IComponentInstanceData;
+
+		public:
+
+			ComponentHandle( ) = default;
+			~ComponentHandle( ) = default;
+
+			ComponentHandle( const ComponentHandle< T >& other )
+				: mHandle( other.mHandle )
+			{ 
+				mInstanceData = other.mInstanceData;
+			}
+
+			ComponentHandle( const ResourceHandle< T >& handle, const IComponentInstanceData* instanceData )
+				: mHandle( handle )
+			{ 
+				mInstanceData = instanceData;
+			} 
+
+			ComponentHandle& operator=( const ComponentHandle< T >& other )
+			{
+				this->mHandle = other.mHandle;
+				this->mInstanceData = other.mInstanceData;
+				return *this;
+			}
+
+			inline bool operator !( )
+			{
+				return mHandle.get_id( ) != INVALID_SLOT_HANDLE;
+			}
+
+			T* operator ->( )
+			{
+				return static_cast< T* >( Get( ) );
+			}
+
+			virtual Component* Get( ) override
+			{
+				return mHandle.get_raw_ptr( );
+			}
+
+			u32 GetHandleID( )
+			{
+				return mHandle.get_id( );
+			}
+
+		private:
+			ResourceHandle< T > mHandle;
 	};
 
 	ENJON_CLASS( Abstract )
 	class IComponentInstanceData : public Object
-	{
-		ENJON_CLASS_BODY( IComponentInstanceData )
+	{ 
+		ENJON_CLASS_BODY( IComponentInstanceData ) 
 
-		public: 
+		public:
+			virtual IComponentHandle* Allocate( const u32& eid ) = 0; 
+			virtual void Deallocate( const u32& eid ) = 0; 
+			virtual IComponentHandle* GetComponentHandle( const u32& eid ) = 0;
 
-			virtual Component* GetComponentData( ) = 0; 
-			virtual void Allocate( const u32& id ) = 0; 
-			virtual void Deallocate( const u32& id ) = 0; 
-			const virtual usize GetCount( ) = 0; 
+			virtual Component* GetComponent( const u32& componentHandleID ) = 0;
 
-			template < typename T >
-			ComponentHandle< T >& GetComponentHandle( const u32& id )
-			{
-				ComponentHandle< Component >* it = GetComponentHandleInternal( id );
-				return ( ComponentHandle< T >& )*it; 
-				//Component* data = GetComponentData( );
-				//return ComponentHandle< T >{ data[ mEntityInstanceIndexMap[ id ] ] };
-			} 
-
-			virtual ComponentHandle< Component >* GetComponentHandleInternal( const u32& id ) = 0;
-
-			template < typename T >
-			static IComponentInstanceData* ConstructComponentInstanceData( )
-			{
-				return new ComponentInstanceData< T >( );
-			}
-
-			bool HasComponent( const u32& id )
-			{
-				return mEntityInstanceIndexMap.find( id ) != mEntityInstanceIndexMap.end( );
-			} 
-
-			const Vector< u32 >& GetEntityIDs( )
-			{
-				return mEntityID_InstanceData;
-			}
-
-			void RegisterPostConstructionCallback( const PostConstructionComponentCallback& cb )
-			{
-				mPostConstructionCallbacks.push_back( cb );
-			}
-
-		protected:
-
-			void PostComponentConstruction( const u32& id )
-			{
-				for ( auto& f : mPostConstructionCallbacks )
-				{
-					f( id, this );
-				}
-			}
-
-			// Really not safe to call other than in ONE particular instance
-			void SetEntity( Component* cmp, const u32& eid );
-
-		protected:
-			Vector< u32 > mEntityID_InstanceData;
-			HashMap< u32, u32 > mEntityInstanceIndexMap; 
-			HashMap< u32, void* > mDataIndexPtr;
-			Vector< PostConstructionComponentCallback > mPostConstructionCallbacks;
-			u32 mCapacity;
+			virtual Component* GetComponentData( ) = 0;
+			virtual usize GetDataSize( ) = 0;
 	};
-
-	template < typename T >
+ 
+	template <typename T>
 	class ComponentInstanceData : public IComponentInstanceData
 	{ 
 		public: 
-			ComponentInstanceData( )
-			{
-				//mData.reserve( 10 );
-			}
 
-			virtual Component* GetComponentData( ) override
-			{
-				return mData.data( );
-			}
-
-			const virtual usize GetCount( ) override
+			virtual usize GetDataSize( ) override 
 			{
 				return mData.size( );
 			}
 
-			virtual void Allocate( const u32& id ) override
+			virtual Component* GetComponentData( ) override
 			{
-				if ( !HasComponent( id ) )
-				{
-					// Push back new instance
-					T cmp;
-					cmp.SetEntityID( id ); 
-					mData.push_back( cmp );
+				return mData.raw_data_array();
+			}
 
-					// Push back entity id ( Don't think I need to do this anymore )
-					mEntityID_InstanceData.push_back( id );
+			virtual Component* GetComponent( const u32& componentHandleID ) override
+			{
+				return mData.get_ptr( { componentHandleID, &mData } );
+			}
 
-					// Update entity index map
-					mEntityInstanceIndexMap[ id ] = ( mData.size() - 1 );
+			virtual IComponentHandle* Allocate( const u32& eid ) override
+			{
+				auto handle = mData.insert( T( ) );
+				mHandles[ eid ] = ComponentHandle< T >( handle, this );
+				return &mHandles[ eid ];
+			}
 
-					// Add component handle
-					mComponentHandles[ id ] = ComponentHandle< T > { &mData.at( mData.size( ) - 1 ) };
-
-					// Adjust all the pointers
-					// If holding onto component handles, must go through and fix up pointers after allocating new 
-					// components, since memory might have been moved to another location. 
-					ResetPointers( ); 
-
-					// Post construction for component
-					ComponentHandle< T >& ch = mComponentHandles[ id ];
-					SetEntity( *mComponentHandles[ id ], id );
-					ch->PostConstruction( ); 
-
-					// Post construction on component data
-					//PostComponentConstruction( id );
-				}
+			void Deallocate( const u32& eid ) override
+			{ 
+				auto& h = mHandles[ eid ];
+				mData.erase( { h.GetHandleID(), &mData } );
+				mHandles.erase( eid );
 			} 
 
-			virtual void Deallocate( const u32& id ) override
+			virtual IComponentHandle* GetComponentHandle( const u32& eid ) override
 			{
-				if ( HasComponent( id ) )
-				{
-					// Grab component index from given entity id
-					u32 idx = mEntityInstanceIndexMap[ id ];
-
-					// Get size of data arrays
-					u32 dataCount = GetCount( );
-
-					// Swap and pop all data ( slowest part of this entire operation )
-					if ( dataCount > 1 )
-					{
-						std::iter_swap( mData.begin( ) + idx, mData.end( ) - 1 );
-
-						// Swap entity id instance as well
-						std::iter_swap( mEntityID_InstanceData.begin( ) + idx, mEntityID_InstanceData.end( ) - 1 );
-
-						// Swap component handle pointers
-					}
-					bool idxIsLast = ( idx == ( dataCount - 1 ) );
-
-					// Pop all data arrays
-					mData.pop_back( );
-
-					// Pop entity instance id data as well
-					mEntityID_InstanceData.pop_back( );
-
-					// Erase entity id from index map
-					mEntityInstanceIndexMap.erase( id );
-
-					// Swap around index indirection
-					if ( !mData.empty( ) && !idxIsLast )
-					{
-						mEntityInstanceIndexMap[ mEntityID_InstanceData.at( idx ) ] = idx;
-					}
-
-					// Remove component handle
-					mComponentHandles.erase( id ); 
-				}
+				return &mHandles[ eid ]; 
 			}
 
-			virtual ComponentHandle< Component >* GetComponentHandleInternal( const u32& id ) override
+			ComponentHandle< T >& GetHandle( const u32& eid )
 			{
-				return ( ComponentHandle< Component >* )( &mComponentHandles[ id ] );
+				assert( mHandles.find( eid ) != mHandles.end( ) );
+				return mHandles[ eid ];
 			}
 
-		private:
-			void ResetPointers( )
-			{
-				if ( mCapacity != mData.capacity( ) )
-				{
-					for ( auto& id : mEntityInstanceIndexMap )
-					{
-						u32 idx = id.second;
-						mComponentHandles[ id.first ].mComponent = &mData.at( idx );
-					} 
-				} 
-
-				mCapacity = mData.capacity( );
-			}
-
-		public:
-
-			Vector< T > mData; 
-			HashMap< u32, ComponentHandle< T > > mComponentHandles;
+		protected:
+			SlotArray< T > mData;
+			HashMap< u32, ComponentHandle< T > > mHandles;
 	};
 
 	ENJON_CLASS( Abstract )
@@ -547,9 +482,7 @@ namespace Enjon
 
 		protected:
 			ComponentTickState mTickState = ComponentTickState::TickAlways;
-	};
-
-
+	}; 
 
 }
 

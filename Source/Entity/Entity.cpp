@@ -64,7 +64,8 @@ namespace Enjon
 					continue;
 				}
 
-				Component* cmp = c->mComponent;
+				// Don't like the const cast here...
+				Component* cmp = c->Get( );
 
 				if ( ImGui::CollapsingHeader( cmp->Class( )->GetName( ).c_str( ) ) )
 				{

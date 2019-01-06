@@ -1196,23 +1196,8 @@ namespace Enjon
 					{
 						Entity* ent = cube.Get( );
 						GraphicsScene* gs = ent->GetWorld( )->ConstCast< World >( )->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
-						IComponentInstanceData* data = em->GetIComponentInstanceData< StaticMeshComponent >( );
-						em->AddComponent< StaticMeshComponent >( ent );
-						ComponentHandle< StaticMeshComponent >& ch = data->GetComponentHandle< StaticMeshComponent >( ent->GetID( ) );
-						gs->SetStaticMeshRenderableMesh( ch->mRenderableHandle, am->GetAsset< Mesh >( "models.unit_cube" ) );
-						//u32 rid = data->GetValue( ent->GetID( ), &StaticMeshComponent::mRenderableHandle );
-						//gs->SetStaticMeshRenderableMesh( rid, am->GetAsset< Mesh >( "models.unit_cube" ) );
-						//data->Allocate( ent->GetID() ); 
-						//IComponentRef* proxy = ( data->GetProxy( ent->GetID( ) ) ); 
-						//StaticMeshRenderable* rend = data->GetValuePointer< StaticMeshComponent >( ent->GetID(), &StaticMeshComponent::mRenderable ); 
-
-						// Add to graphics subsystem just to see if this works
-						// Get graphics scene from world graphics context
-						//World* world = ent->GetWorld( )->ConstCast< World >( );
-						//GraphicsScene* gsc = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
-
-						// Add renderable to scene
-						//gsc->AddStaticMeshRenderable( rend ); 
+						ComponentHandle< StaticMeshComponent > ch = em->AddComponent< StaticMeshComponent >( ent );
+						ch->mRenderableHandle->SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 
 						const Camera* cam = gfx->GetGraphicsSceneCamera( );
 						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 

@@ -341,6 +341,7 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
+
 	void Entity::SetID( u32 id )
 	{
 		mID = id;
@@ -386,20 +387,9 @@ namespace Enjon
 
 	//==========================================================================================
 
-	Vector< ComponentHandle< Component >* > Entity::GetIComponents( )
+	const Vector< IComponentHandle* >& Entity::GetIComponents( ) const
 	{
-		EntityManager* em = EngineSubsystem( EntityManager );
-		Vector< ComponentHandle< Component >* > compReturns;
-		for ( auto& c : mComponents )
-		{
-			auto comp = em->GetIComponent( GetHandle( ), c );
-			if ( comp->mComponent )
-			{
-				compReturns.push_back( comp );
-			}
-		}
-
-		return compReturns;
+		return mComponentHandles;
 	}
 
 	//==========================================================================================
@@ -923,18 +913,7 @@ namespace Enjon
 		}
 
 		return nullptr;
-	}
-
-	//---------------------------------------------------------------
-
-	ComponentHandle< Component >* EntityManager::GetIComponent( const EntityHandle& entity, const u32& cId )
-	{
-		if ( mComponentInstanceDataMap.find( cId ) != mComponentInstanceDataMap.end( ) )
-		{
-			return &mComponentInstanceDataMap[ cId ]->GetComponentHandle< Component >( entity.GetID( ) );
-		}
-		return nullptr;
-	}
+	} 
 
 	//---------------------------------------------------------------
 
@@ -1688,9 +1667,13 @@ namespace Enjon
 		//if ( compCls->InstanceOf( Object::GetClass< StaticMeshComponent >( ) ) )
 		{
 			IComponentInstanceData* data = GetIComponentInstanceData( compCls ); 
-			data->Allocate( eid ); 
-			// Get component ptr and push back into entity components
-			entity->mComponents.push_back( compIdx );
+			IComponentHandle* ch = data->Allocate( eid ); 
+			Component* cmp = ch->Get( );
+			cmp->SetEntity( entity );
+			cmp->SetEntityID( entity->GetID( ) );
+			ch->Get( )->PostConstruction( );
+			//entity->mComponents.push_back( compIdx );
+			entity->mComponentHandles.push_back( ch );
 
 			// Need to add required components from meta class
 			const MetaClassComponent* cc = static_cast<const MetaClassComponent*>( compCls );

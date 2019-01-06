@@ -201,7 +201,7 @@ namespace Enjon
 		* @brief Gets component from entity, if exists
 		*/
 		template <typename T>
-		ComponentHandle< T >& GetComponent( );
+		ComponentHandle< T > GetComponent( );
 
 		/*
 		* @brief
@@ -212,7 +212,7 @@ namespace Enjon
 		* @brief Attaches component to entity, if exists
 		*/
 		template <typename T>
-		ComponentHandle< T >& AddComponent( );
+		ComponentHandle< T > AddComponent( );
 
 		/*
 		* @brief
@@ -448,7 +448,7 @@ namespace Enjon
 		/**
 		* @brief
 		*/
-		Vector< ComponentHandle< Component >* > GetIComponents( );
+		const Vector< IComponentHandle* >& GetIComponents( ) const;
 
 		/**
 		* @brief Propagates transform down through all components
@@ -589,7 +589,9 @@ namespace Enjon
 
 		const World* mWorld = nullptr;
 
-		Enjon::EntityState mState;
+		Enjon::EntityState mState; 
+
+		Vector< IComponentHandle* > mComponentHandles;
 
 		u32 mWorldTransformDirty : 1; 
 		u32 mIsArchetypeRoot : 1;
