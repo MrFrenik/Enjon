@@ -293,11 +293,6 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void ExplicitConstructor( ) override;
-
-			/*
-			* @brief
-			*/
 			virtual void Update( ) override; 
 
 		protected:

@@ -65,7 +65,6 @@ enum MetaPropertyEnumDefines
 		}\
 		~ComponentName()\
 		{\
-			ExplicitDestructor( );\
 		}\
 		virtual const Enjon::MetaClass* Class( ) const override\
 		{\

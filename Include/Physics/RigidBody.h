@@ -28,6 +28,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			void Destroy( );
+
+			/**
+			* @brief
+			*/
 			virtual void ExplicitDestructor( ) override;
 
 			/**

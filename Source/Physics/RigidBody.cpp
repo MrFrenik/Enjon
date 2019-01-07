@@ -41,6 +41,32 @@ namespace Enjon
 
 	//========================================================================
 
+	void RigidBody::Destroy( )
+	{
+		// Remove body from physics world
+		if ( mBody )
+		{
+			Engine::GetInstance( )->GetSubsystem( Object::GetClass< PhysicsSubsystem >( ) )->ConstCast< PhysicsSubsystem >( )->RemoveBody( GetRawBody() );
+			delete mBody;
+		}
+
+		// Delete motion state
+		if ( mMotionState )
+		{
+			delete mMotionState;
+		}
+
+		if ( mShape )
+		{
+			delete mShape;
+		}
+
+		// Set all to null
+		mShape = nullptr;
+		mBody = nullptr;
+		mMotionState = nullptr; 
+	}
+
 	void RigidBody::ExplicitDestructor( )
 	{
 		//// Remove body from physics world

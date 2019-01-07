@@ -21,6 +21,9 @@ namespace Enjon
 
 		// Delete all subscriptions
 		ClearAllCallbacks( );
+
+		// Free memory for rigid body
+		mRigidBody->Destroy( );
 	}
 
 	//========================================================================
@@ -371,11 +374,7 @@ namespace Enjon
 	Transform RigidBodyComponent::GetWorldTransform( )
 	{
 		return mRigidBody->GetWorldTransform( );
-	}
-
-	void RigidBodyComponentSystem::ExplicitConstructor( )
-	{ 
-	}
+	} 
 
 	//======================================================================== 
 
