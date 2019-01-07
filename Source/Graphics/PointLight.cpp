@@ -16,7 +16,7 @@ namespace Enjon
 
 	//============================================================================================================================
 
-	PointLight::PointLight(Vec3& position, float attenuationRate, ColorRGBA32& color, float intensity, float radius)
+	PointLight::PointLight( const Vec3& position, const f32& attenuationRate, const ColorRGBA32& color, const f32& intensity, const f32& radius )
 	{
 		mPosition = position;
 		mAttenuationRate = attenuationRate;
@@ -37,34 +37,34 @@ namespace Enjon
 
 	//============================================================================================================================
 
-	void PointLight::SetColor(ColorRGBA32& color)
+	void PointLight::SetColor( const ColorRGBA32& color )
 	{
 		mColor = color;
 	}
 
 	//============================================================================================================================
 
-	void PointLight::SetIntensity(float intensity)
+	void PointLight::SetIntensity( const f32& intensity )
 	{
 		mIntensity = intensity;	
 	}
 
-	void PointLight::SetGraphicsScene(GraphicsScene* scene)
+	void PointLight::SetGraphicsScene( GraphicsScene* scene )
 	{
 		mGraphicsScene = scene;
 	}
 
-	void PointLight::SetPosition(Vec3& position)
+	void PointLight::SetPosition( const Vec3& position )
 	{
 		mPosition = position;
 	}
 
-	void PointLight::SetAttenuationRate(float rate)
+	void PointLight::SetAttenuationRate( const f32& rate )
 	{
 		mAttenuationRate = rate;
 	}
 
-	void PointLight::SetRadius(float radius)
+	void PointLight::SetRadius( const f32& radius )
 	{
 		mRadius = radius;
 	}

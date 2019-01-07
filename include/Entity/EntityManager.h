@@ -206,7 +206,7 @@ namespace Enjon
 		/*
 		* @brief
 		*/
-		Component* GetComponent( const MetaClass* compCls );
+		IComponentHandle* GetComponent( const MetaClass* compCls );
 
 		/**
 		* @brief Attaches component to entity, if exists
@@ -217,7 +217,7 @@ namespace Enjon
 		/*
 		* @brief
 		*/
-		Component* AddComponent( const MetaClass* compCls );
+		IComponentHandle* AddComponent( const MetaClass* compCls );
 
 		/**
 		* @brief Detaches component from entity, if exists
@@ -430,20 +430,7 @@ namespace Enjon
 		/**
 		* @brief
 		*/
-		Vector< EntityHandle > GetInstancedEntities( );
-
-		/**
-		* @brief
-		*/
-		const Vector<u32>& GetComponentIndicies( ) const
-		{
-			return mComponents;
-		}
-
-		/**
-		* @brief
-		*/
-		Vector<Component*> GetComponents( );
+		Vector< EntityHandle > GetInstancedEntities( ); 
 
 		/**
 		* @brief
@@ -475,12 +462,7 @@ namespace Enjon
 		*/
 		const EntityState& GetState( ) const;
 
-	protected:
-
-		/*
-		* @brief
-		*/
-		void Update( const f32& dt );
+	protected: 
 
 		/*
 		* @brief
@@ -709,7 +691,7 @@ namespace Enjon
 		/**
 		*@brief
 		*/
-		Component* AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle );
+		IComponentHandle* AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle );
 
 		/**
 		*@brief
@@ -731,7 +713,7 @@ namespace Enjon
 		/**
 		*@brief
 		*/
-		Component* GetComponent( const MetaClass* compCls, const EntityHandle& entity );
+		IComponentHandle* GetComponent( const MetaClass* compCls, const EntityHandle& entity );
 
 		/**
 		*@brief
@@ -834,7 +816,7 @@ namespace Enjon
 		/**
 		* @brief
 		*/
-		Component* GetComponent( const EntityHandle& entity, const u32& ComponentID );
+		IComponentHandle* GetComponent( const EntityHandle& entity, const u32& ComponentID );
 
 		/**
 		* @brief

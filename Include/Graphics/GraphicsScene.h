@@ -6,7 +6,6 @@
 #include "System/Types.h"
 #include "Graphics/Color.h"
 #include "Graphics/Camera.h"
-#include "Graphics/StaticMeshRenderable.h"
 #include "Base/Object.h"
 #include "System/Containers.h" 
 
@@ -21,7 +20,7 @@ namespace Enjon
 	class QuadBatch;
 
 	#define INVALID_RESOURCE_HANDLE		0 
-
+	
 	enum class RenderableSortType
 	{
 		MATERIAL,
@@ -67,6 +66,11 @@ namespace Enjon
 		ENJON_CLASS_BODY( GraphicsScene )
 
 		public:
+
+			/*
+			* @brief
+			*/
+			virtual void ExplicitConstructor( ) override;
 
 			/*
 			* @brief
@@ -221,25 +225,42 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void SetStaticMeshRenderableMesh( const ResourceHandle< StaticMeshRenderable >& handle, const AssetHandle< Mesh >& mesh );
-
-			/*
-			* @brief
-			*/
-			void SetStaticMeshRenderableMaterial( const ResourceHandle< StaticMeshRenderable >& handle, const AssetHandle< Material >& material, const u32& matIdx ); 
+			ResourceHandle< PointLight > AllocatePointLight( );
 			
 			/*
 			* @brief
 			*/
-			void SetStaticMeshRenderableTransform( const ResourceHandle< StaticMeshRenderable >& handle, const Transform& wt ); 
+			ResourceHandle< DirectionalLight > AllocateDirectionalLight( );
 
 			/*
 			* @brief
 			*/
-			Vector< StaticMeshRenderable >* GetStaticMeshRenderableArray()
-			{
-				return ( mStaticMeshRenderableSlotArray.data() );
-			} 
+			void DeallocateDirectionalLight( const ResourceHandle< DirectionalLight >& light );
+
+			/*
+			* @brief
+			*/
+			void DeallocatePointLight( const ResourceHandle< PointLight >& light );
+
+			/*
+			* @brief
+			*/
+			void DeallocateStaticMeshRenderable( const ResourceHandle< StaticMeshRenderable >& renderable ); 
+
+			/*
+			* @brief
+			*/
+			Vector< StaticMeshRenderable >* GetStaticMeshRenderableArray( );
+
+			/*
+			* @brief
+			*/
+			Vector< PointLight >* GetPointLightArray( );
+
+			/*
+			* @brief
+			*/
+			Vector< DirectionalLight >* GetDirectionalLightArray( );
 
 		private: 
 
@@ -280,7 +301,9 @@ namespace Enjon
 			HashSet<SpotLight*> mSpotLights; 
 			AmbientSettings mAmbientSettings; 
  
-			SlotArray< StaticMeshRenderable > mStaticMeshRenderableSlotArray;
+			SlotArray< StaticMeshRenderable >*	mStaticMeshRenderableSlotArray = nullptr;
+			SlotArray< PointLight >*			mPointLightSlotArray = nullptr;
+			SlotArray< DirectionalLight >*		mDirectionalLightSlotArray = nullptr;
 
 			// Not sure that I like this "solution"
 			Camera* mActiveCamera = nullptr;

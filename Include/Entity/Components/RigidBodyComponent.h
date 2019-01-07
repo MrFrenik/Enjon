@@ -7,14 +7,13 @@
 
 #include "Base/Object.h"
 #include "Entity/Component.h"
-#include "Physics/PhysicsSubsystem.h"
 #include "Physics/RigidBody.h"
 #include "Physics/CollisionReport.h"
 #include "System/Types.h"
 
 namespace Enjon
 { 
-	using CollisionCallback = std::function< void( Component*, const CollisionReport& ) >; 
+	using CollisionCallback = std::function< void( IComponentHandle*, const CollisionReport& ) >; 
  
 	class CollisionCallbackSubscriptionBase
 	{ 
@@ -37,7 +36,7 @@ namespace Enjon
 			CollisionCallbackSubscription( T* comp, const std::function< void(T*, const CollisionReport& )>& callback )
 				: mComponent( comp ), mCallback( callback )
 			{ 
-				static_assert( std::is_base_of<Component, T>::value, "CollisionCallbackSubscription::Constructor() - T must inherit from Component." ); 
+				static_assert( std::is_base_of<IComponentHandle, T>::value, "CollisionCallbackSubscription::Constructor() - T must inherit from Component." ); 
 			}
 
 			~CollisionCallbackSubscription( )
@@ -90,6 +89,16 @@ namespace Enjon
 			* @brief
 			*/
 			virtual Result OnEditorUI( ) override;
+
+			/**
+			* @brief
+			*/
+			bool IsKinematic( );
+			
+			/**
+			* @brief
+			*/
+			Transform GetWorldTransform( );
 
 			/**
 			* @brief
@@ -263,13 +272,37 @@ namespace Enjon
 			void ClearAllCallbacks( );
 
 		protected: 
-			ENJON_PROPERTY( )
-			RigidBody mBody;
+			//ENJON_PROPERTY( )
+			//RigidBody mBody;
+
+			ResourceHandle< RigidBody > mRigidBody;
 
 		protected: 
 			Vector < CollisionCallbackSubscriptionBase* > mCollisionEnterCallbacks;
 			Vector < CollisionCallbackSubscriptionBase* > mCollisionExitCallbacks;
 			Vector < CollisionCallbackSubscriptionBase* > mCollisionOverlapCallbacks;
+	};
+
+	ENJON_CLASS( )
+	class RigidBodyComponentSystem : public IComponentSystem
+	{
+		ENJON_CLASS_BODY( RigidBodyComponentSystem )
+
+		public: 
+
+			/*
+			* @brief
+			*/
+			virtual void ExplicitConstructor( ) override;
+
+			/*
+			* @brief
+			*/
+			virtual void Update( ) override; 
+
+		protected:
+
+			Result PostComponentConstruction( const u32& id, IComponentInstanceData* data ); 
 	};
 }
 

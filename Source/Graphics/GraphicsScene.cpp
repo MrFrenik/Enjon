@@ -19,6 +19,13 @@ namespace Enjon
 { 
 	//=========================================================================================
 
+	void GraphicsScene::ExplicitConstructor( )
+	{
+		mDirectionalLightSlotArray = new SlotArray< DirectionalLight >( );
+		mPointLightSlotArray = new SlotArray< PointLight >( );
+		mStaticMeshRenderableSlotArray = new SlotArray< StaticMeshRenderable >( );
+	}
+
 	void GraphicsScene::ExplicitDestructor()
 	{
 		for ( auto& r : mStaticMeshRenderables )
@@ -109,45 +116,63 @@ namespace Enjon
 
 	//====================================================================================================
 
+	void GraphicsScene::DeallocateDirectionalLight( const ResourceHandle< DirectionalLight >& light )
+	{
+		mDirectionalLightSlotArray->erase( light );
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::DeallocatePointLight( const ResourceHandle< PointLight >& light )
+	{
+		mPointLightSlotArray->erase( light );
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::DeallocateStaticMeshRenderable( const ResourceHandle< StaticMeshRenderable >& renderable )
+	{
+		mStaticMeshRenderableSlotArray->erase( renderable );
+	}
+
+	//====================================================================================================
+
+	ResourceHandle< PointLight > GraphicsScene::AllocatePointLight( )
+	{
+		ResourceHandle< PointLight > pl = mPointLightSlotArray->emplace( );
+		pl->SetGraphicsScene( this );
+		return pl;
+	}
+
+	//====================================================================================================
+
+	ResourceHandle< DirectionalLight > GraphicsScene::AllocateDirectionalLight( )
+	{
+		ResourceHandle< DirectionalLight > dl = mDirectionalLightSlotArray->emplace( ); 
+		dl->SetGraphicsScene( this );
+		return dl;
+	}
+
+	//====================================================================================================
+
 	ResourceHandle< StaticMeshRenderable > GraphicsScene::AllocateStaticMeshRenderable( const u32& entityID ) 
 	{ 
 		// Construct and new static mesh renderable
 		AssetManager* am = EngineSubsystem( AssetManager );
-		StaticMeshRenderable renderable;
-		renderable.SetGraphicsScene( this );
-		renderable.SetRenderableID( entityID );
-		renderable.SetMesh( am->GetDefaultAsset< Mesh >( ) ); 
+
+		auto handle = mStaticMeshRenderableSlotArray->emplace( ); 
+
+		handle->SetGraphicsScene( this );
+		handle->SetRenderableID( entityID );
+		handle->SetMesh( am->GetDefaultAsset< Mesh >( ) ); 
  
 		// Set default materials for all material elements
-		for ( u32 i = 0; i < renderable.GetMesh( )->GetSubMeshCount( ); ++i ) 
+		for ( u32 i = 0; i < handle->GetMesh( )->GetSubMeshCount( ); ++i ) 
 		{
-			renderable.SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
+			handle->SetMaterial( am->GetDefaultAsset< Material >( ), i ); 
 		} 
 
-		auto handle = mStaticMeshRenderableSlotArray.insert( renderable ); 
-
 		return handle;
-	}
-
-	//====================================================================================================
-
-	void GraphicsScene::SetStaticMeshRenderableMesh( const ResourceHandle< StaticMeshRenderable >& handle, const AssetHandle< Mesh >& mesh )
-	{ 
-		mStaticMeshRenderableSlotArray.get( handle ).SetMesh( mesh );
-	}
-
-	//====================================================================================================
-
-	void GraphicsScene::SetStaticMeshRenderableMaterial( const ResourceHandle< StaticMeshRenderable >& handle, const AssetHandle< Material >& material, const u32& matIdx )
-	{ 
-		mStaticMeshRenderableSlotArray.get( handle ).SetMaterial( material, matIdx );
-	}
-
-	//====================================================================================================
-
-	void GraphicsScene::SetStaticMeshRenderableTransform( const ResourceHandle< StaticMeshRenderable >& handle, const Transform& wt )
-	{
-		mStaticMeshRenderableSlotArray.get( handle ).SetTransform( wt );
 	} 
 
 	//====================================================================================================
@@ -445,6 +470,27 @@ namespace Enjon
 		//AssetHandle<Texture> texB = b->GetMaterial()->GetTexture(TextureSlotType::Albedo);
 
 		//return texA.Get()->GetTextureId() > texB.Get()->GetTextureId();
+	}
+
+	//================================================================================================== 
+
+	Vector< StaticMeshRenderable >* GraphicsScene::GetStaticMeshRenderableArray()
+	{
+		return ( mStaticMeshRenderableSlotArray->data() );
+	} 
+
+	//================================================================================================== 
+
+	Vector< PointLight >* GraphicsScene::GetPointLightArray( )
+	{
+		return mPointLightSlotArray->data( );
+	}
+
+	//================================================================================================== 
+
+	Vector< DirectionalLight >* GraphicsScene::GetDirectionalLightArray( )
+	{
+		return mDirectionalLightSlotArray->data( );
 	}
 
 	//================================================================================================== 

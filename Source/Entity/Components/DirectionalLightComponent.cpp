@@ -22,9 +22,9 @@ namespace Enjon
 	void DirectionalLightComponent::ExplicitDestructor()
 	{
 		// Remove renderable from scene
-		if (mLight.GetGraphicsScene() != nullptr)
+		if (mLight->GetGraphicsScene() != nullptr)
 		{
-			mLight.GetGraphicsScene()->RemoveDirectionalLight(&mLight);
+			mLight->GetGraphicsScene()->DeallocateDirectionalLight( mLight );
 		}
 	} 
 
@@ -35,9 +35,7 @@ namespace Enjon
 		// Get graphics scene from world graphics context
 		World* world = mEntity->GetWorld( )->ConstCast< World >( );
 		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
-
-		// Add light to scene
-		gs->AddDirectionalLight( &mLight ); 
+		mLight = gs->AllocateDirectionalLight( ); 
 	}
 
 	//==================================================================================
@@ -45,21 +43,28 @@ namespace Enjon
 	void DirectionalLightComponent::Update()
 	{
 		// Set direction to entity's forward vector
-		mLight.SetDirection( mEntity->GetWorldRotation( ) * Vec3::ZAxis( ) );
+		mLight->SetDirection( mEntity->GetWorldRotation( ) * Vec3::ZAxis( ) );
 	} 
 
 	//==================================================================================
 
-	void DirectionalLightComponent::SetColor(ColorRGBA32& color)
+	void DirectionalLightComponent::UpdateTransform( const Transform& transform )
 	{
-		mLight.SetColor(color);
+		mLight->SetDirection( transform.GetEulerAngles( ).Normalize( ) );
 	}
 
 	//==================================================================================
 
-	void DirectionalLightComponent::SetIntensity(float intensity)
+	void DirectionalLightComponent::SetColor( const ColorRGBA32& color )
 	{
-		mLight.SetIntensity(intensity);
+		mLight->SetColor(color);
+	}
+
+	//==================================================================================
+
+	void DirectionalLightComponent::SetIntensity( const f32& intensity )
+	{
+		mLight->SetIntensity(intensity);
 	} 
 
 	//================================================================================== 
@@ -67,7 +72,7 @@ namespace Enjon
 	Result DirectionalLightComponent::OnEditorUI( )
 	{
 		// Inspect light 
-		EngineSubsystem( ImGuiManager )->InspectObject( &mLight ); 
+		EngineSubsystem( ImGuiManager )->InspectObject( mLight.get_raw_ptr( ) );
 
 		return Result::SUCCESS;
 	}

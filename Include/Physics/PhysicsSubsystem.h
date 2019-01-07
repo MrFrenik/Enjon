@@ -9,6 +9,9 @@
 #include "Subsystem.h"
 #include "Math/Vec3.h" 
 #include "Physics/PhysicsDefines.h"
+#include "Entity/Component.h"
+#include "Physics/RigidBody.h"
+#include "Entity/Components/RigidBodyComponent.h"
 
 namespace Enjon 
 { 
@@ -109,6 +112,8 @@ namespace Enjon
 	{ 
 		ENJON_CLASS_BODY( PhysicsSubsystem )
 
+		friend RigidBodyComponent;
+
 		public: 
 
 			/**
@@ -129,12 +134,14 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void AddBody( RigidBody* body ); 
+			void AddBody( BulletRigidBody* body );
+			//void AddBody( const ResourceHandle< RigidBody >& body ); 
 
 			/**
 			*@brief
 			*/
-			void RemoveBody( RigidBody* body );
+			//void RemoveBody( const ResourceHandle< RigidBody >& body );
+			void RemoveBody( BulletRigidBody* body );
 
 			/**
 			*@brief
@@ -149,7 +156,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void RemoveFromContactEvents( RigidBodyComponent* comp );
+			void RemoveFromContactEvents( ComponentHandle< RigidBodyComponent >* comp );
 
 			/**
 			*@brief
@@ -159,7 +166,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			const HashSet< RigidBodyComponent* >* GetContactList( RigidBodyComponent* component );
+			const HashSet< ComponentHandle< RigidBodyComponent >* >* GetContactList( ComponentHandle< RigidBodyComponent >* component );
 
 			/**
 			*@brief
@@ -176,12 +183,16 @@ namespace Enjon
 			*/
 			void CastRay( RayCastResult* ray );
 
+		protected:
+
+			ResourceHandle< RigidBody > AllocateRigidBodyHandle( );
+
 		private:
 
 			/**
 			*@brief
 			*/
-			bool HasContact( RigidBodyComponent* component );
+			bool HasContact( ComponentHandle< RigidBodyComponent >* component );
 
 			/**
 			*@brief
@@ -196,10 +207,12 @@ namespace Enjon
 			BulletSequentialImpulseConstraintSolver* mSolver				= nullptr;
 
 			HashSet<RigidBody*> mRigidBodies;
-			HashMap< RigidBodyComponent*, HashSet< RigidBodyComponent* > > mContactEvents;
-			HashMap< RigidBodyComponent*, HashSet< RigidBodyComponent* > > mNewContactEvents;
+			HashMap< ComponentHandle< RigidBodyComponent >*, HashSet< ComponentHandle< RigidBodyComponent >* > > mContactEvents;
+			HashMap< ComponentHandle< RigidBodyComponent >*, HashSet< ComponentHandle< RigidBodyComponent >* > > mNewContactEvents;
 
 			PhysicsDebugDrawer mDebugDrawer;
+
+			SlotArray< RigidBody > mRigidBodySlotArray;
 
 			u32 mIsPaused = false;
 			u32 mWasTicked = false;

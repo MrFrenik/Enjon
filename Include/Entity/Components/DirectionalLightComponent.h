@@ -34,6 +34,11 @@ namespace Enjon
 			*/
 			virtual void Update() override;
 
+			/*
+			* @brief
+			*/
+			virtual void UpdateTransform( const Transform& transform ) override;
+
 			/**
 			* @brief
 			*/
@@ -42,46 +47,48 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			DirectionalLight* GetLight() { return &mLight; } 
+			DirectionalLight& GetLight() { return *mLight; } 
 
 			/*
 			* @brief
 			*/
-			ColorRGBA32& GetColor() { return mLight.GetColor(); }
+			ColorRGBA32& GetColor() { return mLight->GetColor(); }
 
 			/*
 			* @brief
 			*/
-			float GetIntensity() { return mLight.GetIntensity(); } 
+			f32 GetIntensity() { return mLight->GetIntensity(); } 
 
 			/*
 			* @brief
 			*/
-			void SetAttenuationRate(float rate);
+			void SetAttenuationRate( const f32& rate );
 
 			/*
 			* @brief
 			*/
-			void SetPosition(Vec3& position);
+			void SetPosition( const Vec3& position );
 
 			/*
 			* @brief
 			*/
-			void SetColor(ColorRGBA32& color);
+			void SetColor( const ColorRGBA32& color );
 
 			/* 
 			* @brief
 			*/
-			void SetIntensity(float intensity);
+			void SetIntensity( const f32& intensity );
 
 			/* 
 			* @brief
 			*/
-			void SetRadius(float radius); 
+			void SetRadius( const f32& radius ); 
 
 		private:
-			ENJON_PROPERTY( )
-			DirectionalLight mLight;	
+			//ENJON_PROPERTY( )
+			//DirectionalLight mLight;	
+
+			ResourceHandle< DirectionalLight > mLight;
 	};
 }
 

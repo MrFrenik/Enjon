@@ -747,12 +747,12 @@ namespace Enjon
 			{
 				case MetaPropertyType::Object:
 				{ 
-					if ( prop->GetTraits( ).IsPointer( ) )
-					{
-						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
-						ObjectArchiver::ClearAllPropertyOverrides( base->GetValueAsObject( obj )->ConstCast< Object >( ) );
-					}
-					else
+					//if ( prop->GetTraits( ).IsPointer( ) )
+					//{
+					//	const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+					//	ObjectArchiver::ClearAllPropertyOverrides( base->GetValueAsObject( obj )->ConstCast< Object >( ) );
+					//}
+					//else
 					{
 						Enjon::Object* destObj = cls->GetValueAs< Object >( obj, prop )->ConstCast< Object >( );
 						ObjectArchiver::ClearAllPropertyOverrides( destObj );

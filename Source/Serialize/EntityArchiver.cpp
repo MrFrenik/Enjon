@@ -84,7 +84,7 @@ namespace Enjon
 		// Components
 		//========================================================================== 
 
-		const Vector< Component* >& comps = entity.Get( )->GetComponents( );
+		const Vector< IComponentHandle* >& comps = entity.Get( )->GetIComponents( );
 
 		// Write out number of comps
 		buffer->Write< u32 >( ( u32 )comps.size( ) );
@@ -92,8 +92,10 @@ namespace Enjon
 		// Write out component data
 		for ( auto& c : comps ) 
 		{ 
+			Component* comp = c->Get( );
+
 			// Get component's meta class
-			const MetaClass* compCls = c->Class( ); 
+			const MetaClass* compCls = comp->Class( ); 
 
 			// Write out component class
 			buffer->Write< String >( compCls->GetName( ) );
@@ -101,17 +103,17 @@ namespace Enjon
 			// Need to write out specific data regarding the component, namely how much size there is so that I can 
 			// skip the data in the buffer
 			ByteBuffer temp; 
-			if ( c->SerializeData( &temp ) == Result::INCOMPLETE )
+			if ( comp->SerializeData( &temp ) == Result::INCOMPLETE )
 			{
-				SerializeObjectDataDefault( c, compCls, &temp );
+				SerializeObjectDataDefault( comp, compCls, &temp );
 			}
 			buffer->Write< usize >( temp.GetSize( ) );
 
 			// Serialize component data
-			Result res = c->SerializeData( buffer );
+			Result res = comp->SerializeData( buffer );
 			if ( res == Result::INCOMPLETE )
 			{
-				SerializeObjectDataDefault( c, compCls, buffer );
+				SerializeObjectDataDefault( comp, compCls, buffer );
 			}
 		}
 
@@ -309,9 +311,10 @@ namespace Enjon
 			if ( cmpCls )
 			{
 				// Attach new component to entity using MetaClass
-				Component* cmp = ent->AddComponent( cmpCls );
-				if ( cmp )
+				IComponentHandle* handle = ent->AddComponent( cmpCls );
+				if ( handle )
 				{
+					Component* cmp = handle->Get( );
 					Result res = cmp->DeserializeData( buffer );
 					if ( res == Result::INCOMPLETE )
 					{

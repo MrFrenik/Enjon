@@ -125,16 +125,18 @@ namespace Enjon
 			btPersistentManifold* contactManifold = mDynamicsWorld->getDispatcher( )->getManifoldByIndexInternal( i );
 
 			// Get user pointers as components
-			RigidBodyComponent* compA = (RigidBodyComponent* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody0( ) ) )->getUserPointer( ) );
-			RigidBodyComponent* compB = (RigidBodyComponent* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody1( ) ) )->getUserPointer( ) );
+			ComponentHandle< RigidBodyComponent >* compA = ( ComponentHandle< RigidBodyComponent >* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody0( ) ) )->getUserPointer( ) );
+			ComponentHandle< RigidBodyComponent >* compB = ( ComponentHandle< RigidBodyComponent >* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody1( ) ) )->getUserPointer( ) );
+			//RigidBodyComponent* compA = (RigidBodyComponent* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody0( ) ) )->getUserPointer( ) );
+			//RigidBodyComponent* compB = (RigidBodyComponent* )( ( static_cast< const btCollisionObject* > ( contactManifold->getBody1( ) ) )->getUserPointer( ) ); 
 
 			if ( compA == nullptr || compB == nullptr )
 			{
 				return; 
-			}
+			} 
 
-			Entity* entA = compA->GetEntity( );
-			Entity* entB = compB->GetEntity( );
+			Entity* entA = compA->Get()->GetEntity();
+			Entity* entB = compB->Get()->GetEntity();
 
 			if ( entA == nullptr || entB == nullptr )
 			{
@@ -158,7 +160,7 @@ namespace Enjon
 					inContact = true;
 
 					// Order A < B, will make things easier with the contact hash.
-					RigidBodyComponent* compT;
+					ComponentHandle< RigidBodyComponent >* compT;
 					if ( idA > idB )
 					{
 						compT = compA;
@@ -169,13 +171,13 @@ namespace Enjon
 					// If set doesn't exist, then make it
 					if ( mNewContactEvents.find( compA ) == mNewContactEvents.end( ) )
 					{
-						mNewContactEvents[ compA ] = HashSet< RigidBodyComponent* >( );
+						mNewContactEvents[ compA ] = HashSet< ComponentHandle< RigidBodyComponent >* >( );
 					}
 
 					// If set doesn't exist, then make it
 					if ( mNewContactEvents.find( compB ) == mNewContactEvents.end( ) )
 					{
-						mNewContactEvents[ compB ] = HashSet< RigidBodyComponent* >( );
+						mNewContactEvents[ compB ] = HashSet< ComponentHandle< RigidBodyComponent >* >( );
 					}
 
 					// Insert new contact event into set for idA
@@ -196,8 +198,8 @@ namespace Enjon
 					// Was not there, so we have begun contact
 					if ( !contains )
 					{
-						compA->OnCollisionEnter( CollisionReport( compB ) );
-						compB->OnCollisionEnter( CollisionReport( compA ) );
+						(*compA)->OnCollisionEnter( CollisionReport( compB ) );
+						(*compB)->OnCollisionEnter( CollisionReport( compA ) );
 					} 
 				}
 
@@ -218,7 +220,7 @@ namespace Enjon
 				for ( auto& curVal : mContactEvents[ curKey.first ] )
 				{ 
 					// End contact for values
-					curVal->OnCollisionExit( CollisionReport( curKey.first ) );
+					(*curVal)->OnCollisionExit( CollisionReport( curKey.first ) );
 				}
 			}
 			else
@@ -231,12 +233,12 @@ namespace Enjon
 					// Not found in the newer set, so must process end contact event
 					if ( newSet->find( curVal ) == newSet->end( ) )
 					{ 
-						curVal->OnCollisionExit( CollisionReport( curKey.first ) );
+						(*curVal)->OnCollisionExit( CollisionReport( curKey.first ) );
 					}
 					// Otherwise was found, so processing current overlap
 					else
 					{ 
-						curVal->OnCollisionOverlap( CollisionReport( curKey.first ) );
+						(*curVal)->OnCollisionOverlap( CollisionReport( curKey.first ) );
 					}
 				}
 			}
@@ -249,7 +251,7 @@ namespace Enjon
 
 	//====================================================================== 
 
-	void PhysicsSubsystem::RemoveFromContactEvents( RigidBodyComponent* comp )
+	void PhysicsSubsystem::RemoveFromContactEvents( ComponentHandle< RigidBodyComponent >* comp )
 	{
 		// Remove key instances
 		auto query = mContactEvents.find( comp );
@@ -267,14 +269,14 @@ namespace Enjon
 
 	//====================================================================== 
 
-	bool PhysicsSubsystem::HasContact( RigidBodyComponent* component )
+	bool PhysicsSubsystem::HasContact( ComponentHandle< RigidBodyComponent >* component )
 	{
 		return ( mContactEvents.find( component ) != mContactEvents.end( ) );
 	}
 
 	//====================================================================== 
 
-	const HashSet< RigidBodyComponent* >* PhysicsSubsystem::GetContactList( RigidBodyComponent* component )
+	const HashSet< ComponentHandle< RigidBodyComponent >* >* PhysicsSubsystem::GetContactList( ComponentHandle< RigidBodyComponent >* component )
 	{
 		if ( HasContact( component ) )
 		{
@@ -295,21 +297,32 @@ namespace Enjon
 
 	//====================================================================== 
 
-	void PhysicsSubsystem::AddBody( RigidBody* body )
+	//void PhysicsSubsystem::AddBody( const ResourceHandle< RigidBody >& body )
+	void PhysicsSubsystem::AddBody( BulletRigidBody* body )
 	{
-		if ( mRigidBodies.find( body ) == mRigidBodies.end( ) )
+		//if ( mRigidBodies.find( body ) == mRigidBodies.end( ) )
+		//{
+		//	mRigidBodies.insert( body );
+		//	mDynamicsWorld->addRigidBody( body->GetRawBody() ); 
+		//}
+		if ( mDynamicsWorld )
 		{
-			mRigidBodies.insert( body );
-			mDynamicsWorld->addRigidBody( body->GetRawBody() ); 
+			mDynamicsWorld->addRigidBody( body ); 
 		}
 	}
 
 	//====================================================================== 
 
-	void PhysicsSubsystem::RemoveBody( RigidBody* body )
+	//void PhysicsSubsystem::RemoveBody( const ResourceHandle< RigidBody >& body )
+	void PhysicsSubsystem::RemoveBody( BulletRigidBody* body )
 	{
-		mRigidBodies.erase( body );
-		mDynamicsWorld->removeRigidBody( body->GetRawBody() );
+		//mRigidBodies.erase( body );
+		//mDynamicsWorld->removeRigidBody( body->GetRawBody() );
+		//mDynamicsWorld->removeRigidBody( body->GetRawBody( ) );
+		if ( mDynamicsWorld )
+		{
+			mDynamicsWorld->removeRigidBody( body ); 
+		}
 	}
 
 	//====================================================================== 
@@ -330,10 +343,14 @@ namespace Enjon
 
 	void PhysicsSubsystem::ClearAllForces( )
 	{
-		for ( auto& b : mRigidBodies )
+		for ( auto& b : *mRigidBodySlotArray.data() )
 		{
-			b->ClearForces( );
+			b.ClearForces( );
 		}
+		//for ( auto& b : mRigidBodies )
+		//{
+		//	b->ClearForces( );
+		//}
 	}
 
 	//====================================================================== 
@@ -444,6 +461,13 @@ namespace Enjon
 	s32 PhysicsDebugDrawer::getDebugMode( ) const 
 	{ 
 		return mDebugMode; 
+	}
+
+	//====================================================================== 
+
+	ResourceHandle< RigidBody > PhysicsSubsystem::AllocateRigidBodyHandle( )
+	{
+		return ( mRigidBodySlotArray.emplace( ) );
 	}
 
 	//====================================================================== 

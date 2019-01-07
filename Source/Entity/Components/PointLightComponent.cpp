@@ -22,64 +22,70 @@ namespace Enjon
 	void PointLightComponent::ExplicitDestructor()
 	{
 		// Remove renderable from scene
-		if (mLight.GetGraphicsScene() != nullptr)
-		{
-			mLight.GetGraphicsScene()->RemovePointLight(&mLight);
-		}
+		//if (mLight->GetGraphicsScene() != nullptr)
+		//{
+		//	GraphicsScene* gs = mLight->GetGraphicsScene( );
+		//	gs->DeallocatePointLight( mLight );
+		//}
 	}
 
 	//==================================================================================
 
 	void PointLightComponent::PostConstruction( )
-	{
+	{ 
 		// Get graphics scene from world graphics context
-		World* world = mEntity->GetWorld( )->ConstCast< World >( );
+		World* world = mEntity->GetWorld( )->ConstCast< World >( ); 
 		GraphicsScene* gs = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( ); 
+		mLight = gs->AllocatePointLight( ); 
+	}
 
-		// Add light to scene
-		gs->AddPointLight( &mLight ); 
+	//==================================================================================
+
+	void PointLightComponent::UpdateTransform( const Transform& transform )
+	{
+		mLight->SetPosition( transform.GetPosition( ) );
 	}
 
 	//==================================================================================
 
 	void PointLightComponent::Update()
 	{
-		mLight.SetPosition(mEntity->GetWorldPosition());	
+		mLight->SetPosition( mEntity->GetWorldPosition( ) );
 	} 
 
 	//==================================================================================
 
-	void PointLightComponent::SetColor(ColorRGBA32& color)
+	void PointLightComponent::SetColor( const ColorRGBA32& color )
 	{
-		mLight.SetColor(color);
+		mLight->SetColor( color );
 	}
 
 	//==================================================================================
 
-	void PointLightComponent::SetIntensity(float intensity)
+	void PointLightComponent::SetIntensity( const f32& intensity )
 	{
-		mLight.SetIntensity(intensity);
+		mLight->SetIntensity( intensity );
 	}
 
 	//==================================================================================
 
-	void PointLightComponent::SetPosition(Vec3& position)
+	void PointLightComponent::SetPosition( const Vec3& position )
 	{
-		mLight.SetPosition(position);
+		mLight->SetPosition( position );
 	}
 
 	//==================================================================================
 
-	void PointLightComponent::SetRadius(float radius)
+	void PointLightComponent::SetRadius( const f32& radius )
 	{
-		mLight.SetRadius(radius);
+		mLight->SetRadius( radius );
 	}
 
 	//==================================================================================
 
-	void PointLightComponent::SetAttenuationRate(float rate)
+	void PointLightComponent::SetAttenuationRate( const f32& rate )
 	{
-		mLight.SetAttenuationRate(rate);
+		mLight->SetAttenuationRate( rate );
 	}
 
 	//================================================================================== 
@@ -87,7 +93,7 @@ namespace Enjon
 	Result PointLightComponent::OnEditorUI( )
 	{
 		// Inspect light 
-		EngineSubsystem( ImGuiManager )->InspectObject( &mLight ); 
+		EngineSubsystem( ImGuiManager )->InspectObject( mLight.get_raw_ptr( ) );
 
 		return Result::SUCCESS;
 	} 

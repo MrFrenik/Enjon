@@ -13,12 +13,12 @@ namespace Enjon
 	{ 
 		public:
 
-			CollisionReport( RigidBodyComponent* collider )
+			CollisionReport( ComponentHandle< RigidBodyComponent >* collider )
 				: mCollider( collider )
 			{
 			}
  
-			RigidBodyComponent* mCollider;
+			ComponentHandle< RigidBodyComponent >* mCollider;
 	}; 
 }
 

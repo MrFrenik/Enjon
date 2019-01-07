@@ -32,7 +32,7 @@ namespace Enjon {
 			* @brief
 			*/
 			ENJON_FUNCTION( Constructor ) 
-			PointLight(Vec3& position, float attenuationRate, ColorRGBA32& color, float intensity = 1.0f, float radius = 1.0f); 
+			PointLight( const Vec3& position, const f32& attenuationRate, const ColorRGBA32& color, const f32& intensity = 1.0f, const f32& radius = 1.0f); 
 
 			/**
 			* @brief
@@ -68,37 +68,37 @@ namespace Enjon {
 			* @brief
 			*/
 			ENJON_FUNCTION() 
-			void SetColor(ColorRGBA32& color);
+			void SetColor( const ColorRGBA32& color );
 
 			/**
 			* @brief
 			*/
 			ENJON_FUNCTION() 
-			void SetIntensity(float intensity);
+			void SetIntensity( const f32& intensity );
 			
 			/**
 			* @brief
 			*/
 			ENJON_FUNCTION() 
-			void SetGraphicsScene(GraphicsScene* scene);
+			void SetGraphicsScene( GraphicsScene* scene );
 			
 			/**
 			* @brief
 			*/
 			ENJON_FUNCTION() 
-			void SetPosition(Enjon::Vec3& position);
+			void SetPosition( const Vec3& position );
 			
 			/**
 			* @brief
 			*/
 			ENJON_FUNCTION() 
-			void SetAttenuationRate(float rate);
+			void SetAttenuationRate( const f32& rate );
 
 			/**
 			* @brief
 			*/
 			ENJON_FUNCTION() 
-			void SetRadius(float radius); 
+			void SetRadius( const f32& radius ); 
 
 			/*
 			* @brief

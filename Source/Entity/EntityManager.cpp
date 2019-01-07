@@ -288,29 +288,7 @@ namespace Enjon
 
 		// Remove from world
 		RemoveFromWorld( );
-	}
-
-	//====================================================================================================
-
-	void Entity::Update( const f32& dt )
-	{
-		EntityManager* em = EngineSubsystem( EntityManager );
-
-		const Application* app = Engine::GetInstance( )->GetApplication( );
-
-		// Update all components
-		for ( auto& c : mComponents )
-		{
-			auto comp = em->GetComponent( GetHandle( ), c );
-			if ( comp )
-			{
-				if ( comp->GetTickState( ) == ComponentTickState::TickAlways || app->GetApplicationState( ) == ApplicationState::Running )
-				{
-					comp->Update( );
-				}
-			}
-		}
-	}
+	} 
 
 	//====================================================================================================
 
@@ -321,14 +299,14 @@ namespace Enjon
 
 	//====================================================================================================
 
-	Component* Entity::GetComponent( const MetaClass* compCls )
+	IComponentHandle* Entity::GetComponent( const MetaClass* compCls )
 	{
 		return EngineSubsystem( EntityManager )->GetComponent( compCls, GetHandle() );
 	}
 
 	//====================================================================================================
 
-	Component* Entity::AddComponent( const MetaClass* compCls )
+	IComponentHandle* Entity::AddComponent( const MetaClass* compCls )
 	{
 		return EngineSubsystem( EntityManager )->AddComponent( compCls, GetHandle( ) );
 	}
@@ -337,7 +315,8 @@ namespace Enjon
 
 	bool Entity::HasComponent( const MetaClass* compCls )
 	{
-		return ( std::find( mComponents.begin( ), mComponents.end( ), compCls->GetTypeId( ) ) != mComponents.end( ) );
+		auto data = EngineSubsystem( EntityManager )->GetIComponentInstanceData( compCls );
+		return data->HasComponent( GetID() );
 	}
 
 	//---------------------------------------------------------------
@@ -365,25 +344,7 @@ namespace Enjon
 			handles.push_back( em->GetRawEntity( id ) );
 		}
 		return handles;
-	}
-
-	//==========================================================================================
-
-	Vector<Component*> Entity::GetComponents( )
-	{
-		EntityManager* em = EngineSubsystem( EntityManager );
-		Vector<Component*> compReturns;
-		for ( auto& c : mComponents )
-		{
-			auto comp = em->GetComponent( GetHandle( ), c );
-			if ( comp )
-			{
-				compReturns.push_back( comp );
-			}
-		}
-
-		return compReturns;
-	}
+	} 
 
 	//==========================================================================================
 
@@ -494,9 +455,9 @@ namespace Enjon
 
 	void Entity::UpdateComponentTransforms( )
 	{
-		for ( auto& c : GetComponents( ) )
+		for ( auto& c : GetIComponents( ) )
 		{
-			c->UpdateTransform( mWorldTransform );
+			c->Get( )->UpdateTransform( mWorldTransform );
 		}
 	}
 
@@ -858,6 +819,7 @@ namespace Enjon
 	}
 
 	//---------------------------------------------------------------
+
 	void Entity::UpdateAllChildTransforms( )
 	{
 		// Maybe this should just be to set their flags to dirty?
@@ -905,19 +867,16 @@ namespace Enjon
 
 	//---------------------------------------------------------------
 
-	Component* EntityManager::GetComponent( const EntityHandle& entity, const u32& ComponentID )
+	IComponentHandle* EntityManager::GetComponent( const EntityHandle& entity, const u32& ComponentID )
 	{
-		if ( mComponents.find( ComponentID ) != mComponents.end( ) )
-		{
-			return mComponents[ ComponentID ]->GetComponent( entity.GetID( ) );
-		}
-
-		return nullptr;
+		IComponentInstanceData* data = mComponentInstanceDataMap[ ComponentID ];
+		IComponentHandle* handle = data->GetComponentHandle( entity.GetID( ) );
+		return handle;
 	} 
 
 	//---------------------------------------------------------------
 
-	Component* EntityManager::GetComponent( const MetaClass* compCls, const EntityHandle& entity )
+	IComponentHandle* EntityManager::GetComponent( const MetaClass* compCls, const EntityHandle& entity )
 	{
 		u32 compId = compCls->GetTypeId( );
 		return GetComponent( entity, compId );
@@ -1179,10 +1138,10 @@ namespace Enjon
 		if ( ent )
 		{
 			// Remove all components
-			for ( auto& c : ent->GetComponents( ) )
-			{
-				mNeedInitializationList.erase( std::remove( mNeedInitializationList.begin( ), mNeedInitializationList.end( ), c ), mNeedInitializationList.end( ) );
-			}
+			//for ( auto& c : ent->GetComponents( ) )
+			//{
+			//	mNeedInitializationList.erase( std::remove( mNeedInitializationList.begin( ), mNeedInitializationList.end( ), c ), mNeedInitializationList.end( ) );
+			//}
 		}
 	}
 
@@ -1194,10 +1153,10 @@ namespace Enjon
 		if ( ent )
 		{
 			// Remove all components
-			for ( auto& c : ent->GetComponents( ) )
-			{
-				mNeedStartList.erase( std::remove( mNeedStartList.begin( ), mNeedStartList.end( ), c ), mNeedStartList.end( ) );
-			}
+			//for ( auto& c : ent->GetComponents( ) )
+			//{
+			//	mNeedStartList.erase( std::remove( mNeedStartList.begin( ), mNeedStartList.end( ), c ), mNeedStartList.end( ) );
+			//}
 		}
 	}
 
@@ -1276,23 +1235,24 @@ namespace Enjon
 				if ( ent && ent->mState != EntityState::INVALID )
 				{
 					// Destroy all components
-					for ( auto& c : ent->mComponents )
+					for ( auto& c : ent->mComponentHandles )
 					{
-						auto comp = GetComponent( ent->GetHandle( ), c );
+						Component* comp = c->Get( );
 						if ( comp )
 						{
 							// Call shutdown on component
 							comp->Shutdown( );
 							// Destroy the component
-							comp->Destroy( );
+							//comp->Destroy( );
 							// Remove component from world
 							comp->RemoveFromWorld( );
 						}
 
+						// TODO(): Remove from instance data
 						// Free component memory
-						delete comp;
+						//delete comp;
 						// Set to null
-						comp = nullptr;
+						//comp = nullptr;
 					}
 
 					// Remove entity ( includes reset )
@@ -1335,9 +1295,9 @@ namespace Enjon
 					}
 
 					// Add components to world
-					for ( auto& c : entity->GetComponents( ) )
+					for ( auto& c : entity->GetIComponents( ) )
 					{
-						c->AddToWorld( world );
+						c->Get()->AddToWorld( world );
 					}
 
 					entity->mWorld = world; 
@@ -1368,9 +1328,9 @@ namespace Enjon
 				}
 
 				// Remove components from world
-				for ( auto& c : entity->GetComponents( ) )
+				for ( auto& c : entity->GetIComponents( ) )
 				{
-					c->RemoveFromWorld( );
+					c->Get()->RemoveFromWorld( );
 				}
 
 				// Set world to null
@@ -1486,13 +1446,13 @@ namespace Enjon
 		}
 
 		// Update all component arrays ( legacy )
-		for ( auto& system : mComponents )
-		{
-			if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
-			{
-				system.second->Update( ); 
-			}
-		}
+		//for ( auto& system : mComponents )
+		//{
+		//	if ( system.second->GetTickState( ) != ComponentTickState::TickNever )
+		//	{
+		//		system.second->Update( ); 
+		//	}
+		//}
 
 		// Update all component systems
 		for ( auto& system : mComponentSystems )
@@ -1583,6 +1543,7 @@ namespace Enjon
 	void EntityManager::RegisterAllEngineComponentSystems( )
 	{
 		RegisterComponentSystem< StaticMeshComponentSystem >( );
+		RegisterComponentSystem< RigidBodyComponentSystem >( );
 	}
 
 	//================================================================================================== 
@@ -1634,7 +1595,7 @@ namespace Enjon
 
 	//========================================================================================================================
 
-	Component* EntityManager::AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle )
+	IComponentHandle* EntityManager::AddComponent( const MetaClass* compCls, const Enjon::EntityHandle& handle )
 	{
 		// Get type id from component class
 		u32 compIdx = compCls->GetTypeId( );
@@ -1658,20 +1619,21 @@ namespace Enjon
 		// If component exists, return it
 		if ( entity->HasComponent( compCls ) )
 		{
-			return mComponents.at( compIdx )->GetComponent( entity->mID );
+			return GetIComponentInstanceData( compCls )->GetComponentHandle( entity->mID );
 		}
 
 		ComponentWrapperBase* base = mComponents[ compIdx ];
 
 		// Try and add new icomponent data here
-		//if ( compCls->InstanceOf( Object::GetClass< StaticMeshComponent >( ) ) )
+		IComponentInstanceData* data = GetIComponentInstanceData( compCls ); 
+		IComponentHandle* ch = data->Allocate( eid ); 
+		if ( ch )
 		{
-			IComponentInstanceData* data = GetIComponentInstanceData( compCls ); 
-			IComponentHandle* ch = data->Allocate( eid ); 
 			Component* cmp = ch->Get( );
 			cmp->SetEntity( entity );
 			cmp->SetEntityID( entity->GetID( ) );
-			ch->Get( )->PostConstruction( );
+			cmp->SetHandle( ch );
+			cmp->PostConstruction( );
 			//entity->mComponents.push_back( compIdx );
 			entity->mComponentHandles.push_back( ch );
 
@@ -1693,48 +1655,9 @@ namespace Enjon
 				}
 			}
 
-			// Need to return a component handle pointer here
-		}
-		//else
-		//{
-		//	// Create new component and place into map
-		//	Component* component = base->AddComponent( compCls, eid );
-		//	if ( component )
-		//	{
-		//		component->SetEntity( entity );
-		//		component->SetID( compIdx );
-		//		component->SetBase( base );
-		//		component->mEntityID = entity->mID;
-		//		component->PostConstruction( );
+			return ch; 
+		} 
 
-		//		// Get component ptr and push back into entity components
-		//		entity->mComponents.push_back( compIdx );
-
-		//		// Push back for need initilization and start
-		//		mNeedInitializationList.push_back( component );
-		//		mNeedStartList.push_back( component );
-
-		//		// Need to add required components from meta class
-		//		const MetaClassComponent* cc = static_cast<const MetaClassComponent*>( compCls );
-		//		if ( cc )
-		//		{
-		//			for ( auto& c : cc->GetRequiredComponentList( ) )
-		//			{
-		//				const MetaClass* cls = Object::GetClass( c );
-		//				if ( cls )
-		//				{
-		//					// Add component if entity doesn't already contain this one
-		//					if ( !entity->HasComponent( cls ) )
-		//					{
-		//						AddComponent( cls, entity );
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//	return component;
-		//} 
 		return nullptr; 
 	}
 
@@ -1742,26 +1665,36 @@ namespace Enjon
 
 	void EntityManager::RemoveComponent( const MetaClass* compCls, const EntityHandle& entity )
 	{
-		auto comp = GetComponent( entity, compCls->GetTypeId( ) );
-		if ( comp )
+		auto compHandle = GetComponent( entity, compCls->GetTypeId( ) );
+		if ( compHandle )
 		{
-			// Remove from initialization list
-			mNeedInitializationList.erase( std::remove( mNeedInitializationList.begin( ), mNeedInitializationList.end( ), comp ), mNeedInitializationList.end( ) );
+			Component* comp = compHandle->Get( );
 
-			// Remove from start list
-			mNeedStartList.erase( std::remove( mNeedStartList.begin( ), mNeedStartList.end( ), comp ), mNeedStartList.end( ) );
+			// Remove from initialization list
+			//mNeedInitializationList.erase( std::remove( mNeedInitializationList.begin( ), mNeedInitializationList.end( ), comp ), mNeedInitializationList.end( ) );
+
+			//// Remove from start list
+			//mNeedStartList.erase( std::remove( mNeedStartList.begin( ), mNeedStartList.end( ), comp ), mNeedStartList.end( ) );
 
 			// Destroy component
 			comp->Destroy( );
 
 			// Remove from entity component list
-			auto comps = &entity.Get( )->mComponents;
-			comps->erase( std::remove( comps->begin( ), comps->end( ), compCls->GetTypeId( ) ), comps->end( ) );
+			//auto comps = &entity.Get( )->mComponents;
+			//comps->erase( std::remove( comps->begin( ), comps->end( ), compCls->GetTypeId( ) ), comps->end( ) );
+
+			// Remove from entity's component list
+			auto comps = &entity.Get( )->mComponentHandles;
+			comps->erase( std::remove( comps->begin( ), comps->end( ), compHandle ), comps->end( ) ); 
+
+			// Remove from instance data
+			IComponentInstanceData* data = GetIComponentInstanceData( compCls );
+			data->Deallocate( entity.mID );
 
 			// Free memory of component
-			delete comp;
+			//delete comp;
 			// Set to null
-			comp = nullptr;
+			//comp = nullptr;
 		}
 	} 
 

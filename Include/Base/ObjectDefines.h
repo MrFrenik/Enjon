@@ -76,7 +76,7 @@ enum MetaPropertyEnumDefines
 	public:\
 		virtual void Destroy() override\
 		{\
-			DestroyBase<ComponentName>();\
+			ExplicitDestructor( );\
 		} 
 
 #define ENJON_COMPONENT( ComponentName, ... )\

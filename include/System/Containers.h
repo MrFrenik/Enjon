@@ -160,6 +160,10 @@ namespace Enjon
 	class slot_array
 	{
 		public:
+			slot_array( )
+			{
+				clear( );
+			}
 
 			class handle
 			{
@@ -227,6 +231,26 @@ namespace Enjon
 			inline T* raw_data_array( )
 			{
 				return mData.data( );
+			}
+
+			inline handle emplace( )
+			{
+				// Here's the tricky part. Want to push back a new index? Do I store a free list of indices? Do I iterate to find a free index? ( ideally would not do that last bit )	
+				// Free list stack? So you push a free index onto the stack and then pop off to get the newest available index? 
+				u32 freeIdx = find_next_available_index( );
+
+				// Allocate new resource					
+				mData.emplace_back( );
+
+				// Push back new indirection index
+				mReverseIndirectionIndices.push_back( freeIdx );
+
+				// This gets the available index in the indirection list of indices, not in the actual resource array ( the reason being that the resource array can have its contents shifted around when adding / removing items )
+				// If the index is the last item in the list, then push that on to grow the array
+				mhandleIndices[ freeIdx ] = mData.size( ) - 1;
+
+				return { freeIdx, this };
+
 			}
 
 			inline handle insert( const T& v )

@@ -305,7 +305,7 @@ namespace Enjon
 		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 
 		ComponentInstanceData< StaticMeshComponent >* iData = em->GetIComponentInstanceData< StaticMeshComponent >( );
-		StaticMeshComponent* compData = iData->GetComponentData( )->ConstCast< StaticMeshComponent >( );
+		StaticMeshComponent* compData = iData->Data( );
 
 		// Update all data
 		for ( usize i = 0; i < iData->GetDataSize( ); ++i )

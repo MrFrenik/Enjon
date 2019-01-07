@@ -5,9 +5,10 @@
 #include "Entity/EntityManager.h"
 #include "Serialize/ByteBuffer.h"
 #include "Serialize/ObjectArchiver.h"
+#include "Physics/PhysicsSubsystem.h"
 #include "ImGui/ImGuiManager.h"
 #include "SubsystemCatalog.h"
-#include "Engine.h"
+#include "Engine.h" 
 
 namespace Enjon
 { 
@@ -16,7 +17,7 @@ namespace Enjon
 	void RigidBodyComponent::ExplicitDestructor( )
 	{
 		// Remove component from physics subsystem's contact events
-		Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->RemoveFromContactEvents( this );
+		Engine::GetInstance( )->GetSubsystemCatalog( )->Get< PhysicsSubsystem >( )->ConstCast< PhysicsSubsystem >( )->RemoveFromContactEvents( static_cast< ComponentHandle< RigidBodyComponent >* >( GetHandle() ) );
 
 		// Delete all subscriptions
 		ClearAllCallbacks( );
@@ -54,19 +55,23 @@ namespace Enjon
 	}
 
 	//========================================================================
- 
+
 	void RigidBodyComponent::PostConstruction( )
 	{
+		// Want to get a handle from the Physics Subsystem for the rigid body
+		mRigidBody = EngineSubsystem( PhysicsSubsystem )->AllocateRigidBodyHandle( );
+
 		// Initialize the rigidbody
-		mBody.Initialize( );
+		mRigidBody->Initialize( ); 
 
 		// Set user pointer to this physics component
-		mBody.SetUserPointer( this );
+		mRigidBody->SetUserPointer( GetHandle( ) );
+		//mRigidBody->SetUserPointer( this );
 
 		//Set local scale of collision shape
 		Vec3 localScale = mEntity->GetLocalScale( );
 
-		mBody.SetLocalScaling( localScale );
+		mRigidBody->SetLocalScaling( localScale );
 
 		// Set transform ( this happend RIGHT AFTER setting the local scaling )
 		UpdateTransform( mEntity->GetWorldTransform( ) );
@@ -79,9 +84,9 @@ namespace Enjon
 		{ 
 			// Need to make sure to only set this if the physics was ticked this scene
 			// Only set position and rotation if not kinematic - could make a derived kinematic body component for this
-			if ( !mBody.GetIsKinematic( ) )
+			if ( !mRigidBody->GetIsKinematic( ) )
 			{
-				Transform wt = mBody.GetWorldTransform( );
+				Transform wt = mRigidBody->GetWorldTransform( );
 				mEntity->SetLocalPosition( wt.GetPosition(), false );
 				mEntity->SetLocalRotation( wt.GetRotation(), false ); 
 			}
@@ -93,7 +98,7 @@ namespace Enjon
 	void RigidBodyComponent::Initialize( )
 	{ 
 		// Set world transform of rigidbody
-		mBody.SetWorldTransform( mEntity->GetWorldTransform( ) );
+		mRigidBody->SetWorldTransform( mEntity->GetWorldTransform( ) );
 	}
 
 	//========================================================================
@@ -101,7 +106,7 @@ namespace Enjon
 	void RigidBodyComponent::Shutdown( )
 	{
 		// Set transform of rigidbody and clear forces
-		mBody.SetWorldTransform( mEntity->GetWorldTransform( ) );
+		mRigidBody->SetWorldTransform( mEntity->GetWorldTransform( ) );
 	}
 
 	//========================================================================
@@ -109,7 +114,7 @@ namespace Enjon
 	void RigidBodyComponent::SetShape( CollisionShapeType collisionType )
 	{
 		// Set shape on rigid body 
-		mBody.SetShape( collisionType );
+		mRigidBody->SetShape( collisionType );
 
 		// Update transform
 		UpdateTransform( mEntity->GetWorldTransform( ) );
@@ -119,77 +124,77 @@ namespace Enjon
 
 	void RigidBodyComponent::ClearForces( )
 	{
-		mBody.ClearForces( );
+		mRigidBody->ClearForces( );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetMass( const f32& mass )
 	{
-		mBody.SetMass( mass );
+		mRigidBody->SetMass( mass );
 	}
 
 	//========================================================================
 
 	f32 RigidBodyComponent::GetMass( ) const
 	{
-		return mBody.GetMass();
+		return mRigidBody->GetMass();
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetRestitution( const f32& restitution )
 	{
-		mBody.SetRestitution( restitution );
+		mRigidBody->SetRestitution( restitution );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetLinearDamping( const f32& damping )
 	{
-		mBody.SetLinearDamping( damping );
+		mRigidBody->SetLinearDamping( damping );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetAngularDamping( const f32& damping )
 	{
-		mBody.SetAngularDamping( damping );
+		mRigidBody->SetAngularDamping( damping );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetFriction( const f32& friction )
 	{
-		mBody.SetFriction( friction );
+		mRigidBody->SetFriction( friction );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetGravity( const Vec3& gravity )
 	{
-		mBody.SetGravity( gravity );
+		mRigidBody->SetGravity( gravity );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetLinearVelocity( const Vec3& velocity )
 	{
-		mBody.SetLinearVelocity( velocity );
+		mRigidBody->SetLinearVelocity( velocity );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetLinearFactor( const iVec3& factor )
 	{
-		mBody.SetLinearFactor( factor );
+		mRigidBody->SetLinearFactor( factor );
 	}
 
 	//========================================================================
 	
 	void RigidBodyComponent::SetAngularFactor( const iVec3& factor )
 	{
-		mBody.SetAngularFactor( factor );
+		mRigidBody->SetAngularFactor( factor );
 	}
 
 	//========================================================================
@@ -197,64 +202,64 @@ namespace Enjon
 	void RigidBodyComponent::UpdateTransform( const Transform& transform )
 	{
 		// Reset state position state 
-		mBody.SetWorldTransform( transform );
-		mBody.SetAwake( true );
+		mRigidBody->SetWorldTransform( transform );
+		mRigidBody->SetAwake( true );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::ForceAwake( )
 	{
-		mBody.ForceAwake( );
+		mRigidBody->ForceAwake( );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::Translate( const Vec3& translation )
 	{
-		mBody.Translate( translation );
+		mRigidBody->Translate( translation );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::ApplyCentralForce( const Vec3& force )
 	{
-		mBody.ApplyCentralForce( force );
+		mRigidBody->ApplyCentralForce( force );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::ApplyRelativeForce( const Vec3& force, const Vec3& relativePosition )
 	{
-		mBody.ApplyRelativeForce( force, relativePosition );
+		mRigidBody->ApplyRelativeForce( force, relativePosition );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::ApplyCentralImpulse( const Vec3& force )
 	{
-		mBody.ApplyCentralImpulse( force );
+		mRigidBody->ApplyCentralImpulse( force );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::ApplyImpulse( const Vec3& force, const Vec3& relativePosition )
 	{
-		mBody.ApplyImpulse( force, relativePosition );
+		mRigidBody->ApplyImpulse( force, relativePosition );
 	}
 
 	//========================================================================
 
 	CollisionShapeType RigidBodyComponent::GetShapeType( ) const
 	{
-		return mBody.GetShapeType( );
+		return mRigidBody->GetShapeType( );
 	}
 
 	//========================================================================
 
 	void RigidBodyComponent::SetContinuousCollisionDetectionEnabled( bool enabled )
 	{
-		mBody.SetContinuousCollisionDetectionEnabled( enabled );
+		mRigidBody->SetContinuousCollisionDetectionEnabled( enabled );
 	}
 
 	//========================================================================
@@ -298,7 +303,7 @@ namespace Enjon
 		PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
 
 		// Get set of rigidbodycomponents from contact lists
-		const HashSet<RigidBodyComponent*>* contacts = physx->GetContactList( this );
+		auto contacts = physx->GetContactList( static_cast< ComponentHandle< RigidBodyComponent >* >( GetHandle() ) );
 
 		// Fill out entities to return
 		Vector<EntityHandle> entities;
@@ -307,7 +312,7 @@ namespace Enjon
 		{
 			for ( auto& c : *contacts )
 			{
-				entities.push_back( c->GetEntity( ) );
+				entities.push_back( c->Get()->GetEntity( ) );
 			} 
 		}
 
@@ -319,7 +324,7 @@ namespace Enjon
 	Result RigidBodyComponent::SerializeData( ByteBuffer* buffer ) const 	
 	{
 		// Serialize out mBody
-		return ObjectArchiver::Serialize( &mBody, buffer ); 
+		return ObjectArchiver::Serialize( mRigidBody.get(), buffer ); 
 	}
 
 	//======================================================================== 
@@ -327,7 +332,7 @@ namespace Enjon
 	Result RigidBodyComponent::DeserializeData( ByteBuffer* buffer )
 	{
 		// Deserialize mBody 
-		return ObjectArchiver::Deserialize( buffer, &mBody ); 
+		return ObjectArchiver::Deserialize( buffer, mRigidBody.get_raw_ptr() ); 
 	}
 
 	//======================================================================== 
@@ -335,12 +340,12 @@ namespace Enjon
 	Result RigidBodyComponent::DeserializeLateInit( )
 	{
 		// Reinitialize rigidbody
-		mBody.Reinitialize( ); 
+		mRigidBody->Reinitialize( ); 
 
 		// Reset world transform
 		if ( mEntity )
 		{
-			mBody.SetWorldTransform( mEntity->GetWorldTransform( ) );
+			mRigidBody->SetWorldTransform( mEntity->GetWorldTransform( ) );
 		}
 
 		return Result::SUCCESS;
@@ -351,9 +356,60 @@ namespace Enjon
 	Result RigidBodyComponent::OnEditorUI( )
 	{
 		// Inspect rigid body 
-		EngineSubsystem( ImGuiManager )->InspectObject( &mBody ); 
+		EngineSubsystem( ImGuiManager )->InspectObject( mRigidBody.get_raw_ptr() ); 
 
 		return Result::SUCCESS;
 	}
+
+	//======================================================================== 
+
+	bool RigidBodyComponent::IsKinematic( )
+	{
+		return mRigidBody->GetIsKinematic( );
+	}
+	
+	Transform RigidBodyComponent::GetWorldTransform( )
+	{
+		return mRigidBody->GetWorldTransform( );
+	}
+
+	void RigidBodyComponentSystem::ExplicitConstructor( )
+	{ 
+	}
+
+	//======================================================================== 
+
+	void RigidBodyComponentSystem::Update( )
+	{ 
+		PhysicsSubsystem* phys = EngineSubsystem( PhysicsSubsystem );
+		if ( !phys->IsPaused( ) )
+		{ 
+			// Grab all rigid body component data from entity manager
+			EntityManager* em = EngineSubsystem( EntityManager );
+			ComponentInstanceData< RigidBodyComponent >* data = em->GetIComponentInstanceData< RigidBodyComponent >( ); 
+			RigidBodyComponent* rbcd = data->Data( );
+
+			for ( usize i = 0; i < data->GetDataSize(); ++i )
+			{
+				RigidBodyComponent& rbc = rbcd[ i ]; 
+				if ( rbc.IsKinematic( ) )
+				{
+					Transform wt = rbc.GetWorldTransform( );
+					Entity* ent = rbc.GetEntity( );
+					ent->SetWorldPosition( wt.GetPosition(), false );
+					ent->SetWorldRotation( wt.GetRotation( ), false );
+				}
+			} 
+		} 
+	}
+
+	//======================================================================== 
+
+	Result RigidBodyComponentSystem::PostComponentConstruction( const u32& id, IComponentInstanceData* data )
+	{
+		return Result::SUCCESS;
+	} 
+
+	//======================================================================== 
 
 }

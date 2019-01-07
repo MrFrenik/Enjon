@@ -34,6 +34,11 @@ namespace Enjon
 			*/
 			virtual void Update() override;
 
+			/*
+			* @brief
+			*/
+			virtual void UpdateTransform( const Transform& transform );
+
 			/**
 			* @brief
 			*/
@@ -42,64 +47,81 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			PointLight* GetLight() { return &mLight; }
-
-			/*
-			* @brief
-			*/
-			Vec3& GetPosition() const 
+			PointLight* GetLight() 
 			{ 
-				return mLight.GetPosition(); 
+				return mLight.get_raw_ptr(); 
 			}
 
 			/*
 			* @brief
 			*/
-			ColorRGBA32& GetColor() { return mLight.GetColor(); }
+			Vec3 GetPosition() const 
+			{ 
+				return mLight->GetPosition(); 
+			}
 
 			/*
 			* @brief
 			*/
-			float GetIntensity() { return mLight.GetIntensity(); }
+			ColorRGBA32 GetColor() 
+			{ 
+				return mLight->GetColor(); 
+			}
 
 			/*
 			* @brief
 			*/
-			float GetRadius() { return mLight.GetRadius(); }
+			f32 GetIntensity() 
+			{ 
+				return mLight->GetIntensity(); 
+			}
 
 			/*
 			* @brief
 			*/
-			float GetAttenuationRate() { return mLight.GetAttenuationRate(); }
+			f32 GetRadius() 
+			{ 
+				return mLight->GetRadius(); 
+			}
 
 			/*
 			* @brief
 			*/
-			void SetAttenuationRate(float rate);
+			f32 GetAttenuationRate() 
+			{ 
+				return mLight->GetAttenuationRate(); 
+			}
 
 			/*
 			* @brief
 			*/
-			void SetPosition(Vec3& position);
+			void SetAttenuationRate( const f32& rate );
 
 			/*
 			* @brief
 			*/
-			void SetColor(ColorRGBA32& color);
+			void SetPosition( const Vec3& position );
+
+			/*
+			* @brief
+			*/
+			void SetColor( const ColorRGBA32& color );
 
 			/* 
 			* @brief
 			*/
-			void SetIntensity(float intensity);
+			void SetIntensity( const f32& intensity );
 
 			/* 
 			* @brief
 			*/
-			void SetRadius(float radius); 
+			void SetRadius( const f32& radius ); 
 
 		private:
-			ENJON_PROPERTY( )
-			PointLight mLight;	
+			//ENJON_PROPERTY( )
+			//PointLight mLight;	
+
+			ResourceHandle< PointLight > mLight;
 	};
 }
 

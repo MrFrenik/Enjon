@@ -38,6 +38,7 @@ namespace Enjon
 	class Entity;
 	class EntityManager;
 	class Component; 
+	class IComponentHandle;
 
 	using ComponentID = u32;
 
@@ -221,12 +222,10 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void SetID( u32 id );
-
-			/**
-			* @brief
-			*/
-			void SetEntityID( const u32& id );
+			IComponentHandle* GetHandle( )
+			{
+				return mHandle;
+			}
 
 			/**
 			* @brief
@@ -245,6 +244,23 @@ namespace Enjon
 			}
 
 		protected:
+
+			void SetHandle( IComponentHandle* handle )
+			{
+				mHandle = handle;
+			} 
+
+			/**
+			* @brief
+			*/
+			void SetID( u32 id );
+
+			/**
+			* @brief
+			*/
+			void SetEntityID( const u32& id );
+
+
 
 			/**
 			* @brief
@@ -292,6 +308,7 @@ namespace Enjon
 		protected:
 			Entity* mEntity = nullptr;
 			EntityManager* mManager = nullptr;
+			IComponentHandle* mHandle = nullptr;
 
 			ComponentTickState mTickState = ComponentTickState::TickOnRunOnly;
 
@@ -321,14 +338,15 @@ namespace Enjon
 		public:
 
 			~IComponentHandle( ) = default;
-			IComponentHandle( ) = default;
-
-			virtual Component* operator ->( )
-			{
-				return Get( );
-			}
+			IComponentHandle( ) = default; 
 
 			virtual Component* Get( ) = 0;
+
+			template < typename T >
+			T* Get( )
+			{
+				return (T*)Get( );
+			} 
 
 		protected:
 
@@ -372,18 +390,28 @@ namespace Enjon
 
 			inline bool operator !( )
 			{
-				return mHandle.get_id( ) != INVALID_SLOT_HANDLE;
-			}
+				return IsValid( );
+			} 
 
-			T* operator ->( )
+			bool IsValid( ) 
 			{
-				return static_cast< T* >( Get( ) );
+				return mHandle.get_id() != INVALID_SLOT_HANDLE;
 			}
 
 			virtual Component* Get( ) override
 			{
+				return (Component*)mHandle.get_raw_ptr( );
+			}
+
+			T* operator ->( )
+			{
 				return mHandle.get_raw_ptr( );
 			}
+				
+			//T* Get( )
+			//{
+			//	return mHandle.get_raw_ptr( );
+			//
 
 			u32 GetHandleID( )
 			{
@@ -403,6 +431,7 @@ namespace Enjon
 			virtual IComponentHandle* Allocate( const u32& eid ) = 0; 
 			virtual void Deallocate( const u32& eid ) = 0; 
 			virtual IComponentHandle* GetComponentHandle( const u32& eid ) = 0;
+			virtual bool HasComponent( const u32& eid ) = 0;
 
 			virtual Component* GetComponent( const u32& componentHandleID ) = 0;
 
@@ -414,6 +443,17 @@ namespace Enjon
 	class ComponentInstanceData : public IComponentInstanceData
 	{ 
 		public: 
+			ComponentInstanceData( )
+			{
+				mData.clear( );
+				mHandles.clear( );
+			}
+
+			~ComponentInstanceData( )
+			{
+				mData.clear( );
+				mHandles.clear( );
+			}
 
 			virtual usize GetDataSize( ) override 
 			{
@@ -425,6 +465,11 @@ namespace Enjon
 				return mData.raw_data_array();
 			}
 
+			T* Data( )
+			{
+				return mData.raw_data_array( );
+			}
+
 			virtual Component* GetComponent( const u32& componentHandleID ) override
 			{
 				return mData.get_ptr( { componentHandleID, &mData } );
@@ -432,8 +477,8 @@ namespace Enjon
 
 			virtual IComponentHandle* Allocate( const u32& eid ) override
 			{
-				auto handle = mData.insert( T( ) );
-				mHandles[ eid ] = ComponentHandle< T >( handle, this );
+				auto handle = mData.emplace(); 
+				mHandles[ eid ] = ComponentHandle< T >( handle, this ); 
 				return &mHandles[ eid ];
 			}
 
@@ -444,9 +489,19 @@ namespace Enjon
 				mHandles.erase( eid );
 			} 
 
+			virtual bool HasComponent( const u32& eid ) override
+			{
+				return ( mHandles.find( eid ) != mHandles.end( ) );
+			}
+
 			virtual IComponentHandle* GetComponentHandle( const u32& eid ) override
 			{
-				return &mHandles[ eid ]; 
+				if ( HasComponent( eid ) )
+				{
+					return &mHandles[ eid ];
+				}
+
+				return nullptr;
 			}
 
 			ComponentHandle< T >& GetHandle( const u32& eid )

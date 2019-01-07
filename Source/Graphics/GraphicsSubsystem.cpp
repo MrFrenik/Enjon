@@ -886,49 +886,49 @@ namespace Enjon
 		Mat4x4 projMtx = camera->GetProjection( );
 		Mat4x4 viewProjMtx = camera->GetViewProjection( );
 
-		if (!sortedStaticMeshRenderables.empty())
-		{ 
-			// Shader graph to be used
-			Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
-			const Material* material = nullptr;
+		//if (!sortedStaticMeshRenderables.empty())
+		//{ 
+		//	// Shader graph to be used
+		//	Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
+		//	const Material* material = nullptr;
 
-			for (auto& renderable : sortedStaticMeshRenderables)
-			{ 
-				renderable->Bind( );
-				{
-					// For each submesh
-					const Vector< SubMesh* >& subMeshes = renderable->GetMesh( )->GetSubmeshes( );
-					for ( u32 i = 0; i < subMeshes.size(); ++i )
-					{
-						const Material* curMaterial = renderable->GetMaterial( i ).Get( );
-						sg = curMaterial->GetShaderGraph( );
-						assert( curMaterial != nullptr );
+		//	for (auto& renderable : sortedStaticMeshRenderables)
+		//	{ 
+		//		renderable->Bind( );
+		//		{
+		//			// For each submesh
+		//			const Vector< SubMesh* >& subMeshes = renderable->GetMesh( )->GetSubmeshes( );
+		//			for ( u32 i = 0; i < subMeshes.size(); ++i )
+		//			{
+		//				const Material* curMaterial = renderable->GetMaterial( i ).Get( );
+		//				sg = curMaterial->GetShaderGraph( );
+		//				assert( curMaterial != nullptr );
 
-						if ( sg )
-						{
-							Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
-							if ( material != curMaterial )
-							{
-								// Set material
-								material = curMaterial;
+		//				if ( sg )
+		//				{
+		//					Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
+		//					if ( material != curMaterial )
+		//					{
+		//						// Set material
+		//						material = curMaterial;
 
-								// Bind uniforms
-								sgShader->Use( );
-								sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
-								sgShader->SetUniform( "uWorldTime", wt );
-								sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
-								sgShader->SetUniform( "uPreviousViewProjection", ctx->mPreviousViewProjectionMatrix );
-								material->Bind( sgShader );
-							}
+		//						// Bind uniforms
+		//						sgShader->Use( );
+		//						sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+		//						sgShader->SetUniform( "uWorldTime", wt );
+		//						sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
+		//						sgShader->SetUniform( "uPreviousViewProjection", ctx->mPreviousViewProjectionMatrix );
+		//						material->Bind( sgShader );
+		//					}
 
-							//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
-							renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ), i );
-						}
-					} 
-				}
-				renderable->Unbind( );
-			}
-		}
+		//					//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
+		//					renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ), i );
+		//				}
+		//			} 
+		//		}
+		//		renderable->Unbind( );
+		//	}
+		//}
 
 		if ( !staticMeshRenderableArray->empty( ) )
 		{
@@ -1249,9 +1249,12 @@ namespace Enjon
 		//const HashSet<SpotLight*>& spotLights 					= mGraphicsScene.GetSpotLights();	
 		//const HashSet<PointLight*>& pointLights 				= mGraphicsScene.GetPointLights();
 
-		const HashSet<DirectionalLight*>& directionalLights 	= scene->GetDirectionalLights();	
+		//const HashSet<DirectionalLight*>& directionalLights 	= scene->GetDirectionalLights();	
 		const HashSet<SpotLight*>& spotLights 					= scene->GetSpotLights();	
-		const HashSet<PointLight*>& pointLights 				= scene->GetPointLights();
+		//const HashSet<PointLight*>& pointLights 				= scene->GetPointLights();
+
+		const Vector< DirectionalLight >* directionalLights		= scene->GetDirectionalLightArray( );
+		const Vector< PointLight >* pointLights					= scene->GetPointLightArray( );
 
 		AmbientSettings* aS = scene->GetAmbientSettings( );
 		//AmbientSettings* aS = mGraphicsScene.GetAmbientSettings();
@@ -1320,15 +1323,15 @@ namespace Enjon
 			directionalShader->SetUniform( "uViewMatrixInv", viewInverse );
 			
 			// Bind individual light and render
-			for (auto& l : directionalLights)
+			for (auto& l : *directionalLights)
 			{
-				ColorRGBA32 color = l->GetColor();
+				ColorRGBA32 color = l.GetColor();
 
 				// directionalShader->SetUniform("u_lightSpaceMatrix", mShadowCamera->GetViewProjectionMatrix());
 				// directionalShader->SetUniform("u_shadowBias", 		EM::Vec2(0.005f, ShadowBiasMax));
-				directionalShader->SetUniform("u_lightDirection", 	l->GetDirection());															
+				directionalShader->SetUniform("u_lightDirection", 	l.GetDirection());															
 				directionalShader->SetUniform("u_lightColor", 		Vec3(color.r, color.g, color.b));
-				directionalShader->SetUniform("u_lightIntensity", 	l->GetIntensity());
+				directionalShader->SetUniform("u_lightIntensity", 	l.GetIntensity());
 
 				// Render	
 				 mFullScreenQuad->Submit();
@@ -1349,16 +1352,16 @@ namespace Enjon
 			pointShader->SetUniform( "uProjMatrixInv", projInverse );
 			pointShader->SetUniform( "uViewMatrixInv", viewInverse );
 
-			for (auto& l : pointLights)
+			for (auto& l : *pointLights)
 			{
-				ColorRGBA32& color = l->GetColor();
-				Vec3& position = l->GetPosition();
+				ColorRGBA32& color = l.GetColor();
+				Vec3& position = l.GetPosition();
 
 				pointShader->SetUniform("u_lightPos", position);
 				pointShader->SetUniform("u_lightColor", Vec3(color.r, color.g, color.b));
-				pointShader->SetUniform("u_lightIntensity", l->GetIntensity());
-				pointShader->SetUniform("u_attenuationRate", l->GetAttenuationRate());
-				pointShader->SetUniform("u_radius", l->GetRadius());
+				pointShader->SetUniform("u_lightIntensity", l.GetIntensity());
+				pointShader->SetUniform("u_attenuationRate", l.GetAttenuationRate());
+				pointShader->SetUniform("u_radius", l.GetRadius());
 
 				// Render Light to screen
 				mFullScreenQuad->Submit( );

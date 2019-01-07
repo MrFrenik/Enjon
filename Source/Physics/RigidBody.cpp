@@ -43,28 +43,28 @@ namespace Enjon
 
 	void RigidBody::ExplicitDestructor( )
 	{
-		// Remove body from physics world
-		if ( mBody )
-		{
-			Engine::GetInstance( )->GetSubsystem( Object::GetClass< PhysicsSubsystem >( ) )->ConstCast< PhysicsSubsystem >( )->RemoveBody( this );
-			delete mBody;
-		}
+		//// Remove body from physics world
+		//if ( mBody )
+		//{
+		//	Engine::GetInstance( )->GetSubsystem( Object::GetClass< PhysicsSubsystem >( ) )->ConstCast< PhysicsSubsystem >( )->RemoveBody( GetRawBody() );
+		//	delete mBody;
+		//}
 
-		// Delete motion state
-		if ( mMotionState )
-		{
-			delete mMotionState;
-		}
+		//// Delete motion state
+		//if ( mMotionState )
+		//{
+		//	delete mMotionState;
+		//}
 
-		if ( mShape )
-		{
-			delete mShape;
-		}
+		//if ( mShape )
+		//{
+		//	delete mShape;
+		//}
 
-		// Set all to null
-		mShape = nullptr;
-		mBody = nullptr;
-		mMotionState = nullptr;
+		//// Set all to null
+		//mShape = nullptr;
+		//mBody = nullptr;
+		//mMotionState = nullptr;
 	}
 
 	//========================================================================
@@ -149,7 +149,7 @@ namespace Enjon
 		PhysicsSubsystem* phys = Engine::GetInstance( )->GetSubsystem( Object::GetClass<PhysicsSubsystem>( ) )->ConstCast< PhysicsSubsystem >( );
 
 		// Add body to physics world and set physics world pointer
-		phys->AddBody( this );
+		phys->AddBody( GetRawBody() );
 		mWorld = phys->GetWorld( );
 	}
 
@@ -161,7 +161,7 @@ namespace Enjon
 		PhysicsSubsystem* phys = Engine::GetInstance( )->GetSubsystem( Object::GetClass<PhysicsSubsystem>( ) )->ConstCast< PhysicsSubsystem >( );
 
 		// Add body to physics world and set physics world pointer
-		phys->RemoveBody( this );
+		phys->RemoveBody( GetRawBody() );
 		mWorld = nullptr;
 	}
 
@@ -654,6 +654,7 @@ namespace Enjon
 			{
 				// Capture its previous position
 				Transform wt = PhysicsUtils::BTransformToTransform( mBody->getWorldTransform( ) );
+				wt.SetScale( mShape->GetLocalScaling( ) );
 
 				SetShape( mShape->GetCollisionShapeType( ) );
 

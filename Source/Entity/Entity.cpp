@@ -41,22 +41,6 @@ namespace Enjon
 				ImGui::PopFont( );
 			} 
 
-			for ( auto& c : GetComponents( ) )
-			{
-				if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
-				{
-					ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-					igm->InspectObject( c ); 
-					ImGui::PopFont( );
-
-					if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
-					{
-						RemoveComponent( c->Class( ) );
-					}
-				}
-			} 
-
-			ImGui::Text( "IComponents" );
 			for ( auto& c : GetIComponents( ) )
 			{
 				if ( !c )
@@ -64,22 +48,44 @@ namespace Enjon
 					continue;
 				}
 
-				// Don't like the const cast here...
-				Component* cmp = c->Get( );
+				Component* comp = c->Get( );
 
-				if ( ImGui::CollapsingHeader( cmp->Class( )->GetName( ).c_str( ) ) )
+				if ( ImGui::CollapsingHeader( comp->Class( )->GetName( ).c_str( ) ) )
 				{
 					ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
-					igm->InspectObject( cmp ); 
+					igm->InspectObject( comp ); 
 					ImGui::PopFont( );
 
 					if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
 					{
-						// This doesn't work the way I'd like it to anymore...
-						RemoveComponent( cmp->Class( ) );
+						RemoveComponent( comp->Class( ) );
 					}
-				} 
-			}
+				}
+			} 
+
+			//ImGui::Text( "IComponents" );
+			//for ( auto& c : GetIComponents( ) )
+			//{
+			//	if ( !c )
+			//	{
+			//		continue;
+			//	}
+
+			//	Component* cmp = c->Get( );
+
+			//	if ( ImGui::CollapsingHeader( cmp->Class( )->GetName( ).c_str( ) ) )
+			//	{
+			//		ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
+			//		igm->InspectObject( cmp ); 
+			//		ImGui::PopFont( );
+
+			//		if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
+			//		{
+			//			// This doesn't work the way I'd like it to anymore...
+			//			RemoveComponent( cmp->Class( ) );
+			//		}
+			//	} 
+			//}
 
 			/*
 			if ( mArchetype )
@@ -191,17 +197,18 @@ namespace Enjon
 		} 
 
 		bool componentPropChangeExists = false;
-		for ( auto& c : source->GetComponents() )
+		for ( auto& c : source->GetIComponents() )
 		{
+			Component* comp = c->Get( );
 			// If component doesn't exist, add it
-			if ( !HasComponent( c->Class() ) )
+			if ( !HasComponent( comp->Class() ) )
 			{ 
 				// Add component 
-				AddComponent( c->Class( ) );
+				AddComponent( comp->Class( ) );
 			}
 
 			// Attempt to merge the components 
-			ObjectArchiver::MergeObjects( c, GetComponent( c->Class() ), mergeType );	
+			ObjectArchiver::MergeObjects( comp, GetComponent( comp->Class( ) )->Get( ), mergeType );
 		}
 
 		// Add override if property changes
@@ -356,13 +363,14 @@ namespace Enjon
 		}
 
 		// Record overrides for components
-		for ( auto& c : GetComponents() )
+		for ( auto& c : GetIComponents() )
 		{
 			// Only record overrides if proto entity has component as well
-			Component* sourceComponent = mPrototypeEntity.Get( )->GetComponent( c->Class( ) );
+			Component* comp = c->Get( );
+			Component* sourceComponent = mPrototypeEntity.Get( )->GetComponent( comp->Class( ) )->Get( );
 			if ( sourceComponent )
 			{
-				ObjectArchiver::RecordAllPropertyOverrides( sourceComponent, c ); 
+				ObjectArchiver::RecordAllPropertyOverrides( sourceComponent, comp ); 
 			}
 		}
 
@@ -374,9 +382,9 @@ namespace Enjon
 	Result Entity::ClearAllPropertyOverrides( )
 	{
 		// Clear components
-		for ( auto& c : GetComponents( ) )
+		for ( auto& c : GetIComponents( ) )
 		{
-			ObjectArchiver::ClearAllPropertyOverrides( c );
+			ObjectArchiver::ClearAllPropertyOverrides( c->Get( ) );
 		}
 
 		return Result::INCOMPLETE;
