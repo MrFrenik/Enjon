@@ -16,12 +16,7 @@ namespace Enjon
 	{
 		ENJON_COMPONENT( StaticMeshComponent  )
 
-		public:
-
-			/* 
-			* @brief
-			*/
-			virtual void ExplicitConstructor() override; 
+		public: 
 
 			/*
 			* @brief

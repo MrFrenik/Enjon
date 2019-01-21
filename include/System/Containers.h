@@ -180,6 +180,11 @@ namespace Enjon
 					inline const slot_array< T >* get_array( )
 					{
 						return mslot_array;
+					} 
+
+					inline bool is_valid( )
+					{
+						return mslot_array->is_valid( *this );
 					}
 
 					inline bool operator !( )
@@ -233,6 +238,16 @@ namespace Enjon
 				return mData.data( );
 			}
 
+			inline void reserve( const usize& sz )
+			{
+				mData.reserve( sz );
+			}
+
+			inline bool is_valid( const handle& res ) const
+			{ 
+				return ( res.mhandleID < mhandleIndices.size() && mhandleIndices[ res.mhandleID ] != INVALID_SLOT_HANDLE );
+			}
+
 			inline handle emplace( )
 			{
 				// Here's the tricky part. Want to push back a new index? Do I store a free list of indices? Do I iterate to find a free index? ( ideally would not do that last bit )	
@@ -274,20 +289,25 @@ namespace Enjon
 
 			inline void erase( const handle& res )
 			{
-				assert( res.mhandleID < mhandleIndices.size( ) );
+				const u32 res_id = res.mhandleID;
+
+				assert( res_id < mhandleIndices.size( ) );
 
 				// Need to grab the actual resource index from the handle's indirection index
-				u32 idx = mhandleIndices[ res.mhandleID ];
+				u32 idx = mhandleIndices[ res_id ];
 
 				// If the index and generation don't match, then we have an invalid handle ( or just use INVALID_handle ) ? Not sure here...  
 				assert( idx != INVALID_SLOT_HANDLE );
 
 				// Set handle indirection index to invalid
-				mhandleIndices[ res.mhandleID ] = INVALID_SLOT_HANDLE;
+				mhandleIndices[ res_id ] = INVALID_SLOT_HANDLE;
 
 				// Need to pop and swap data			
 				if ( mData.size( ) > 1 )
 				{
+					// Swap index and back
+
+
 					std::iter_swap( mData.begin( ) + idx, mData.end( ) - 1 );
 					std::iter_swap( mReverseIndirectionIndices.begin( ) + idx, mReverseIndirectionIndices.end( ) - 1 );
 				}
@@ -303,7 +323,7 @@ namespace Enjon
 				}
 
 				// Push onto free list for handle
-				mIndexFreeList.push_back( res.mhandleID );
+				mIndexFreeList.push_back( res_id );
 			}
 
 			inline T& get( const handle& res ) const

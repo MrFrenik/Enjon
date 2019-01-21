@@ -8,6 +8,7 @@
 #include "Base/Object.h"
 #include "System/Types.h"
 #include "Physics/PhysicsDefines.h" 
+#include "Physics/RigidBody.h"
 #include "Math/Vec3.h"
 
 namespace Enjon
@@ -41,7 +42,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			CollisionShape( RigidBody* body );
+			CollisionShape( const ResourceHandle< RigidBody >& body );
 
 			/**
 			* @brief
@@ -65,7 +66,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void SetBody( RigidBody* body );
+			void SetBody( const ResourceHandle< RigidBody >& body );
 
 			/**
 			* @brief
@@ -116,8 +117,8 @@ namespace Enjon
 			CollisionShapeType mShapeType = CollisionShapeType::Empty;
 
 		protected: 
-			BulletCollisionShape* mShape = nullptr;
-			RigidBody* mBody = nullptr;
+			BulletCollisionShape* mShape = nullptr; 
+			ResourceHandle< RigidBody > mBody;
 	}; 
 }
 

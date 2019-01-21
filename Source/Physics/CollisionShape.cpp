@@ -12,7 +12,7 @@ namespace Enjon
 { 
 	//===========================================================
 
-	CollisionShape::CollisionShape( RigidBody* body )
+	CollisionShape::CollisionShape( const ResourceHandle< RigidBody >& body )
 		: mBody( body )
 	{ 
 	}
@@ -88,10 +88,12 @@ namespace Enjon
 		mOffset = offset;
 
 		// Refresh transform body
-		if ( mBody )
+		if ( !mBody )
 		{
-			mBody->RefreshTransform( );
+			return;
 		}
+
+		mBody->RefreshTransform( );
 	}
 
 	//===========================================================
@@ -103,7 +105,7 @@ namespace Enjon
 
 	//===========================================================
 
-	void CollisionShape::SetBody( RigidBody* body )
+	void CollisionShape::SetBody( const ResourceHandle< RigidBody >& body )
 	{
 		mBody = body;
 	}

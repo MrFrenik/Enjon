@@ -4,6 +4,7 @@
 #include "Physics/RigidBody.h"
 #include "Physics/PhysicsSubsystem.h"
 #include "Physics/PhysicsUtils.h"
+#include "Physics/CollisionShape.h"
 #include "Physics/BoxCollisionShape.h"
 #include "Physics/SphereCollisionShape.h"
 #include "Physics/EmptyCollisionShape.h"
@@ -13,6 +14,7 @@
 #include "Graphics/GraphicsSubsystem.h"
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/BaseTypeSerializeMethods.h"
+#include "Entity/Components/RigidBodyComponent.h"
 #include "Serialize/ByteBuffer.h"
 #include "ImGui/ImGuiManager.h"
 #include "SubsystemCatalog.h"
@@ -41,12 +43,46 @@ namespace Enjon
 
 	//========================================================================
 
-	void RigidBody::Destroy( )
+	RigidBody::RigidBody( RigidBody&& other )
 	{
+		*this = std::move( other );
+	}
+
+	//========================================================================
+
+	RigidBody& RigidBody::operator=( RigidBody&& other )
+	{
+		mMass = other.mMass; 
+		mRestitution = other.mRestitution; 
+		mFriction = other.mFriction; 
+		mLinearDamping = other.mLinearDamping; 
+		mAngularDamping = other.mAngularDamping; 
+		mGravity = other.mGravity; 
+		mCCDEnabled = other.mCCDEnabled; 
+		mIsTriggerVolume = other.mIsTriggerVolume; 
+		mLinearFactor = other.mLinearFactor; 
+		mAngularFactor = other.mAngularFactor; 
+		mIsKinematic = other.mIsKinematic; 
+		mShape = other.mShape; 
+		mBody = other.mBody;
+		mMotionState = other.mMotionState;
+		mWorld = other.mWorld; 
+		mHandle = other.mHandle; 
+		return *this;
+	}
+
+	//========================================================================
+
+	void RigidBody::Destroy( )
+	{ 
+		// Remove handle from world
+		auto physx = EngineSubsystem( PhysicsSubsystem ); 
+
+		physx->RemoveBody( mBody );
+		
 		// Remove body from physics world
 		if ( mBody )
 		{
-			Engine::GetInstance( )->GetSubsystem( Object::GetClass< PhysicsSubsystem >( ) )->ConstCast< PhysicsSubsystem >( )->RemoveBody( GetRawBody() );
 			delete mBody;
 		}
 
@@ -58,21 +94,29 @@ namespace Enjon
 
 		if ( mShape )
 		{
-			delete mShape;
-		}
+			delete mShape; 
+		} 
 
 		// Set all to null
 		mShape = nullptr;
 		mBody = nullptr;
 		mMotionState = nullptr; 
+
+		// Remove rigid body handle from physics world ( should also remove rigid body from world )
+		physx->DeallocateRigidBodyHandle( mHandle ); 
 	}
 
 	void RigidBody::ExplicitDestructor( )
 	{
+		//// Remove handle from world
+		//auto physx = EngineSubsystem( PhysicsSubsystem );
+
+		//// Remove rigid body handle from physics world ( should also remove rigid body from world )
+		//physx->DeallocateRigidBodyHandle( mHandle );
+
 		//// Remove body from physics world
 		//if ( mBody )
 		//{
-		//	Engine::GetInstance( )->GetSubsystem( Object::GetClass< PhysicsSubsystem >( ) )->ConstCast< PhysicsSubsystem >( )->RemoveBody( GetRawBody() );
 		//	delete mBody;
 		//}
 
@@ -133,7 +177,7 @@ namespace Enjon
 		mBody->setCollisionShape( mShape->GetRawShape( ) );
 
 		// Reset body of shape
-		mShape->SetBody( this );
+		mShape->SetBody( mHandle );
 
 		// Calculate local inertia using shape
 		BV3 localInertia = mShape->CalculateLocalInertia( mMass );
@@ -245,31 +289,31 @@ namespace Enjon
 			default:
 			case CollisionShapeType::Empty:
 			{
-				mShape = new EmptyCollisionShape( this );
+				mShape = new EmptyCollisionShape( mHandle );
 			} break;
 			case CollisionShapeType::Box:
 			{
-				mShape = new BoxCollisionShape( this );
+				mShape = new BoxCollisionShape( mHandle );
 			} break;
 
 			case CollisionShapeType::Sphere:
 			{
-				mShape = new SphereCollisionShape( this );
+				mShape = new SphereCollisionShape( mHandle );
 			} break;
 
 			case CollisionShapeType::Cylinder:
 			{
-				mShape = new CylinderCollisionShape( this );
+				mShape = new CylinderCollisionShape( mHandle );
 			} break;
 
 			case CollisionShapeType::Capsule:
 			{
-				mShape = new CapsuleCollisionShape( this ); 
+				mShape = new CapsuleCollisionShape( mHandle ); 
 			} break;
 
 			case CollisionShapeType::Cone:
 			{
-				mShape = new ConeCollisionShape( this ); 
+				mShape = new ConeCollisionShape( mHandle ); 
 			} break;
 		}
 
@@ -706,5 +750,10 @@ namespace Enjon
 		} 
 
 		return Result::SUCCESS;
+	}
+
+	void RigidBody::SetResourceHandle( const ResourceHandle< RigidBody >& handle )
+	{
+		mHandle = handle;
 	}
 }

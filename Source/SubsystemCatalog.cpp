@@ -28,7 +28,7 @@ namespace Enjon
 	SubsystemCatalog::~SubsystemCatalog()
 	{ 
 		// Shutdown individual subsystems
-		// NOTE(): Need to explicit in ordering of shutdowns to prevent crashes!
+		// NOTE(): Need to be explicit in ordering of shutdowns to prevent crashes!
 
 		EngineSubsystem( EntityManager )->Shutdown( ); 
 		EngineSubsystem( AssetManager )->Shutdown( );

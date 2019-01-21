@@ -15,7 +15,6 @@
 #include <type_traits>
 #include <unordered_map> 
 
-
 namespace Enjon 
 { 
 	template <typename T, typename U>
@@ -167,6 +166,7 @@ namespace Enjon
 
 	class Component : public Object
 	{ 
+		friend IComponentHandle;
 		friend IComponentInstanceData;
 		friend Entity;
 		friend EntityManager; 
@@ -335,6 +335,9 @@ namespace Enjon
 
 	struct IComponentHandle 
 	{ 
+		friend EntityManager;
+		friend Entity;
+
 		public:
 
 			~IComponentHandle( ) = default;
@@ -354,6 +357,8 @@ namespace Enjon
 				: mInstanceData( data )
 			{ 
 			}
+
+			void Destroy( );
 
 		protected:
 			const IComponentInstanceData* mInstanceData = nullptr; 
@@ -413,12 +418,17 @@ namespace Enjon
 			//	return mHandle.get_raw_ptr( );
 			//
 
+			const ResourceHandle< T >& GetHandle( )
+			{
+				return mHandle;
+			}
+
 			u32 GetHandleID( )
 			{
 				return mHandle.get_id( );
 			}
 
-		private:
+		protected:
 			ResourceHandle< T > mHandle;
 	};
 
@@ -485,7 +495,7 @@ namespace Enjon
 			void Deallocate( const u32& eid ) override
 			{ 
 				auto& h = mHandles[ eid ];
-				mData.erase( { h.GetHandleID(), &mData } );
+				mData.erase( h.GetHandle() );
 				mHandles.erase( eid );
 			} 
 

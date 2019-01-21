@@ -238,18 +238,18 @@ namespace Enjon
 					ByteBuffer temp;
 
 					// Treat this differently if is pointer
-					if ( prop->GetTraits( ).IsPointer( ) )
-					{
-						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
-						const Object* obj = base->GetValueAsObject( object );
-						ObjectArchiver::Serialize( obj, &temp );
-						buffer->Write< usize >( temp.GetSize( ) );
+					//if ( prop->GetTraits( ).IsPointer( ) )
+					//{
+					//	const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+					//	const Object* obj = base->GetValueAsObject( object );
+					//	ObjectArchiver::Serialize( obj, &temp );
+					//	buffer->Write< usize >( temp.GetSize( ) );
 
-						// Serialize object data to actual buffer
-						ObjectArchiver::Serialize( obj, buffer );
-					}
+					//	// Serialize object data to actual buffer
+					//	ObjectArchiver::Serialize( obj, buffer );
+					//}
 
-					else
+					//else
 					{
 						// Write out to temp to write size of object
 						const Object* obj = cls->GetValueAs< Object >( object, prop );
@@ -643,26 +643,26 @@ namespace Enjon
 
 					case MetaPropertyType::Object:
 					{
-						// If is pointer
-						if ( prop->GetTraits( ).IsPointer( ) )
-						{
-							const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
-							Object* actualObj = base->GetValueAsObject( object )->ConstCast<Object>( );
+						//// If is pointer
+						//if ( prop->GetTraits( ).IsPointer( ) )
+						//{
+						//	const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
+						//	Object* actualObj = base->GetValueAsObject( object )->ConstCast<Object>( );
  
-							// Destroy the object for now and recreate it
-							if ( actualObj )
-							{
-								delete actualObj;
-								actualObj = nullptr;
-							}
+						//	// Destroy the object for now and recreate it
+						//	if ( actualObj )
+						//	{
+						//		delete actualObj;
+						//		actualObj = nullptr;
+						//	}
 
-							// Grab object from deserializer
-							Object* obj = ObjectArchiver::Deserialize( buffer );
+						//	// Grab object from deserializer
+						//	Object* obj = ObjectArchiver::Deserialize( buffer );
 
-							// Set value
-							cls->SetValue( object, prop, obj ); 
-						}
-						else
+						//	// Set value
+						//	cls->SetValue( object, prop, obj ); 
+						//}
+						//else
 						{
 							// Grab the object pointer
 							Object* obj = cls->GetValueAs< Object >( object, prop )->ConstCast< Object >( );

@@ -61,7 +61,6 @@ enum MetaPropertyEnumDefines
 	public:\
 		ComponentName()\
 		{\
-			ExplicitConstructor( );\
 		}\
 		~ComponentName()\
 		{\
@@ -75,7 +74,6 @@ enum MetaPropertyEnumDefines
 	public:\
 		virtual void Destroy() override\
 		{\
-			ExplicitDestructor( );\
 		} 
 
 #define ENJON_COMPONENT( ComponentName, ... )\

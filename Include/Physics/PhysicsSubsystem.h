@@ -13,6 +13,8 @@
 #include "Physics/RigidBody.h"
 #include "Entity/Components/RigidBodyComponent.h"
 
+#define ENJON_MAX_RIGID_BODIES	131072
+
 namespace Enjon 
 { 
 	class CollisionShape;
@@ -112,6 +114,7 @@ namespace Enjon
 	{ 
 		ENJON_CLASS_BODY( PhysicsSubsystem )
 
+		friend RigidBody;
 		friend RigidBodyComponent;
 
 		public: 
@@ -186,6 +189,8 @@ namespace Enjon
 		protected:
 
 			ResourceHandle< RigidBody > AllocateRigidBodyHandle( );
+
+			void DeallocateRigidBodyHandle( const ResourceHandle< RigidBody >& handle );
 
 		private:
 

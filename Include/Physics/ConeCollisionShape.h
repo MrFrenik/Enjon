@@ -30,7 +30,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			ConeCollisionShape( RigidBody* body );
+			ConeCollisionShape( const ResourceHandle< RigidBody >& body );
 
 
 		private:

@@ -8,14 +8,22 @@
 #include "Base/Object.h"
 #include "System/Types.h"
 #include "Math/Maths.h"
-#include "Physics/CollisionShape.h"
 #include "Physics/PhysicsDefines.h" 
 
 namespace Enjon
 { 
+	// Forward Declaration
+	class CollisionShape;
+	class PhysicsSubsystem;
+	class RigidBodyComponent;
+	enum class CollisionShapeType;
+
 	ENJON_CLASS( )
 	class RigidBody : public Object
 	{
+		friend PhysicsSubsystem;
+		friend RigidBodyComponent;
+
 		ENJON_CLASS_BODY( RigidBody )
 
 		public: 
@@ -24,6 +32,16 @@ namespace Enjon
 			* @brief
 			*/
 			RigidBody( const CollisionShapeType& type );
+
+			/**
+			* @brief
+			*/
+			RigidBody( RigidBody&& other );
+
+			/**
+			* @brief
+			*/
+			RigidBody& operator=( RigidBody&& other );
 
 			/**
 			* @brief
@@ -293,6 +311,10 @@ namespace Enjon
 			*/
 			CollisionShapeType GetShapeType( ) const; 
 
+		protected:
+
+			void SetResourceHandle( const ResourceHandle< RigidBody >& handle );
+
 		// Serialized properties
 		private:
 
@@ -337,6 +359,9 @@ namespace Enjon
 			BulletRigidBody* mBody = nullptr;
 			BulletRigidBodyMotionState* mMotionState = nullptr;
 			BulletDynamicPhysicsWorld* mWorld = nullptr; 
+
+			// TODO(): Something is crashing whenever the slot array holding this handle gets reallocated. Figure it out. 
+			ResourceHandle< RigidBody > mHandle;
 	};
 }
 

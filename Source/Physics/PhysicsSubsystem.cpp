@@ -51,6 +51,9 @@ namespace Enjon
 		// Set mode for debug drawer
 		mDebugDrawer.setDebugMode( btIDebugDraw::DBG_DrawWireframe );
 
+		// Reserve space for slot array
+		mRigidBodySlotArray.reserve( ENJON_MAX_RIGID_BODIES );
+
 		return Result::SUCCESS;
 	}
 
@@ -300,11 +303,6 @@ namespace Enjon
 	//void PhysicsSubsystem::AddBody( const ResourceHandle< RigidBody >& body )
 	void PhysicsSubsystem::AddBody( BulletRigidBody* body )
 	{
-		//if ( mRigidBodies.find( body ) == mRigidBodies.end( ) )
-		//{
-		//	mRigidBodies.insert( body );
-		//	mDynamicsWorld->addRigidBody( body->GetRawBody() ); 
-		//}
 		if ( mDynamicsWorld )
 		{
 			mDynamicsWorld->addRigidBody( body ); 
@@ -316,10 +314,7 @@ namespace Enjon
 	//void PhysicsSubsystem::RemoveBody( const ResourceHandle< RigidBody >& body )
 	void PhysicsSubsystem::RemoveBody( BulletRigidBody* body )
 	{
-		//mRigidBodies.erase( body );
-		//mDynamicsWorld->removeRigidBody( body->GetRawBody() );
-		//mDynamicsWorld->removeRigidBody( body->GetRawBody( ) );
-		if ( mDynamicsWorld )
+		if ( mDynamicsWorld && body )
 		{
 			mDynamicsWorld->removeRigidBody( body ); 
 		}
@@ -467,7 +462,16 @@ namespace Enjon
 
 	ResourceHandle< RigidBody > PhysicsSubsystem::AllocateRigidBodyHandle( )
 	{
-		return ( mRigidBodySlotArray.emplace( ) );
+		return mRigidBodySlotArray.emplace( );
+		//ResourceHandle< RigidBody > handle = mRigidBodySlotArray.emplace( );
+		//handle->SetResourceHandle( handle );
+		//return handle;
+	}
+
+	void PhysicsSubsystem::DeallocateRigidBodyHandle( const ResourceHandle< RigidBody >& handle )
+	{
+		// Remove handle
+		mRigidBodySlotArray.erase( handle );
 	}
 
 	//====================================================================== 

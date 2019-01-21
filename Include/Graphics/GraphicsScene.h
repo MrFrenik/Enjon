@@ -8,14 +8,14 @@
 #include "Graphics/Camera.h"
 #include "Base/Object.h"
 #include "System/Containers.h" 
+#include "Graphics/DirectionalLight.h"
+#include "Graphics/PointLight.h"
+#include "Graphics/StaticMeshRenderable.h"
 
 namespace Enjon 
 { 
 	class Renderable;
-	class StaticMeshRenderable;
 	class SkeletalMeshRenderable;
-	class DirectionalLight;
-	class PointLight;
 	class SpotLight;
 	class QuadBatch;
 
@@ -301,9 +301,9 @@ namespace Enjon
 			HashSet<SpotLight*> mSpotLights; 
 			AmbientSettings mAmbientSettings; 
  
-			SlotArray< StaticMeshRenderable >*	mStaticMeshRenderableSlotArray = nullptr;
-			SlotArray< PointLight >*			mPointLightSlotArray = nullptr;
-			SlotArray< DirectionalLight >*		mDirectionalLightSlotArray = nullptr;
+			SlotArray< StaticMeshRenderable >	mStaticMeshRenderableSlotArray;
+			SlotArray< PointLight >				mPointLightSlotArray;
+			SlotArray< DirectionalLight >		mDirectionalLightSlotArray;
 
 			// Not sure that I like this "solution"
 			Camera* mActiveCamera = nullptr;

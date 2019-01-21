@@ -276,6 +276,12 @@ namespace Enjon
 			} 
 		} 
 
+		for ( auto& c : mComponentHandles )
+		{
+			// Destroy the component handle
+			c->Destroy( );
+		} 
+
 		// Reset all fields
 		mLocalTransform = Enjon::Transform( );
 		mWorldTransform = Enjon::Transform( );
@@ -285,6 +291,7 @@ namespace Enjon
 		mWorldTransformDirty = true;
 		mComponents.clear( );
 		mChildren.clear( );
+		mComponentHandles.clear( );
 
 		// Remove from world
 		RemoveFromWorld( );
@@ -1235,26 +1242,6 @@ namespace Enjon
 				if ( ent && ent->mState != EntityState::INVALID )
 				{
 					// Destroy all components
-					for ( auto& c : ent->mComponentHandles )
-					{
-						Component* comp = c->Get( );
-						if ( comp )
-						{
-							// Call shutdown on component
-							comp->Shutdown( );
-							// Destroy the component
-							//comp->Destroy( );
-							// Remove component from world
-							comp->RemoveFromWorld( );
-						}
-
-						// TODO(): Remove from instance data
-						// Free component memory
-						//delete comp;
-						// Set to null
-						//comp = nullptr;
-					}
-
 					// Remove entity ( includes reset )
 					RemoveEntityUnsafe( ent );
 				}

@@ -17,6 +17,8 @@ namespace Enjon
 	{
 	public:
 
+		friend World;
+
 		/**
 		* @brief
 		*/

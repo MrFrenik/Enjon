@@ -21,9 +21,6 @@ namespace Enjon
 
 	void GraphicsScene::ExplicitConstructor( )
 	{
-		mDirectionalLightSlotArray = new SlotArray< DirectionalLight >( );
-		mPointLightSlotArray = new SlotArray< PointLight >( );
-		mStaticMeshRenderableSlotArray = new SlotArray< StaticMeshRenderable >( );
 	}
 
 	void GraphicsScene::ExplicitDestructor()
@@ -62,6 +59,10 @@ namespace Enjon
 		{
 			s->SetGraphicsScene( nullptr );
 		}
+
+		mStaticMeshRenderableSlotArray.clear( );
+		mPointLightSlotArray.clear( );
+		mDirectionalLightSlotArray.clear( );
 
 		// Free all memory
 		mStaticMeshRenderables.clear( );
@@ -118,28 +119,28 @@ namespace Enjon
 
 	void GraphicsScene::DeallocateDirectionalLight( const ResourceHandle< DirectionalLight >& light )
 	{
-		mDirectionalLightSlotArray->erase( light );
+		mDirectionalLightSlotArray.erase( light );
 	}
 
 	//====================================================================================================
 
 	void GraphicsScene::DeallocatePointLight( const ResourceHandle< PointLight >& light )
 	{
-		mPointLightSlotArray->erase( light );
+		mPointLightSlotArray.erase( light );
 	}
 
 	//====================================================================================================
 
 	void GraphicsScene::DeallocateStaticMeshRenderable( const ResourceHandle< StaticMeshRenderable >& renderable )
 	{
-		mStaticMeshRenderableSlotArray->erase( renderable );
+		mStaticMeshRenderableSlotArray.erase( renderable );
 	}
 
 	//====================================================================================================
 
 	ResourceHandle< PointLight > GraphicsScene::AllocatePointLight( )
 	{
-		ResourceHandle< PointLight > pl = mPointLightSlotArray->emplace( );
+		ResourceHandle< PointLight > pl = mPointLightSlotArray.emplace( );
 		pl->SetGraphicsScene( this );
 		return pl;
 	}
@@ -148,7 +149,7 @@ namespace Enjon
 
 	ResourceHandle< DirectionalLight > GraphicsScene::AllocateDirectionalLight( )
 	{
-		ResourceHandle< DirectionalLight > dl = mDirectionalLightSlotArray->emplace( ); 
+		ResourceHandle< DirectionalLight > dl = mDirectionalLightSlotArray.emplace( ); 
 		dl->SetGraphicsScene( this );
 		return dl;
 	}
@@ -160,7 +161,7 @@ namespace Enjon
 		// Construct and new static mesh renderable
 		AssetManager* am = EngineSubsystem( AssetManager );
 
-		auto handle = mStaticMeshRenderableSlotArray->emplace( ); 
+		auto handle = mStaticMeshRenderableSlotArray.emplace( ); 
 
 		handle->SetGraphicsScene( this );
 		handle->SetRenderableID( entityID );
@@ -476,21 +477,21 @@ namespace Enjon
 
 	Vector< StaticMeshRenderable >* GraphicsScene::GetStaticMeshRenderableArray()
 	{
-		return ( mStaticMeshRenderableSlotArray->data() );
+		return ( mStaticMeshRenderableSlotArray.data() );
 	} 
 
 	//================================================================================================== 
 
 	Vector< PointLight >* GraphicsScene::GetPointLightArray( )
 	{
-		return mPointLightSlotArray->data( );
+		return mPointLightSlotArray.data( );
 	}
 
 	//================================================================================================== 
 
 	Vector< DirectionalLight >* GraphicsScene::GetDirectionalLightArray( )
 	{
-		return mDirectionalLightSlotArray->data( );
+		return mDirectionalLightSlotArray.data( );
 	}
 
 	//================================================================================================== 

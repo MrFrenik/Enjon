@@ -23,7 +23,7 @@ namespace Enjon
 		ClearAllCallbacks( );
 
 		// Free memory for rigid body
-		mRigidBody->Destroy( );
+		mRigidBody->Destroy( ); 
 	}
 
 	//========================================================================
@@ -63,6 +63,8 @@ namespace Enjon
 	{
 		// Want to get a handle from the Physics Subsystem for the rigid body
 		mRigidBody = EngineSubsystem( PhysicsSubsystem )->AllocateRigidBodyHandle( );
+
+		mRigidBody->SetResourceHandle( mRigidBody );
 
 		// Initialize the rigidbody
 		mRigidBody->Initialize( ); 

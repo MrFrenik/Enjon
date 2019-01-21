@@ -20,6 +20,7 @@
 #include <Entity/EntityManager.h>
 #include <Physics/PhysicsSubsystem.h>
 #include <Scene/SceneManager.h>
+#include <Physics/CollisionShape.h>
 #include <Entity/Components/StaticMeshComponent.h>
 #include <Entity/Components/RigidBodyComponent.h>
 #include <Entity/Components/PointLightComponent.h>

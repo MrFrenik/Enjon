@@ -19,7 +19,7 @@ namespace Enjon
 
 	//==============================================================
 
-	EmptyCollisionShape::EmptyCollisionShape( RigidBody* body )
+	EmptyCollisionShape::EmptyCollisionShape( const ResourceHandle< RigidBody >& body )
 		: CollisionShape( body )
 	{ 
 		// Construct box collision shape

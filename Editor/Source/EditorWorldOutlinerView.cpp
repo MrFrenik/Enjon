@@ -570,6 +570,9 @@ namespace Enjon
 		{
 			mEntityNameChangeID = mSelectedEntity.Get( )->GetID( );
 		} 
+
+		ImGui::SameLine( );
+		ImGui::Text( "Frame: %.3f", 1000.0f / ( f32 )ImGui::GetIO( ).Framerate );
 	}
 
 	//=================================================================

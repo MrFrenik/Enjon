@@ -62,8 +62,10 @@ void EntityManager::RemoveComponent(Entity* entity)
 	// Check to make sure isn't already attached to this entity
 	assert(entity->HasComponent<T>());
 
+	RemoveComponent( Object::GetClass< T >( ), entity->GetHandle( ) );
+
 	// Remove component from entity manager components
-	DetachComponentFromEntity<T>(entity);
+	//DetachComponentFromEntity<T>(entity);
 
 	// Set bitmask field for component
 	//entity->mComponentMask ^= Enjon::GetComponentBitMask<T>();

@@ -387,7 +387,7 @@ namespace Enjon
 			{
 				case SDL_QUIT:
 				{
-					return Result::FAILURE;
+					//return Result::FAILURE;
 				} break;
 
 				case SDL_KEYUP:
@@ -431,6 +431,11 @@ namespace Enjon
 
 				// Pass event to windows
 				w->ProcessInput( event );
+			}
+
+			if ( windows.empty() )
+			{
+				return Result::FAILURE;
 			}
 		}
 

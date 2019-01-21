@@ -53,10 +53,10 @@ namespace Enjon
 	template <typename T>
 	using Stack = std::stack<T>; 
 
-	template <typename T>
-	using SlotArray = slot_array<T>;
+	template < typename T >
+	using SlotArray = slot_array< T >;
 
-	template <typename T>
+	template < typename T >
 	using ResourceHandle = typename slot_array< T >::handle;
 }
 

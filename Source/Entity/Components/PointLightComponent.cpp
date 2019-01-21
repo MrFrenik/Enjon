@@ -20,13 +20,12 @@ namespace Enjon
 	//==================================================================================
 
 	void PointLightComponent::ExplicitDestructor()
-	{
+	{ 
 		// Remove renderable from scene
-		//if (mLight->GetGraphicsScene() != nullptr)
-		//{
-		//	GraphicsScene* gs = mLight->GetGraphicsScene( );
-		//	gs->DeallocatePointLight( mLight );
-		//}
+		if (mLight.is_valid() && mLight->GetGraphicsScene() != nullptr)
+		{
+			mLight->GetGraphicsScene()->DeallocatePointLight( mLight );
+		}
 	}
 
 	//==================================================================================

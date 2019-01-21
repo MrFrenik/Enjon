@@ -12,23 +12,16 @@
 #include "Engine.h"
 
 namespace Enjon
-{
-	//====================================================================
-
-	void StaticMeshComponent::ExplicitConstructor()
-	{ 
-		// Set explicit tick state
-		mTickState = ComponentTickState::TickNever;
-	} 
-
+{ 
 	//====================================================================
 
 	void StaticMeshComponent::ExplicitDestructor()
 	{
-		// Remove renderable from scene
-		if (mRenderable.GetGraphicsScene() != nullptr)
+		// Remove renderable from scene 
+		if ( mRenderableHandle.is_valid() )
 		{
-			mRenderable.GetGraphicsScene()->RemoveStaticMeshRenderable(&mRenderable);
+			GraphicsScene* gfx = mRenderableHandle->GetGraphicsScene( );
+			mRenderableHandle->GetGraphicsScene( )->DeallocateStaticMeshRenderable( mRenderableHandle );
 		}
 	}
 
@@ -271,7 +264,7 @@ namespace Enjon
 
 	//==================================================================== 
 
-	// This makes the IDIOTIC assumption that this component data is in face what I want. No type safety there whatsoever.
+	// This makes the IDIOTIC assumption that this component data is in fact what I want. No type safety there whatsoever.
 	Result StaticMeshComponentSystem::PostComponentConstruction( const u32& id, IComponentInstanceData* data )
 	{ 
 		// Get subsystems		

@@ -149,6 +149,16 @@ namespace Enjon
 	} 
 
 	//=========================================================================
+
+	void IComponentHandle::Destroy( )
+	{
+		Component* comp = Get( );
+		comp->ExplicitDestructor( );
+		comp->RemoveFromWorld( );
+		const_cast< IComponentInstanceData* >( mInstanceData )->Deallocate( comp->GetEntity( )->GetID( ) );
+	}
+
+	//=========================================================================
 }
 
 

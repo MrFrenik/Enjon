@@ -22,7 +22,7 @@ namespace Enjon
 	void DirectionalLightComponent::ExplicitDestructor()
 	{
 		// Remove renderable from scene
-		if (mLight->GetGraphicsScene() != nullptr)
+		if (mLight.is_valid() && mLight->GetGraphicsScene() != nullptr)
 		{
 			mLight->GetGraphicsScene()->DeallocateDirectionalLight( mLight );
 		}

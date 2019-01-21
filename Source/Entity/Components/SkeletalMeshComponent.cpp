@@ -26,10 +26,10 @@ namespace Enjon
 	void SkeletalMeshComponent::ExplicitDestructor()
 	{
 		// Remove renderable from scene
-		if (mRenderable.GetGraphicsScene() != nullptr)
-		{
-			mRenderable.GetGraphicsScene()->RemoveSkeletalMeshRenderable(&mRenderable);
-		}
+		//if (mRenderable.GetGraphicsScene() != nullptr)
+		//{
+		//	mRenderable.GetGraphicsScene()->RemoveSkeletalMeshRenderable(&mRenderable);
+		//}
 	}
 
 	//==================================================================== 

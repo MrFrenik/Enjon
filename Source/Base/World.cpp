@@ -19,6 +19,7 @@ namespace Enjon
 		// Release all contexts
 		for ( auto& c : mContextMap )
 		{
+			c.second->ExplicitDestructor( );
 			delete ( c.second );
 			c.second = nullptr;
 		}

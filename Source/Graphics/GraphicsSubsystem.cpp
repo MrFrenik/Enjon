@@ -111,6 +111,9 @@ namespace Enjon
 			delete ( mObjectIDBuffer );
 			mObjectIDBuffer = nullptr;
 		}
+
+		// Destruct the scene
+		mScene.ExplicitDestructor( );
 	}
 
 	//======================================================================================================
