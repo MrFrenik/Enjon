@@ -315,6 +315,16 @@ namespace Enjon
 
 			void SetResourceHandle( const ResourceHandle< RigidBody >& handle );
 
+			/**
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			/**
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
+
 		// Serialized properties
 		private:
 

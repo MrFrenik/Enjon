@@ -61,12 +61,7 @@ namespace Enjon
 			ENJON_FUNCTION( )
 			Vec3 GetOffset( ); 
 
-		protected:
-
-			/**
-			* @brief
-			*/
-			void SetBody( const ResourceHandle< RigidBody >& body );
+		protected: 
 
 			/**
 			* @brief
@@ -118,7 +113,6 @@ namespace Enjon
 
 		protected: 
 			BulletCollisionShape* mShape = nullptr; 
-			ResourceHandle< RigidBody > mBody;
 	}; 
 }
 

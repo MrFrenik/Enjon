@@ -12,13 +12,6 @@ namespace Enjon
 { 
 	//===========================================================
 
-	CollisionShape::CollisionShape( const ResourceHandle< RigidBody >& body )
-		: mBody( body )
-	{ 
-	}
-
-	//===========================================================
-
 	void CollisionShape::ExplicitDestructor( )
 	{ 
 		// Delete the shape
@@ -85,15 +78,7 @@ namespace Enjon
 
 	void CollisionShape::SetOffset( const Vec3& offset )
 	{
-		mOffset = offset;
-
-		// Refresh transform body
-		if ( !mBody )
-		{
-			return;
-		}
-
-		mBody->RefreshTransform( );
+		mOffset = offset; 
 	}
 
 	//===========================================================
@@ -101,14 +86,7 @@ namespace Enjon
 	Vec3 CollisionShape::GetOffset( )
 	{
 		return mOffset;
-	}
-
-	//===========================================================
-
-	void CollisionShape::SetBody( const ResourceHandle< RigidBody >& body )
-	{
-		mBody = body;
-	}
+	} 
 
 	//===========================================================
 }

@@ -17,19 +17,7 @@ namespace Enjon
 		mShapeType = CollisionShapeType::Capsule;
 	}
 
-	//==============================================================
-
-	CapsuleCollisionShape::CapsuleCollisionShape( const ResourceHandle< RigidBody >& body )
-		: CollisionShape( body )
-	{
-		// Construct box collision shape
-		mShape = new BulletCapsuleShape( mRadius, mHeight );
-
-		// Set up shape type
-		mShapeType = CollisionShapeType::Capsule; 
-	}
-
-	//==============================================================
+	//============================================================== 
 
 	void CapsuleCollisionShape::ExplicitDestructor( )
 	{

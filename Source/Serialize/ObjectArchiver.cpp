@@ -262,7 +262,7 @@ namespace Enjon
 				} 
 			} 
 			// Successfully constructed, now deserialize data into it
-			else
+			//else
 			{
 				Result res = object->DeserializeData( buffer );
 

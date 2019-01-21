@@ -25,13 +25,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void ExplicitDestructor( ) override;
-
-			/**
-			* @brief
-			*/
-			ConeCollisionShape( const ResourceHandle< RigidBody >& body );
-
+			virtual void ExplicitDestructor( ) override; 
 
 		private:
 

@@ -17,19 +17,7 @@ namespace Enjon
 		mShapeType = CollisionShapeType::Empty;
 	}
 
-	//==============================================================
-
-	EmptyCollisionShape::EmptyCollisionShape( const ResourceHandle< RigidBody >& body )
-		: CollisionShape( body )
-	{ 
-		// Construct box collision shape
-		mShape = new btEmptyShape( );
-
-		// Set up shape type
-		mShapeType = CollisionShapeType::Empty;
-	}
-
-	//==============================================================
+	//============================================================== 
 
 	void EmptyCollisionShape::ExplicitDestructor( )
 	{

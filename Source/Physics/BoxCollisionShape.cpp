@@ -15,19 +15,7 @@ namespace Enjon
 
 		// Set up shape type
 		mShapeType = CollisionShapeType::Box;
-	}
-
-	//==============================================================
-
-	BoxCollisionShape::BoxCollisionShape( const ResourceHandle< RigidBody >& body )
-		: CollisionShape( body )
-	{ 
-		// Construct box collision shape
-		mShape = new BulletBoxShape( BV3( mHalfExtents.x, mHalfExtents.y, mHalfExtents.z ) ); 
-
-		// Set up shape type
-		mShapeType = CollisionShapeType::Box;
-	}
+	} 
 	
 	//==============================================================
 

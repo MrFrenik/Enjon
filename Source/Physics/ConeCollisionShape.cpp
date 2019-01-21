@@ -15,19 +15,7 @@ namespace Enjon
 
 		// Set up shape type
 		mShapeType = CollisionShapeType::Cone;
-	}
-
-	//==============================================================
-
-	ConeCollisionShape::ConeCollisionShape( const ResourceHandle< RigidBody >& body )
-		: CollisionShape( body )
-	{
-		// Construct box collision shape
-		mShape = new BulletConeShape( mRadius, mHeight );
-
-		// Set up shape type
-		mShapeType = CollisionShapeType::Cone; 
-	}
+	} 
 
 	//==============================================================
 

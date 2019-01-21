@@ -5,6 +5,8 @@
 #include "Utils/FileUtils.h"
 #include "Serialize/UUID.h"
 #include "Math/Mat4.h"
+#include "Math/Vec4.h"
+#include "Math/Vec2.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -177,6 +179,54 @@ namespace Enjon
 
 	//======================================================================== 
 
+	template<>
+	iVec2 ByteBuffer::Read< iVec2 >( )
+	{
+		return iVec2( Read< s32 >( ), Read< s32 >( ) );
+	}
+
+	//======================================================================== 
+
+	template<>
+	iVec3 ByteBuffer::Read< iVec3 >( )
+	{
+		return iVec3( Read< s32 >( ), Read< s32 >( ), Read< s32 >() );
+	}
+
+	//======================================================================== 
+
+	template<>
+	iVec4 ByteBuffer::Read< iVec4 >( )
+	{
+		return iVec4( Read< s32 >( ), Read< s32 >( ), Read< s32 >(), Read< s32 >() );
+	}
+
+	//======================================================================== 
+
+	template<>
+	Vec2 ByteBuffer::Read< Vec2 >( )
+	{
+		return Vec2( Read< f32 >( ), Read< f32 >( ) );
+	}
+
+	//======================================================================== 
+
+	template<>
+	Vec3 ByteBuffer::Read< Vec3 >( )
+	{
+		return Vec3( Read< f32 >( ), Read< f32 >( ), Read< f32 >() );
+	}
+
+	//======================================================================== 
+
+	template<>
+	Vec4 ByteBuffer::Read< Vec4 >( )
+	{
+		return Vec4( Read< f32 >( ), Read< f32 >( ), Read< f32 >(), Read< f32 >() );
+	}
+
+	//======================================================================== 
+
 	template < typename T >
 	void ByteBuffer::Write( const T& val )
 	{
@@ -215,6 +265,66 @@ namespace Enjon
 		{
 			Write< f32 >( e );
 		}
+	}
+
+	//======================================================================== 
+
+	template<>
+	void ByteBuffer::Write< iVec2 >( const iVec2& val )
+	{
+		Write< s32 >( val.x );
+		Write< s32 >( val.y );
+	}
+
+	//======================================================================== 
+	
+	template<>
+	void ByteBuffer::Write< iVec3 >( const iVec3& val )
+	{
+		Write< s32 >( val.x );
+		Write< s32 >( val.y );
+		Write< s32 >( val.z );
+	}
+
+	//======================================================================== 
+
+	template<>
+	void ByteBuffer::Write< iVec4 >( const iVec4& val )
+	{
+		Write< s32 >( val.x );
+		Write< s32 >( val.y );
+		Write< s32 >( val.z );
+		Write< s32 >( val.w );
+	}
+
+	//======================================================================== 
+
+	template<>
+	void ByteBuffer::Write< Vec2 >( const Vec2& val )
+	{
+		Write< f32 >( val.x );
+		Write< f32 >( val.y );
+	}
+
+	//======================================================================== 
+ 
+	template<>
+	void ByteBuffer::Write< Vec3 >( const Vec3& val )
+	{
+		Write< f32 >( val.x );
+		Write< f32 >( val.y );
+		Write< f32 >( val.z );
+	}
+
+	//======================================================================== 
+ 
+	template<>
+	void ByteBuffer::Write< Vec4 >( const Vec4& val )
+	{
+		Write< f32 >( val.x );
+		Write< f32 >( val.y );
+		Write< f32 >( val.z );
+		Write< f32 >( val.w );
 	}
 
 	//======================================================================== 
@@ -458,5 +568,11 @@ namespace Enjon
 	BYTE_BUFFER_RW( f64 )
 	BYTE_BUFFER_RW( usize )
 	BYTE_BUFFER_RW( Mat4x4 )
+	BYTE_BUFFER_RW( iVec2 )
+	BYTE_BUFFER_RW( iVec3 )
+	BYTE_BUFFER_RW( iVec4 )
+	BYTE_BUFFER_RW( Vec2 )
+	BYTE_BUFFER_RW( Vec3 )
+	BYTE_BUFFER_RW( Vec4 )
 }
 

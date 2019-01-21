@@ -174,10 +174,7 @@ namespace Enjon
 	void RigidBody::Reinitialize( )
 	{
 		// Set shape
-		mBody->setCollisionShape( mShape->GetRawShape( ) );
-
-		// Reset body of shape
-		mShape->SetBody( mHandle );
+		mBody->setCollisionShape( mShape->GetRawShape( ) ); 
 
 		// Calculate local inertia using shape
 		BV3 localInertia = mShape->CalculateLocalInertia( mMass );
@@ -208,7 +205,7 @@ namespace Enjon
 		SetContinuousCollisionDetectionEnabled( mCCDEnabled );
 
 		// Add body to physics world and set physics world pointer
-		AddToWorld( );
+		//AddToWorld( );
 	}
 
 	//========================================================================
@@ -289,31 +286,31 @@ namespace Enjon
 			default:
 			case CollisionShapeType::Empty:
 			{
-				mShape = new EmptyCollisionShape( mHandle );
+				mShape = new EmptyCollisionShape();
 			} break;
 			case CollisionShapeType::Box:
 			{
-				mShape = new BoxCollisionShape( mHandle );
+				mShape = new BoxCollisionShape();
 			} break;
 
 			case CollisionShapeType::Sphere:
 			{
-				mShape = new SphereCollisionShape( mHandle );
+				mShape = new SphereCollisionShape();
 			} break;
 
 			case CollisionShapeType::Cylinder:
 			{
-				mShape = new CylinderCollisionShape( mHandle );
+				mShape = new CylinderCollisionShape();
 			} break;
 
 			case CollisionShapeType::Capsule:
 			{
-				mShape = new CapsuleCollisionShape( mHandle ); 
+				mShape = new CapsuleCollisionShape(); 
 			} break;
 
 			case CollisionShapeType::Cone:
 			{
-				mShape = new ConeCollisionShape( mHandle ); 
+				mShape = new ConeCollisionShape(); 
 			} break;
 		}
 
@@ -749,11 +746,82 @@ namespace Enjon
 			gfx->DrawDebugAABB( PhysicsUtils::BV3ToVec3( aabbMin ), PhysicsUtils::BV3ToVec3( aabbMax ), Vec3( 0.0f, 1.0f, 0.0f ) ); 
 		} 
 
+		RefreshTransform( );
+
 		return Result::SUCCESS;
 	}
+
+	//========================================================================
 
 	void RigidBody::SetResourceHandle( const ResourceHandle< RigidBody >& handle )
 	{
 		mHandle = handle;
 	}
+
+	//========================================================================
+
+	Result RigidBody::SerializeData( ByteBuffer* buffer ) const
+	{ 
+		buffer->Write( mMass );
+		buffer->Write( mRestitution ); 
+		buffer->Write( mFriction );
+		buffer->Write( mLinearDamping ); 
+		buffer->Write( mAngularDamping ); 
+		buffer->Write( mGravity ); 
+		buffer->Write( mCCDEnabled ); 
+		buffer->Write( mIsTriggerVolume ); 
+		buffer->Write( mLinearFactor ); 
+		buffer->Write( mAngularFactor ); 
+		buffer->Write( mIsKinematic ); 
+
+		return ObjectArchiver::Serialize( mShape, buffer );
+	}
+	
+	//========================================================================
+
+	Result RigidBody::DeserializeData( ByteBuffer* buffer )
+	{ 
+		mMass = buffer->Read< f32 >(); 
+		mRestitution = buffer->Read< f32 >(); 
+		mFriction = buffer->Read< f32 >(); 
+		mLinearDamping = buffer->Read< f32 >(); 
+		mAngularDamping = buffer->Read< f32 >(); 
+		mGravity = buffer->Read< Vec3 >(); 
+		mCCDEnabled = buffer->Read< bool >(); 
+		mIsTriggerVolume = buffer->Read< bool >(); 
+		mLinearFactor = buffer->Read< iVec3 >(); 
+		mAngularFactor = buffer->Read< iVec3 >(); 
+		mIsKinematic = buffer->Read< bool >(); 
+
+		if ( mShape ) 
+		{
+			delete mShape;
+			mShape = nullptr;
+		} 
+
+		mShape = (CollisionShape*)ObjectArchiver::Deserialize( buffer ); 
+
+		return Result::SUCCESS;
+	}
+	
+	//========================================================================
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -15,19 +15,7 @@ namespace Enjon
 
 		// Set up shape type
 		mShapeType = CollisionShapeType::Cylinder;
-	}
-
-	//==============================================================
-
-	CylinderCollisionShape::CylinderCollisionShape( const ResourceHandle< RigidBody >& body )
-		: CollisionShape( body )
-	{
-		// Construct box collision shape
-		mShape = new BulletCylinderShape( BV3( mHalfExtents.x, mHalfExtents.y, mHalfExtents.z ) );
-
-		// Set up shape type
-		mShapeType = CollisionShapeType::Cylinder; 
-	}
+	} 
 
 	//==============================================================
 
