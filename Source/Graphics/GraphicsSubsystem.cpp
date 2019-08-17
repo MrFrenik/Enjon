@@ -162,10 +162,11 @@ namespace Enjon
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
+		Vec2 displaySize = Window::GetDisplaySize();
 		mWindow = new Window( );
-		mWindow->Init( "Enjon", 1440, 900, WindowFlags::RESIZABLE ); 
+		mWindow->Init( "Enjon", displaySize.x, displaySize.y, WindowFlags::RESIZABLE ); 
+		mWindow->MaximizeWindow( );
 		mWindows.push_back( mWindow ); 
-		mWindow->SetViewport( 1400, 900 ); 
 
 		// Set current window
 		mCurrentWindow = mWindow;

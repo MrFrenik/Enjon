@@ -23,10 +23,12 @@ namespace Enjon
 	{
 		AssetDropArchetype,
 		AssetDropStaticMesh,
-		AssetDropSkeletalMesh
+		AssetDropSkeletalMesh,
+		CustomRenderOverlay,
 	};
 
-	using AssetCallback = std::function< void( const Asset* ) >;
+	// Pass some user data into the callback
+	using ViewportCallback = std::function< void( void* ) >;
 
 	class EditorViewport : public EditorView
 	{
@@ -62,7 +64,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			void SetViewportCallback( ViewportCallbackType type, const AssetCallback& callback );
+			void SetViewportCallback( ViewportCallbackType type, const ViewportCallback& callback );
 
 			/**
 			* @brief
@@ -109,7 +111,7 @@ namespace Enjon
 			Vec2 mMouseCoordsDelta = Vec2( 0.0f );
 			bool mStartedFocusing = false;
 			bool mFocusSet = false;
-			HashMap< ViewportCallbackType, AssetCallback > mViewportCallbacks;
+			HashMap< ViewportCallbackType, ViewportCallback > mViewportCallbacks;
 	}; 
 
 	class EditorTransformWidgetToolBar : public EditorView

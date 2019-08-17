@@ -53,14 +53,20 @@ Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
 Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
-Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
+Enjon::String mVisualStudioDir = ""; 
 
-Enjon::String configuration = "Release";
+// Need to make two different builds for editor configurations - debug / release
+
+// Need to come up with a way to set the current configuration for the editor - or at the very least, just replace the current .dll with what is loaded? 
+//Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-//Enjon::String configuration = "Debug";
+Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Bin";
 
 namespace Enjon
 {
+	// This has to happen anyway. Perfect!
 	void CopyLibraryContents( const String& projectName, const String& projectDir )
 	{
 		Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
@@ -260,7 +266,7 @@ namespace Enjon
 		// Compile the project
 		mProject.CompileProject( );
 
-		// Save scene
+		// Save scene (this seems to be acting strangely)
 		SceneManager* sm = EngineSubsystem( SceneManager );
 		if ( sm->GetScene() )
 		{
@@ -846,6 +852,7 @@ namespace Enjon
 
 		// Try to load library
 		dllHandle = LoadLibrary( ( mProject.GetProjectName() + ".dll" ).c_str() );
+		//dllHandle = LoadLibrary( ( mProject.GetProjectPath() + "Build/" + configuration +"/" + mProject.GetProjectName() + ".dll" ).c_str() );
 
 		// If valid, then set address of procedures to be called
 		if ( dllHandle )
@@ -1108,7 +1115,7 @@ namespace Enjon
 		GUIContext* guiContext = mainWindow->GetGUIContext( );
 		assert( guiContext->GetContext( ) != nullptr );
 
-		mainWindow->SetSize( iVec2( 1400, 900 ) ); 
+		// Set window title to whatever the project is
 		mainWindow->SetWindowTitle( "Enjon Editor: " + mProject.GetProjectName( ) );
 
 		// Destroy previous contexts and windows if available
@@ -1126,6 +1133,47 @@ namespace Enjon
 		mAssetBroswerView = new EditorAssetBrowserView( this, mainWindow );
 		mInspectorView = new EditorInspectorView( this, mainWindow );
 		mTransformToolBar = new EditorTransformWidgetToolBar( this, mainWindow );
+
+		// Archetype callback for scene view
+		mEditorSceneView->SetViewportCallback( ViewportCallbackType::AssetDropArchetype, [ & ] ( const void* data )
+		{ 
+			Archetype* archType = ((const Asset*)data)->ConstCast< Archetype >( );
+			if ( archType )
+			{
+				// Instantiate the archetype right in front of the camera for now
+				GraphicsSubsystemContext* gfxCtx = mEditorSceneView->GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+				Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+				Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
+				Vec3 scale = archType->GetRootEntity( ).Get( )->GetLocalScale( );
+				EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), scale ), mEditorSceneView->GetWindow()->GetWorld() );
+			}
+		});
+
+		mEditorSceneView->SetViewportCallback( ViewportCallbackType::CustomRenderOverlay, [ & ] ( const void* data )
+		{
+			// Data should be null here
+			// Just want to place the scene name at the bottom of the screen
+			ImVec2 windowPos = ImGui::GetWindowPos( );
+			ImVec2 windowSize = ImGui::GetWindowSize( ); 
+			const Vec2 margin = Vec2(15.f, 12.f);
+			String txt;
+			ImVec2 txtSz;
+
+			AssetHandle< Scene > currentScene = EngineSubsystem( SceneManager )->GetScene( ); 
+			if ( currentScene )
+			{
+				txt = fmt::format( "Scene: {}", currentScene->GetName() );
+				txtSz = ImGui::CalcTextSize( txt.c_str() );
+			} 
+			else
+			{ 
+				txt = fmt::format( "Scene: default" );
+				txtSz = ImGui::CalcTextSize( txt.c_str() );
+			}
+
+			ImGui::SetCursorScreenPos( ImVec2( windowPos.x + windowSize.x - txtSz.x - margin.x, windowPos.y + windowSize.y - txtSz.y - margin.y ) );
+			ImGui::Text( "%s", txt.c_str() );
+		});
 
 		// Register selection callback with outliner view
 		mWorldOutlinerView->RegisterEntitySelectionCallback( [ & ] ( const EntityHandle& handle )

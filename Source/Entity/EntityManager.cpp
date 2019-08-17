@@ -1243,15 +1243,22 @@ namespace Enjon
 	//==============================================================================
 
 	void EntityManager::ForceAddEntities( )
-	{
+	{ 
 		// Add all new entities into active entities
 		for ( auto& e : mMarkedForAdd )
 		{
-			mActiveEntities.push_back( e );
+			if ( e->mState == EntityState::ACTIVE )
+			{
+				// Push back entity
+				mActiveEntities.push_back( e );
+
+				// Push back entity into its world map vector
+				AddEntityToWorld( e, e->GetWorld( )->ConstCast< World >( ) ); 
+			} 
 		}
 
 		// Clear the marked for add entities
-		mMarkedForAdd.clear( );
+		mMarkedForAdd.clear( ); 
 	}
 
 	//==============================================================================
@@ -1430,20 +1437,7 @@ namespace Enjon
 		Cleanup( );
 
 		// Add all new entities into active entities
-		for ( auto& e : mMarkedForAdd )
-		{
-			if ( e->mState == EntityState::ACTIVE )
-			{
-				// Push back entity
-				mActiveEntities.push_back( e );
-
-				// Push back entity into its world map vector
-				AddEntityToWorld( e, e->GetWorld( )->ConstCast< World >( ) ); 
-			} 
-		}
-
-		// Clear the marked for add entities
-		mMarkedForAdd.clear( );
+		ForceAddEntities( );
 
 		// If the application is running 
 		if ( Engine::GetInstance( )->GetApplication( )->GetApplicationState( ) == ApplicationState::Running )

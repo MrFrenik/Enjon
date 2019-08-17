@@ -133,12 +133,27 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void SetViewport( const iVec2& dimensions );
+			void SetViewport( const iVec2& dimensions ); 
 
 			/*
 			* @brief
 			*/
-			iVec2 GetViewport() const;
+			iVec2 GetViewport() const; 
+
+			/*
+			* @brief
+			*/
+			void SetPosition( const iVec2& position );
+
+			/*
+			* @brief
+			*/
+			void SetPosition( const u32& x, const u32& y );
+
+			/*
+			* @brief
+			*/
+			void MaximizeWindow( );
 
 			/*
 			* @brief
@@ -230,6 +245,7 @@ namespace Enjon
 			void SetWorld( World* world );
 			World* GetWorld( );
 
+			static Vec2 GetDisplaySize( const u32& displayIndex = 0 );
 			static u32 NumberOfHoveredWindows( );
 			static bool AnyWindowHovered( );
 			static void AddNewWindow( const WindowParams& params ); 

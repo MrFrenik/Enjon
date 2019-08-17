@@ -85,6 +85,11 @@ namespace Enjon
 			} 
 		}
 
+		if ( HasViewportCallback( ViewportCallbackType::CustomRenderOverlay ) )
+		{
+			mViewportCallbacks[ ViewportCallbackType::CustomRenderOverlay ]( nullptr );
+		}
+
 		if ( IsFocused( ) )
 		{
 			UpdateCamera( );
@@ -104,7 +109,7 @@ namespace Enjon
 
 	//===============================================================================================
 
-	void EditorViewport::SetViewportCallback( ViewportCallbackType type, const AssetCallback& callback )
+	void EditorViewport::SetViewportCallback( ViewportCallbackType type, const ViewportCallback& callback )
 	{
 		mViewportCallbacks[ type ] = callback;
 	}
@@ -169,19 +174,8 @@ namespace Enjon
 		{
 			if ( HasViewportCallback( ViewportCallbackType::AssetDropArchetype ) )
 			{
-				mViewportCallbacks[ ViewportCallbackType::AssetDropArchetype ]( grabbedAsset );
-			}
-
-			//Archetype* archType = grabbedAsset->ConstCast< Archetype >( );
-			//if ( archType )
-			//{
-			//	// Instantiate the archetype right in front of the camera for now
-			//	GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
-			//	Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
-			//	Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
-			//	Vec3 scale = archType->GetRootEntity( ).Get( )->GetLocalScale( );
-			//	EntityHandle handle = archType->Instantiate( Transform( position, Quaternion( ), scale ), GetWindow()->GetWorld() );
-			//}
+				mViewportCallbacks[ ViewportCallbackType::AssetDropArchetype ]( (void*)grabbedAsset );
+			} 
 		}
 		else if ( grabbedAsset->Class( )->InstanceOf< SkeletalMesh >( ) )
 		{
@@ -591,8 +585,9 @@ namespace Enjon
 		guiContext->RegisterMenuOption("File", "Save##archetype_options", saveArchetypeOption); 
 
 		// Register archetype drop callback with viewport
-		mViewport->SetViewportCallback( ViewportCallbackType::AssetDropArchetype, [ & ] ( const Asset* asset )
+		mViewport->SetViewportCallback( ViewportCallbackType::AssetDropArchetype, [ & ] ( const void* data )
 		{
+			const Asset* asset = ( const Asset* )data;
 			if ( asset )
 			{
 				// Cannot construct entity if asset is our archetype ( no recursive addition of archetypes )

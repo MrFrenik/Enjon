@@ -186,6 +186,10 @@ namespace Enjon
 	    // Make a new ImGui window frame
 		ImGui_ImplSdlGL3_NewFrame( mWindow->GetSDLWindow(), GetContext( ) ); 
 
+		// Set current context for ImGui manager and ImGui
+		ImGuiManager* manager = EngineSubsystem( ImGuiManager );
+		manager->SetContextByWindow( mWindow );
+
 		s32 menu_height = MainMenu();
 
 		if (ImGui::GetIO().DisplaySize.y > 0) 
@@ -316,6 +320,7 @@ namespace Enjon
 		{
 			ImGui::SetCurrentContext( ctx );
 		}
+		mContext = ctx;
 	}
 
 	ImGuiContext* ImGuiManager::Init(Window* window)

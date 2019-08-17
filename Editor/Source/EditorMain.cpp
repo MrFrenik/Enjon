@@ -7,10 +7,11 @@
  
 #include <filesystem> 
 
-#define ENJON_MEMORY_LEAK_DETECTION 0
-#if ENJON_MEMORY_LEAK_DETECTION
-	#include <vld.h> 
-#endif
+// TODO(john): Have to figure out a good way of including this into the repo. For now, will just comment out. 
+//#define ENJON_MEMORY_LEAK_DETECTION 0
+//#if ENJON_MEMORY_LEAK_DETECTION
+//	#include <vld.h> 
+//#endif
 
 namespace FS = std::experimental::filesystem; 
 

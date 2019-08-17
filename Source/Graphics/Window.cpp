@@ -161,10 +161,25 @@ namespace Enjon
 		}
 	}
 
+	void Window::MaximizeWindow( )
+	{
+		SDL_MaximizeWindow( m_sdlWindow );
+	} 
+
 	void Window::SetSize( const iVec2& dims )
 	{
 		SDL_SetWindowSize( m_sdlWindow, dims.x, dims.y ); 
 		SetViewport( dims );
+	}
+
+	void Window::SetPosition( const iVec2& position )
+	{
+		SDL_SetWindowPosition( m_sdlWindow, position.x, position.y );
+	}
+
+	void Window::SetPosition( const u32& x, const u32& y )
+	{
+		SDL_SetWindowPosition( m_sdlWindow, x, y );
 	}
 
 	iVec2 Window::GetViewport() const 
@@ -533,6 +548,19 @@ namespace Enjon
 		}
 
 		return count;
+	}
+
+	//==============================================================================================
+
+	Vec2 Window::GetDisplaySize( const u32& displayIndex )
+	{ 
+		if ( displayIndex > SDL_GetNumVideoDisplays( ) )
+		{
+			return Vec2( -1.f, -1.f );
+		}
+		SDL_DisplayMode curr;
+		s32 shouldBeZero = SDL_GetCurrentDisplayMode( displayIndex, &curr );
+		return Vec2( curr.w, curr.h );
 	}
 
 	//==============================================================================================
