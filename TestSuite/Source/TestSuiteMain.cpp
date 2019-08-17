@@ -9,10 +9,10 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#define ENJON_MEMORY_LEAK_DETECTION 1
-#if ENJON_MEMORY_LEAK_DETECTION
-	#include <vld.h> 
-#endif
+//#define ENJON_MEMORY_LEAK_DETECTION 1
+//#if ENJON_MEMORY_LEAK_DETECTION
+//	#include <vld.h> 
+//#endif
 
 namespace FS = std::experimental::filesystem; 
 
