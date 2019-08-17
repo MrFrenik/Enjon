@@ -11,7 +11,7 @@ namespace Enjon
 	//==================================================================================
 
 	void SkeletalAnimationComponent::UpdateAndCalculateTransforms( )
-	{
+	{ 
 		// Get skeletal mesh component and renderable from entity
 		SkeletalMeshComponent* smc = mEntity->GetComponent< SkeletalMeshComponent >( );
 
@@ -56,7 +56,11 @@ namespace Enjon
 		skeleton.Get( )->CalculateTransform( rootID, Mat4x4::Identity( ), mats, mAnimation.Get(), mCurrentAnimationTime ); 
 
 		// Increment current animation time ( this is hacked to just use a single animation for now... )
-		mCurrentAnimationTime = std::fmod( mCurrentAnimationTime + Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( ) * mAnimationSpeed, mAnimation->GetDuration( ) );
+		// Only increment if playing an animation
+		if ( mPlaying )
+		{
+			mCurrentAnimationTime = std::fmod( mCurrentAnimationTime + Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( ) * mAnimationSpeed, mAnimation->GetDuration( ) ); 
+		}
 	} 
 
 	//================================================================================== 
@@ -64,6 +68,13 @@ namespace Enjon
 	void SkeletalAnimationComponent::SetAnimation( const AssetHandle< SkeletalAnimation >& animation )
 	{
 		mAnimation = animation;
+	}
+
+	//================================================================================== 
+
+	void SkeletalAnimationComponent::SetPlaying( const b32& enabled )
+	{
+		mPlaying = enabled;
 	}
 
 	//================================================================================== 

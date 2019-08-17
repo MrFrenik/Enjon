@@ -32,6 +32,11 @@ namespace Enjon
 			*/
 			void SetAnimation( const AssetHandle< SkeletalAnimation >& animation );
 
+			/**
+			* @brief
+			*/
+			void SetPlaying( const b32& enabled );
+
 		private: 
 
 			ENJON_PROPERTY( )
@@ -42,6 +47,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( UIMin = 0.1f, UIMax = 10.0f )
 			f32 mAnimationSpeed = 1.0f; 
+
+			ENJON_PROPERTY( )
+			b32 mPlaying = true;
 	};
 }
 

@@ -49,6 +49,7 @@ funcDeleteApp deleteAppFunc = nullptr;
 
 namespace fs = std::experimental::filesystem; 
 
+// ALL of this needs to change to be user dependent
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
@@ -57,6 +58,8 @@ Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 Enjon::String mVisualStudioDir = ""; 
 
 // Need to make two different builds for editor configurations - debug / release
+
+// Should have release/debug builds of the engine and editors for people. That way they can load different versions and debug if necessary.
 
 // Need to come up with a way to set the current configuration for the editor - or at the very least, just replace the current .dll with what is loaded? 
 //Enjon::String configuration = "Release";
@@ -959,6 +962,9 @@ namespace Enjon
 
 	void EditorApp::CollectAllProjectsOnDisk( )
 	{ 
+		// So before we get to this point, need to make sure we HAVE a projects directory
+		// In the directory for the editor, need to have a .ini or .config file that tells where the project directory is located
+
 		for ( auto& p : fs::recursive_directory_iterator( mProjectsDir ) )
 		{
 			if ( Enjon::Utils::HasFileExtension( p.path( ).string( ), "eproj" ) )
@@ -1489,6 +1495,11 @@ namespace Enjon
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
+
+		// Need to grab project files from directory 
+		String config = Utils::read_file_sstream( "enjon_editor.cfg" );
+		std::cout << "Config:: " << config << "\n";
+
 
 		// Grab all .eproj files and store them for loading later
 		CollectAllProjectsOnDisk( ); 

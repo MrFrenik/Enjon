@@ -26,8 +26,8 @@ void main()
 
 	if (brightness > u_threshold || length(EmissiveColor) != 0)
 	{
-		vec3 output = clamp(FragColor, vec3(0), vec3(256));
-		color = vec4(output * 0.1, 1.0) + vec4( max( vec3( 0.0 ), EmissiveColor ), 1.0);
+		vec3 op = clamp(FragColor, vec3(0), vec3(256));
+		color = vec4(op * 0.1, 1.0) + vec4( max( vec3( 0.0 ), EmissiveColor ), 1.0);
 		// color = vec4(FragColor * 0.05, 1.0);
 	}
 }
