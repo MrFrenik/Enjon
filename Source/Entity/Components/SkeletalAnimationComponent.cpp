@@ -59,7 +59,7 @@ namespace Enjon
 		// Only increment if playing an animation
 		if ( mPlaying )
 		{
-			mCurrentAnimationTime = std::fmod( mCurrentAnimationTime + Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( ) * mAnimationSpeed, mAnimation->GetDuration( ) ); 
+			mCurrentAnimationTime = std::fmod( mCurrentAnimationTime + Engine::GetInstance( )->GetWorldTime( ).GetDeltaTime( ) * mAnimationSpeed * mAnimation->GetTicksPerSecond(), mAnimation->GetDuration( ) ); 
 		}
 	} 
 

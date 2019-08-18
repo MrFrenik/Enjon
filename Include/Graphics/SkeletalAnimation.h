@@ -116,6 +116,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			f32 GetTicksPerSecond( ) const;
+
+			/*
+			* @brief
+			*/
 			virtual Result SerializeData( ByteBuffer* buffer ) const override;
 
 			/*

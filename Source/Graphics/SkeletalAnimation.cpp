@@ -178,6 +178,15 @@ namespace Enjon
 		return mNumberOfTicks;
 	}
 
+	//===============================================================
+
+	f32 SkeletalAnimation::GetTicksPerSecond( ) const
+	{
+		return mTicksPerSecond;
+	}
+
+	//===============================================================
+
 	f32 Map01( const f32& min, const f32& max, const f32& t )
 	{
 		f32 range = std::abs( max - min );
