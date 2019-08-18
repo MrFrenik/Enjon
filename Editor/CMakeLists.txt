@@ -102,6 +102,7 @@ target_link_libraries( ${TARGET_NAME} debug BulletCollision_d.lib optimized Bull
 target_link_libraries( ${TARGET_NAME} debug fmt_d.lib optimized fmt.lib )
 target_link_libraries( ${TARGET_NAME} debug liblz4_d.lib optimized liblz4.lib ) 
 target_link_libraries( ${TARGET_NAME} debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
+target_link_libraries( ${TARGET_NAME} debug nfd_d.lib optimized nfd.lib ) 
 
 set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 

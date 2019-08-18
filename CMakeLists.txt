@@ -201,6 +201,7 @@ target_link_libraries( Enjon debug BulletCollision_d.lib optimized BulletCollisi
 target_link_libraries( Enjon debug fmt_d.lib optimized fmt.lib )
 target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
 target_link_libraries( Enjon debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
+target_link_libraries( Enjon debug nfd_d.lib optimized nfd.lib ) 
 
 add_dependencies( Enjon Reflection )
 add_dependencies( EnjonEditor Enjon )

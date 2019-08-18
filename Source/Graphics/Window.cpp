@@ -83,10 +83,7 @@ namespace Enjon
 		}
    
 		//Set glewExperimental to true
-		glewExperimental = GL_TRUE;
-
-		//Check OpenGL version
-		//std::printf("***    OpenGL Version:  %s    ***\n", glGetString(GL_VERSION));
+		glewExperimental = GL_TRUE; 
 
 		//Set Vsync to enabled
 		SDL_GL_SetSwapInterval(0);

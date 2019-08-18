@@ -127,6 +127,7 @@ namespace Enjon
 			void CameraOptions( bool* enable );
 			bool CreateProjectView( );
 			void SelectSceneView( );
+			void SelectProjectDirectoryView( );
 
 			void LoadProjectView( );
 			void CheckForPopups( );
@@ -139,6 +140,7 @@ namespace Enjon
 			void LoadDLL( bool releaseSceneAsset = true );
 			void ReloadDLL( );
 
+			void WriteEditorConfigFileToDisk( );
 			void CollectAllProjectsOnDisk( );
 			void LoadProjectSolution( );
 
@@ -180,6 +182,7 @@ namespace Enjon
 			bool mPlaying = false;
 			bool mNeedsStartup = true; 
 			bool mNeedsShutdown = false;
+			bool mNeedsLoadProject = false;
 
 			Enjon::f32 mCameraSpeed = 10.f;
 			Enjon::f32 mMouseSensitivity = 10.0f;

@@ -33,6 +33,7 @@
 #include <fmt/format.h>
 #include <chrono>
 #include <ctime>
+#include <nfd/include/nfd.h>
 
 #define LOAD_ENGINE_RESOURCES	0
 
@@ -53,7 +54,8 @@ namespace fs = std::experimental::filesystem;
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
+Enjon::String mProjectsDir = "";
 //Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
 Enjon::String mVisualStudioDir = ""; 
 
@@ -702,6 +704,31 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	void EditorApp::SelectProjectDirectoryView( )
+	{
+		char buffer[ 1024 ];
+		strncpy( buffer, mProjectsDir.c_str( ), 1024 ); 
+		if ( ImGui::Button( "Select Project Directory" ) )
+		{
+			nfdchar_t* outPath = NULL;
+			nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+			if ( res == NFD_OKAY )
+			{
+				// Set the path now
+				if ( fs::exists( outPath ) && fs::is_directory( outPath ) )
+				{
+					mProjectsDir = outPath;
+					CollectAllProjectsOnDisk( ); 
+					WriteEditorConfigFileToDisk( );
+				} 
+			}
+		}
+		ImGui::SameLine( );
+		ImGui::Text( "Project Directory: %s", buffer ); 
+	}
+
+	//================================================================================================================================
+
 	bool EditorApp::CreateProjectView( )
 	{
 		char buffer[ 256 ];
@@ -960,10 +987,20 @@ namespace Enjon
 
 	//================================================================================================================================
 
+	void EditorApp::WriteEditorConfigFileToDisk( )
+	{
+		// Write out the config file for the editor (Just do this as json later on for ease of use) 
+		// I want these things to be const char* instead. I'm wasting memory with all of this junk.
+		Utils::WriteToFile( mProjectsDir, fs::current_path().string() + "/editor.cfg");
+	}
+
+	//================================================================================================================================ 
+
 	void EditorApp::CollectAllProjectsOnDisk( )
 	{ 
 		// So before we get to this point, need to make sure we HAVE a projects directory
-		// In the directory for the editor, need to have a .ini or .config file that tells where the project directory is located
+		// In the directory for the editor, need to have a .ini or .config file that tells where the project directory is located 
+		mProjectsOnDisk.clear( );
 
 		for ( auto& p : fs::recursive_directory_iterator( mProjectsDir ) )
 		{
@@ -1373,6 +1410,23 @@ namespace Enjon
 				} 
 			}
 			ImGui::PopStyleColor( );
+
+			if ( ImGui::MenuItem( "Load Project##options", NULL ) )
+			{
+				SceneManager* sm = EngineSubsystem( SceneManager );
+
+				// Must save current scene
+				AssetHandle< Scene > currentScene = sm->GetScene( );
+				if ( currentScene )
+				{
+					currentScene->Save( );
+				}
+
+				// Unload current scene
+				sm->UnloadScene( );
+
+				mNeedsLoadProject = true;
+			}
 		};
 
 		// Register menu options
@@ -1409,31 +1463,66 @@ namespace Enjon
 
 		GUIContext* guiCtx = mProjectSelectionWindow->GetGUIContext( );
 
+		String curDir = fs::current_path( ).string( );
+		if ( !fs::exists( mProjectsDir ) && fs::exists( curDir + "/editor.cfg" ) )
+		{ 
+			String config = Utils::read_file_sstream( "editor.cfg" );
+			mProjectsDir = config;
+			CollectAllProjectsOnDisk( );
+		} 
+
 		auto createProjectView = [ & ] ( )
 		{ 
+			b32 projDirSet = fs::v1::exists( mProjectsDir );
+
 			if ( ImGui::BeginDock( "Project Selection / Creation", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
-				String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
-				if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
+				if ( projDirSet )
 				{
-					for ( auto& p : mProjectsOnDisk )
+					String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
+					if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
 					{
-						if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
-						{ 
-							// Preload project for next frame
-							PreloadProject( p );
-							Window::DestroyWindow( mProjectSelectionWindow );
+						for ( auto& p : mProjectsOnDisk )
+						{
+							if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
+							{ 
+								// Preload project for next frame
+								PreloadProject( p );
+								Window::DestroyWindow( mProjectSelectionWindow );
+							}
+						}
+						ImGui::EndCombo( );
+					} 
+
+					// Create project view underneath this
+					ImGui::NewLine( ); 
+
+					if ( CreateProjectView( ) )
+					{
+						Window::DestroyWindow( mProjectSelectionWindow );
+					} 
+
+					SelectProjectDirectoryView( );
+				}
+				else
+				{
+					// Load view for project
+					ImGui::Text( "Welcome to the Enjon Editor! You do not have a project directory selected currently. Please choose one now." );
+					if ( ImGui::Button( "Choose Project Directory" ) )
+					{
+						nfdchar_t* outPath = NULL;
+						nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+						if ( res == NFD_OKAY )
+						{
+							// Set the path now
+							if ( fs::exists( outPath ) && fs::is_directory( outPath ) )
+							{
+								mProjectsDir = outPath;
+								CollectAllProjectsOnDisk( ); 
+								WriteEditorConfigFileToDisk( );
+							} 
 						}
 					}
-					ImGui::EndCombo( );
-				} 
-
-				// Create project view underneath this
-				ImGui::NewLine( );
-
-				if ( CreateProjectView( ) )
-				{
-					Window::DestroyWindow( mProjectSelectionWindow );
 				}
 			}
 			ImGui::EndDock( );
@@ -1494,20 +1583,11 @@ namespace Enjon
 		mProjectEnjonDefinesTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectEnjonDefines.h" ).c_str( ) ); 
 
 		// Set up copy directory for project dll
-		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/";
-
-		// Need to grab project files from directory 
-		String config = Utils::read_file_sstream( "enjon_editor.cfg" );
-		std::cout << "Config:: " << config << "\n";
-
-
-		// Grab all .eproj files and store them for loading later
-		CollectAllProjectsOnDisk( ); 
+		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/"; 
 
 #if LOAD_ENGINE_RESOURCES
 		LoadResources( );
 #endif 
-		 
 		// Search for loaded project  
 		// NOTE(): ( this is hideous, by the way )
 		FindProjectOnLoad( );
@@ -1557,6 +1637,12 @@ namespace Enjon
 			LoadProject( mProject );
 			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
 			mPrecreateNewProject = false;
+		} 
+
+		if ( mNeedsLoadProject )
+		{
+			mNeedsLoadProject = false;
+			LoadProjectSelectionContext( );
 		}
 
 		if ( !mProject.IsLoaded( ) )
