@@ -388,8 +388,8 @@ namespace Enjon
 
 	void Entity::SetLocalTransform( const Transform& transform, bool propagateToComponents )
 	{
-		mLocalTransform = transform;
-
+		mLocalTransform = transform; 
+		SetAllChildWorldTransformsDirty( );
 		if ( propagateToComponents )
 		{
 			CalculateWorldTransform( );
@@ -397,7 +397,7 @@ namespace Enjon
 		}
 
 		mWorldTransformDirty = true;
-	}
+	} 
 
 	//==========================================================================================
 
@@ -405,6 +405,7 @@ namespace Enjon
 	{
 		mWorldTransform = transform; 
 		CalculateLocalTransform( );
+		SetAllChildWorldTransformsDirty( );
 		if ( propagateToComponents )
 		{
 			UpdateComponentTransforms( );
