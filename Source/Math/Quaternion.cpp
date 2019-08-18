@@ -35,6 +35,12 @@ namespace Enjon
 		return Quaternion( -x, -y, -z, w );
 	}
 
+	Quaternion& Quaternion::operator*=( const Quaternion& other )
+	{
+		*this = *this * other;
+		return *this;
+	}
+
 	// Negative unary operator overload
 	Quaternion Quaternion::operator-() const
 	{

@@ -60,6 +60,8 @@ namespace Enjon
 
 			// Division operator overload with f32
 			Quaternion operator/(const f32& V) const; 
+
+			Quaternion& operator*=( const Quaternion& other );
 		
 			Vec3 operator*(const Vec3& V) const;
 
@@ -70,7 +72,7 @@ namespace Enjon
 			bool operator!=(const Quaternion& Other) const;
 
 			// Operator stream overload
-			friend std::ostream& operator<<(std::ostream& stream, const Quaternion& Q);
+			friend std::ostream& operator<<(std::ostream& stream, const Quaternion& Q); 
 
 			// Gets length of quaternion
 			f32 Length();
