@@ -250,6 +250,16 @@ namespace ImGui
 			return false;
 		} 
 
+		Dock* getDockPointer( const char* label )
+		{
+			ImU32 id = ImHash( label, 0 );
+			for ( int i = 0; i < m_docks.size( ); ++i )
+			{
+				if ( m_docks[ i ]->id == id ) return m_docks[ i ];
+			}
+			return NULL;
+		}
+
 		Dock& getDock(const char* label, bool opened)
 		{
 			ImU32 id = ImHash(label, 0);
@@ -1245,6 +1255,7 @@ namespace ImGui
 		
 		void save()
 		{
+			/*
 			FILE *fp = fopen("E:/Development/Enjon/imgui_dock.layout", "w");
 			fprintf(fp, "docks %d\n\n", m_docks.size());
 			for (int i = 0; i < m_docks.size(); ++i) {
@@ -1268,6 +1279,7 @@ namespace ImGui
 				fprintf(fp, "parent   %d\n\n", getDockIndex(dock.parent));
 			}
 			fclose(fp);
+			*/
 
 		}
 
@@ -1275,6 +1287,7 @@ namespace ImGui
 
 		void load()
 		{
+			/*
 			for (int i = 0; i < m_docks.size(); ++i)
 			{
 				m_docks[i]->~Dock();
@@ -1335,6 +1348,7 @@ namespace ImGui
 				fclose(fp);
 			}
 			printf("done\n"); fflush(stdout);
+			*/
 
 		}
 
@@ -1416,10 +1430,14 @@ namespace ImGui
 		ctx->rootDock(pos, size);
 	} 
 
-	void SetDockActive()
+	void SetDockActive( const char* label )
 	{
 		DockContext* ctx = GetCurrentDockingContext( );
-		ctx->setDockActive();
+		DockContext::Dock* dock = ctx->getDockPointer( label );
+		if ( dock )
+		{
+			dock->setActive( );
+		}
 	}
 
 	bool BeginDock(const char* label, bool* opened, ImGuiWindowFlags extra_flags)

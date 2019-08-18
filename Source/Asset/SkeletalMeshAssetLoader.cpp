@@ -23,7 +23,7 @@ namespace Enjon
 		mDefaultAsset = new SkeletalMesh( );
 	} 
 
-	//========================================================================================
+	//======================================================================================== 
 
 	Asset* SkeletalMeshAssetLoader::LoadResourceFromImporter( const ImportOptions* options )
 	{

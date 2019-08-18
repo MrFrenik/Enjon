@@ -308,6 +308,11 @@ namespace Enjon
 			void RegisterMainMenu( const String& menuName );
 
 			/** 
+			* @brief
+			*/
+			void SetActiveDock( const char* );
+
+			/** 
 			* @brief 
 			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
 			*/
@@ -347,6 +352,7 @@ namespace Enjon
 			HashMap< Enjon::String, ImFont* > mFonts;
 			ImGuiContext* mContext = nullptr;
 			Window* mWindow = nullptr;
+			const char* mActiveDock = nullptr;
 	};
 
 	ENJON_CLASS( )

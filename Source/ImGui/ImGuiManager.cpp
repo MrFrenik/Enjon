@@ -128,6 +128,13 @@ namespace Enjon
 
 	//===================================================================================================
 
+	void GUIContext::SetActiveDock( const char* label )
+	{
+		mActiveDock = label;
+	}
+
+	//===================================================================================================
+
 	void GUIContext::Finalize( )
 	{
 		LateInit( );
@@ -172,6 +179,11 @@ namespace Enjon
 		{ 
 			Window::SetWindowCursor( CursorType::Arrow );
 		}; 
+
+		if ( mActiveDock )
+		{
+			ImGui::SetDockActive( mActiveDock );
+		}
 
 		// Set these callbacks
 		ImGui::SetEventCallback( onEnterHorizontalSplitHover, ImGui::CallBackEventType::OnEnterHorizontalSplitHover );

@@ -127,7 +127,9 @@ namespace Enjon
 			void CameraOptions( bool* enable );
 			bool CreateProjectView( );
 			void SelectSceneView( );
-			void SelectProjectDirectoryView( );
+			void SelectProjectDirectoryView( ); 
+			void ProjectListView( ); 
+			void NewProjectView( );
 
 			void LoadProjectView( );
 			void CheckForPopups( );
@@ -190,7 +192,7 @@ namespace Enjon
 
 			Project mProject;
 
-			String mNewProjectName = "";
+			String mNewProjectName = "NewProject";
  
 			String mProjectsPath = "";
 			String mProjectSourceTemplate = "";

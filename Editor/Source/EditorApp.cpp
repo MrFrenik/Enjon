@@ -594,7 +594,7 @@ namespace Enjon
 	void EditorApp::CreateNewProject( const String& projectName )
 	{ 
 		// Just output the source files for now... This is already going to get ugly, so need to split this all up pretty quickly
-		String projectDir = mProjectsDir + projectName + "/";
+		String projectDir = mProjectsDir + "/" + projectName + "/";
 		if ( !fs::exists( projectDir ) )
 		{
 			fs::create_directory( projectDir );
@@ -730,44 +730,106 @@ namespace Enjon
 	//================================================================================================================================
 
 	bool EditorApp::CreateProjectView( )
-	{
-		char buffer[ 256 ];
-		strncpy( buffer, mNewProjectName.c_str( ), 256 );
-		if ( ImGui::InputText( "Project Name", buffer, 256 ) )
+	{ 
+		auto cleanUpAndLeave = [ & ] ( bool retVal )
 		{
-			mNewProjectName = String( buffer );
-		}
+			ImGui::PopStyleColor( );
+			return retVal;
+		};
 
-		if ( ImGui::Button( "Create New Project" ) && mNewProjectName.compare( "" ) != 0 )
+		// Push text color for entire screen
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.8f, 0.8f, 1.f ) );
+
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		//ImGui::SetCursorPosX( ( ImGui::GetWindowWidth( ) - sz.x ) / 2.f );
+		ImGui::Text( "Welcome to the" ); 
+		ImGui::SameLine( );
+		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.f, 1.f, 1.f, 1.f ) );
+		ImGui::Text( "Project Creation" );
+		ImGui::PopStyleColor( );
+		ImGui::SameLine( );
+		ImGui::Text( "screen." );
+		ImGui::NewLine( );
+
+		char tmpBuffer[ 1024 ];
+		strncpy( tmpBuffer, mProjectsDir.c_str(), 1024 ); 
+
+		ImGui::Text( "Select a location for your project." );
+		ImGui::NewLine( );
+
+		ImGui::PushItemWidth( 300.f );
+		if ( ImGui::InputText( "##ProjectDir", tmpBuffer, 256 ) )
 		{
-			// If project is able to be made, then make it
-			String projectPath = mProjectsDir + "/" + mNewProjectName + "/";
-			if ( !fs::exists( projectPath ) )
+			if ( fs::exists( tmpBuffer ) )
 			{
-				//CreateNewProject( mNewProjectName );
-				PreCreateNewProject( mNewProjectName );
-				return true;
+				mProjectsDir = String( tmpBuffer );
 			}
-			else
+		}
+		ImGui::PopItemWidth( );
+		ImGui::SameLine( );
+		ImGui::SetCursorPosX( ImGui::GetCursorPosX( ) - 10.f ); 
+		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.3f, 0.3f, 0.3f, 1.f ) );
+		if ( ImGui::Button( "..." ) )
+		{
+			// Open file picking dialogue
+			nfdchar_t* folder;
+			nfdresult_t res = NFD_PickFolder( NULL, &folder );
+			if ( res == NFD_OKAY )
 			{
-				std::cout << "Project already exists!\n";
+				mProjectsDir = String( folder );
+			}
+		}
+		ImGui::PopStyleColor( );
+
+		ImGui::SameLine( );
+		strncpy( tmpBuffer, mNewProjectName.c_str( ), 1024 ); 
+		u8 buffer[ 2048 ];
+		snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str( ), tmpBuffer );
+		b32 projExists = fs::exists( buffer ); 
+		ImGui::PushItemWidth( 150.f );
+		if ( ImGui::InputText( "Project Name", tmpBuffer, 50 ) )
+		{ 
+			snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str( ), tmpBuffer );
+			if ( fs::exists( buffer ) )
+			{
+				projExists = true;
+			}
+			mNewProjectName = String( tmpBuffer ); 
+		}
+		ImGui::PopItemWidth( );
+
+		if ( !projExists )
+		{
+			ImGui::NewLine( );
+			if ( ImGui::Button( "Create New Project" ) && mNewProjectName.compare( "" ) != 0 )
+			{
+				// If project is able to be made, then make it
+				String projectPath = mProjectsDir + "/" + mNewProjectName + "/";
+				if ( !fs::exists( projectPath ) )
+				{
+					//CreateNewProject( mNewProjectName );
+					PreCreateNewProject( mNewProjectName );
+					return cleanUpAndLeave( true );
+				}
+				else
+				{
+					std::cout << "Project already exists!\n";
+				} 
 			} 
 		}
+		// Project already exist, so display warning
+		else
+		{
+			ImGui::NewLine( );
+			ImGui::SetCursorPosY( ImGui::GetCursorPosY( ) + 10.f );
+			ImDrawList* dl = ImGui::GetWindowDrawList( );
+			ImVec2 a = ImGui::GetCursorScreenPos( );
+			ImVec2 b = ImVec2( a.x + 400.f, a.y + 40.f );
+			dl->AddRectFilled( a, b, ImColor( 0.9f, 0.1f, 0.f, 1.0f ) );
+			ImGui::Text( "Project already exists. Please choose a different project name." );
+		} 
 
-		return false;
-
-		//if ( !mPlaying )
-		//{ 
-		//	// Load visual studio project 
-		//	if ( ImGui::Button( "Load Project Solution" ) )
-		//	{
-		//		if ( fs::exists( mProject.GetProjectPath( ) + "Build/" + mProject.GetProjectName( ) + ".sln" ) )
-		//		{ 
-		//			LoadProjectSolution( );
-		//		}
-		//	}
-		//}
-
+		return cleanUpAndLeave( false );
 	}
 
 	//================================================================================================================================
@@ -1447,6 +1509,70 @@ namespace Enjon
 
 	//================================================================================================================
 
+	void EditorApp::ProjectListView( )
+	{ 
+		// I don't like this...
+		b32 projDirSet = fs::v1::exists( mProjectsDir );
+
+		if ( ImGui::BeginDock( "Project Browser", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
+		{
+			if ( projDirSet )
+			{
+				String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
+				if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
+				{
+					for ( auto& p : mProjectsOnDisk )
+					{
+						if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
+						{ 
+							// Preload project for next frame
+							PreloadProject( p );
+							Window::DestroyWindow( mProjectSelectionWindow );
+						}
+					}
+					ImGui::EndCombo( );
+				} 
+			}
+			else
+			{
+				// Load view for project
+				ImGui::Text( "Welcome to the Enjon Editor! You do not have a project directory selected currently. Please choose one now." );
+				if ( ImGui::Button( "Choose Project Directory" ) )
+				{
+					nfdchar_t* outPath = NULL;
+					nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+					if ( res == NFD_OKAY )
+					{
+						// Set the path now
+						if ( fs::exists( outPath ) && fs::is_directory( outPath ) )
+						{
+							mProjectsDir = outPath;
+							CollectAllProjectsOnDisk( ); 
+							WriteEditorConfigFileToDisk( );
+						} 
+					}
+				}
+			}
+		}
+		ImGui::EndDock( ); 
+	}
+
+	//================================================================================================================
+
+	void EditorApp::NewProjectView( )
+	{ 
+		if ( ImGui::BeginDock( "New Project", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
+		{
+			if ( CreateProjectView( ) )
+			{
+				Window::DestroyWindow( mProjectSelectionWindow );
+			}
+		}
+		ImGui::EndDock( );
+	}
+
+	//================================================================================================================
+
 	void EditorApp::LoadProjectSelectionContext( )
 	{
 		// Set the window to small
@@ -1458,7 +1584,7 @@ namespace Enjon
 
 		mProjectSelectionWindow = new Window( );
 		mProjectSelectionWindow->Init( "Test", 1200, 500, WindowFlags::DEFAULT );
-		mProjectSelectionWindow->SetWindowTitle( "Enjon Editor: Project Selection / Creation" ); 
+		mProjectSelectionWindow->SetWindowTitle( "Enjon: Project Browser" ); 
 		EngineSubsystem( GraphicsSubsystem )->AddWindow( mProjectSelectionWindow ); 
 
 		GUIContext* guiCtx = mProjectSelectionWindow->GetGUIContext( );
@@ -1471,65 +1597,22 @@ namespace Enjon
 			CollectAllProjectsOnDisk( );
 		} 
 
+		// View all projects loaded currently. This list should be held in a project manifest for the editor.
 		auto createProjectView = [ & ] ( )
 		{ 
-			b32 projDirSet = fs::v1::exists( mProjectsDir );
-
-			if ( ImGui::BeginDock( "Project Selection / Creation", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
-			{
-				if ( projDirSet )
-				{
-					String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
-					if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
-					{
-						for ( auto& p : mProjectsOnDisk )
-						{
-							if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
-							{ 
-								// Preload project for next frame
-								PreloadProject( p );
-								Window::DestroyWindow( mProjectSelectionWindow );
-							}
-						}
-						ImGui::EndCombo( );
-					} 
-
-					// Create project view underneath this
-					ImGui::NewLine( ); 
-
-					if ( CreateProjectView( ) )
-					{
-						Window::DestroyWindow( mProjectSelectionWindow );
-					} 
-
-					SelectProjectDirectoryView( );
-				}
-				else
-				{
-					// Load view for project
-					ImGui::Text( "Welcome to the Enjon Editor! You do not have a project directory selected currently. Please choose one now." );
-					if ( ImGui::Button( "Choose Project Directory" ) )
-					{
-						nfdchar_t* outPath = NULL;
-						nfdresult_t res = NFD_PickFolder( NULL, &outPath );
-						if ( res == NFD_OKAY )
-						{
-							// Set the path now
-							if ( fs::exists( outPath ) && fs::is_directory( outPath ) )
-							{
-								mProjectsDir = outPath;
-								CollectAllProjectsOnDisk( ); 
-								WriteEditorConfigFileToDisk( );
-							} 
-						}
-					}
-				}
-			}
-			ImGui::EndDock( );
+			ProjectListView( );
 		}; 
 
-		guiCtx->RegisterWindow( "Project Selection / Creation", createProjectView ); 
-		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Project Selection / Creation", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) ); 
+		auto newProjectView = [ & ] ( )
+		{
+			NewProjectView( );
+		};
+
+		guiCtx->RegisterWindow( "Projects", createProjectView ); 
+		guiCtx->RegisterWindow( "New Project", newProjectView ); 
+		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Project Browser", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) ); 
+		guiCtx->RegisterDockingLayout( GUIDockingLayout( "New Project", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
+		guiCtx->SetActiveDock( "Project Browser" );
 
 		guiCtx->Finalize( );
 	}
