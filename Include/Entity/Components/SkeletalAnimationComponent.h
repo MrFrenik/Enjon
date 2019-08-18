@@ -49,7 +49,7 @@ namespace Enjon
 			f32 mAnimationSpeed = 1.0f; 
 
 			ENJON_PROPERTY( )
-			b32 mPlaying = true;
+			b8 mPlaying = true;
 	};
 }
 

@@ -52,6 +52,7 @@ void Introspection::InitPropertyMap( )
 {
 	STRING_TO_PROP( "bool", Bool )
 	STRING_TO_PROP( "b8", Bool )
+	STRING_TO_PROP( "b32", Bool )
 	STRING_TO_PROP( "float", F32 )
 	STRING_TO_PROP( "f32", F32 )
 	STRING_TO_PROP( "f64", F64 )
