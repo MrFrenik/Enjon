@@ -60,6 +60,8 @@ namespace Enjon
 			* @brief 
 			*/
 			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleton ); 
+
+			void DisplaySkeletonHeirarchyRecursive( const Skeleton* skeleton, u32 index, u32 indent );
 	}; 
 }
 

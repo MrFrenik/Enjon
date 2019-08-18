@@ -53,7 +53,7 @@ namespace Enjon
 		decl.Add( VertexAttributeFormat::Float3 );			// Normal
 		decl.Add( VertexAttributeFormat::Float3 );			// Tangent
 		decl.Add( VertexAttributeFormat::Float2 );			// UV
-		decl.Add( VertexAttributeFormat::Float4 );			// BoneIndices
+		decl.Add( VertexAttributeFormat::UnsignedInt4 );	// BoneIndices
 		decl.Add( VertexAttributeFormat::Float4 );			// BoneWeights
 
 		// Set vertex decl for mesh
@@ -137,6 +137,8 @@ namespace Enjon
 
 		// Get skeleton asset
 		Skeleton* skeleton = skeletonHandle.Get( )->ConstCast< Skeleton >( );
+
+		b32 allWeightsZero = false;
 
 		// Load bone data
 		for ( u32 i = 0; i < aim->mNumBones; ++i )
@@ -247,14 +249,19 @@ namespace Enjon
 				// Bone Indices
 				for ( u32 bi = 0; bi < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++bi )
 				{
-					sm->mVertexData.Write< f32 >( (f32)vertexJointData->at( vertID ).mIDS[ bi ] );
+					sm->mVertexData.Write< u32 >( (u32)vertexJointData->at( vertID ).mIDS[ bi ] );
 				}
 
 				// Bone Weights
+				f32 sum = 0.f;
 				for ( u32 wi = 0; wi < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++wi ) 
 				{
+					f32 weight = vertexJointData->at( vertID ).mWeights[ wi ];
+					sum += weight;
 					sm->mVertexData.Write< f32 >( vertexJointData->at( vertID ).mWeights[ wi ] );
 				} 
+
+				assert( sum != 0.f );
 			}
 		}
 

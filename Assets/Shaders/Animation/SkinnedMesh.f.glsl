@@ -13,7 +13,7 @@ in VS_OUT
 	vec4 ObjectID;
 	vec4 PreviousFragPositionClipSpace;
 	vec4 CurrentFragPositionClipSpace;
-	vec4 JointIDs;
+	flat ivec4 JointIDs;
 	vec4 JointWeights;
 } fs_in;
 
@@ -28,11 +28,11 @@ uniform mat4 uViewProjection;
 void main()
 {
 	// Base Color
-	AlbedoOut = vec4(1.0, 1.0, 1.0, 1.0);
-	// float r = fs_in.JointIDs.x;
-	// float g = fs_in.JointIDs.y;
-	// float b = fs_in.JointIDs.z;
-	// AlbedoOut = vec4(r, g, b, 1.0);
+	// AlbedoOut = vec4(1.0, 1.0, 1.0, 1.0);
+	float r = float(fs_in.JointIDs.x) / 16.f;
+	float g = float(fs_in.JointIDs.y) / 16.f;
+	float b = float(fs_in.JointIDs.z) / 16.f;
+	AlbedoOut = vec4(r, g, b, 1.0);
 
 	// Normal
 	vec3 normal = fs_in.TBN[2];

@@ -1027,7 +1027,7 @@ namespace Enjon
 				code += OutputLine( "layout (location = 1) in vec3 aVertexNormal;" );
 				code += OutputLine( "layout (location = 2) in vec3 aVertexTangent;" );
 				code += OutputLine( "layout (location = 3) in vec2 aVertexUV;" );
-				code += OutputLine( "layout (location = 4) in vec4 aJointIndices;" );
+				code += OutputLine( "layout (location = 4) in ivec4 aJointIndices;" );
 				code += OutputLine( "layout (location = 5) in vec4 aJointWeights;" );
 			} break;
 		}

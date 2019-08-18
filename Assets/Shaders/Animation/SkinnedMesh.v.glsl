@@ -4,7 +4,7 @@ layout (location = 0) in vec3 aVertexPosition;
 layout (location = 1) in vec3 aVertexNormal;
 layout (location = 2) in vec3 aVertexTangent;
 layout (location = 3) in vec2 aVertexUV;
-layout (location = 4) in vec4 aJointIDs;
+layout (location = 4) in ivec4 aJointIDs;
 layout (location = 5) in vec4 aJointWeights;
 
 const int MAX_JOINTS = 210;
@@ -15,7 +15,7 @@ out VS_OUT
 	vec4 ObjectID;
 	vec4 PreviousFragPositionClipSpace;
 	vec4 CurrentFragPositionClipSpace;
-	vec4 JointIDs;
+	flat ivec4 JointIDs;
 	vec4 JointWeights;
 } vs_out;
 
