@@ -175,7 +175,7 @@ namespace Enjon
 
 	f32 SkeletalAnimation::GetDuration( ) const
 	{
-		return ( mNumberOfTicks / mTicksPerSecond );
+		return mNumberOfTicks;
 	}
 
 	f32 Map01( const f32& min, const f32& max, const f32& t )
