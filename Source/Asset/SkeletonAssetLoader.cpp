@@ -52,7 +52,7 @@ namespace Enjon
 
 		aiMat.a1 = mat4.elements[ 0 ];
 		aiMat.b1 = mat4.elements[ 1 ];
-		aiMat.c1 = mat4.elements[ 3 ];
+		aiMat.c1 = mat4.elements[ 2 ];
 		aiMat.d1 = mat4.elements[ 3 ];
 
 		aiMat.a2 = mat4.elements[ 4 ];
@@ -108,6 +108,22 @@ namespace Enjon
 
 	//=========================================================================
 
+	void SkeletonAssetLoader::DisplaySkeletonHeirarchyRecursive( const Skeleton* skeleton, u32 index, u32 indent ) 
+	{
+		const Joint* j = &skeleton->mJoints[ index ];
+		
+		for ( u32 i = 0; i < indent; ++i ) {
+			std::cout << " ";
+		}
+
+		std::cout << "* " << j->mName << "\n";
+
+		for ( u32 i = 0; i < j->mChildren.size( ); ++i )
+		{
+			DisplaySkeletonHeirarchyRecursive( skeleton, j->mChildren[ i ], indent + 4 );
+		}
+	}
+
 	Asset* SkeletonAssetLoader::LoadResourceFromImporter( const ImportOptions* options )
 	{
 		MeshImportOptions* meshOptions = options->ConstCast< MeshImportOptions >( ); 
@@ -120,7 +136,7 @@ namespace Enjon
 		Assimp::Importer importer;
 
 		// NOTE(): Flipping UVs FUCKS IT ALL because I'm already flipping UVs in the shader generation process (shadergraph). Need to fix this.  
-		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace ); 
+		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights ); 
 		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
 		{
 			// Error 
@@ -138,6 +154,8 @@ namespace Enjon
 
 		// Build the bone heirarchy for this skeleton
 		BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
+
+		DisplaySkeletonHeirarchyRecursive( skeleton, 0, 0 );
 
 		// Set root id for skeleton
 		skeleton->mRootID = skeleton->mJoints.empty() ? -1 : skeleton->mJoints.at( 0 ).mID;

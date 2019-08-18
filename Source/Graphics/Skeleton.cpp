@@ -56,22 +56,24 @@ namespace Enjon
 		} 
 
 		// Calculate relative to parent
-		Mat4x4 relativeTransform = parentMatrix * jointTransform;
+		Mat4x4 globalTransform = parentMatrix * jointTransform;
 
 		// Calculate and set local space matrix
-		if ( animation != nullptr )
-		{
-			outMatrices.at( joint->mID ) = mGlobalInverseTransform * relativeTransform * joint->mInverseBindMatrix; 
-		}
-		else
-		{
-			outMatrices.at( joint->mID ) = mGlobalInverseTransform * joint->mInverseBindMatrix;
-		}
+		//if ( animation != nullptr )
+		//{
+		//	//outMatrices.at( joint->mID ) = mGlobalInverseTransform * relativeTransform * joint->mInverseBindMatrix; 
+		//	//outMatrices.at( joint->mID ) = globalTransform * joint->mInverseBindMatrix; 
+		//}
+		outMatrices.at( joint->mID ) = mGlobalInverseTransform * globalTransform * joint->mInverseBindMatrix; 
+		//else
+		//{
+		//	outMatrices.at( joint->mID ) = mGlobalInverseTransform * joint->mInverseBindMatrix;
+		//}
 
 		// Iterate through children 
 		for ( u32 i = 0; i < joint->mChildren.size(); ++i )
 		{
-			CalculateTransform( joint->mChildren.at( i ), relativeTransform, outMatrices, animation, time );				
+			CalculateTransform( joint->mChildren.at( i ), globalTransform, outMatrices, animation, time );				
 		}
 	} 
 
