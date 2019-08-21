@@ -2202,17 +2202,8 @@ void Introspection::Link( const ReflectionConfig& config )
 	if ( f )
 	{
 		f.write( code.c_str( ), code.length( ) );
-	}
-}
-
-
-
-
-
-
-
-
-
+	} 
+} 
 
 
 

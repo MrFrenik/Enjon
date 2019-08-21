@@ -1,6 +1,10 @@
 // @file EditorApp.h
 // Copyright 2016-2018 John Jackson. All Rights Reserved.
 
+#pragma once 
+#ifndef ENJON_EDITOR_H
+#define ENJON_EDITOR_H
+
 #include "Project.h"
 #include "EditorTransformWidget.h"
 #include "EditorView.h"
@@ -35,8 +39,12 @@ namespace Enjon
 		Rotate
 	};
 
-	class EditorApp : public Enjon::Application
+	// TODO(john): Need to reflect over the editor app to get introspection meta data
+	ENJON_CLASS( Construct )
+	class EditorApp : public Application
 	{
+		ENJON_MODULE_BODY( EditorApp )
+
 		public:
 
 			virtual Enjon::Result Initialize() override;  
@@ -185,6 +193,8 @@ namespace Enjon
 			bool mNeedsStartup = true; 
 			bool mNeedsShutdown = false;
 			bool mNeedsLoadProject = false;
+			bool mNeedRecompile = false;
+			bool mNeedReload = false;
 
 			Enjon::f32 mCameraSpeed = 10.f;
 			Enjon::f32 mMouseSensitivity = 10.0f;
@@ -238,5 +248,10 @@ namespace Enjon
 
 			Window* mProjectSelectionWindow = nullptr;
 	}; 
+
+	// Declaration for module export
+	ENJON_MODULE_DECLARE( EditorApp ) 
+
 }
 
+#endif

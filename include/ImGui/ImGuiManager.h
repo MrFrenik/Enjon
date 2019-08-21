@@ -24,6 +24,7 @@ namespace Enjon
 { 
 	class ImGuiManager;
 	class Window;
+	class WindowSubsystem;
 	class Vec4;
 	class Object;
 	class MetaClass;
@@ -231,11 +232,17 @@ namespace Enjon
 		GUIDockSlotType mSlotType;
 		float mWeight;
 	}; 
+
+	typedef struct GUIContextParams
+	{
+		b32 mUseRootDock = true;
+	} GUIContextParams;
  
 	class GUIContext
 	{
 		friend Window;
 		friend ImGuiManager;
+		friend WindowSubsystem;
 
 		public:
 
@@ -316,13 +323,25 @@ namespace Enjon
 			* @brief 
 			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
 			*/
+			void SetGUIContextParams( const GUIContextParams& params );
+
+			/** 
+			* @brief 
+			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
+			*/
 			void ClearContext( );
 
 			/** 
 			* @brief 
 			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
 			*/
-			void Finalize( );
+			void Finalize();
+ 
+			/** 
+			* @brief 
+			* @note NOT TO BE CALLED OUTSIDE OF IMGUI CODE
+			*/
+			void RootDock( );
 
 		protected:
 
@@ -353,6 +372,7 @@ namespace Enjon
 			ImGuiContext* mContext = nullptr;
 			Window* mWindow = nullptr;
 			const char* mActiveDock = nullptr;
+			GUIContextParams mParams;
 	};
 
 	ENJON_CLASS( )
@@ -360,6 +380,7 @@ namespace Enjon
 	{
 		friend Engine;
 		friend GUIWidget;
+		friend WindowSubsystem;
 
 		ENJON_CLASS_BODY( ImGuiManager )
 
@@ -450,6 +471,7 @@ namespace Enjon
 		protected:
 			void BindContext( ); 
 			void ProcessEvent( SDL_Event* event );
+			void RemoveWindowFromContextMap( SDL_Window* window ); 
 
 		private:
 			s32 MainMenu();
@@ -457,7 +479,6 @@ namespace Enjon
 			void InitializeDefaults(); 
 
 			void AddWindowToContextMap( SDL_Window* window, ImGuiContext* ctx );
-
 
 		private:
 			Vector<std::function<void()>> mGuiFuncs;

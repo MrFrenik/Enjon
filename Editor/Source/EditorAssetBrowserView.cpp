@@ -5,6 +5,7 @@
 #include "EditorInspectorView.h"
 #include "EditorApp.h"
 #include "EditorMaterialEditWindow.h"
+#include "EditorArchetypeEditWindow.h"
 #include "Project.h"
 
 #include <Engine.h>
@@ -292,16 +293,18 @@ namespace Enjon
 									if ( assetCls->InstanceOf< Material >( ) )
 									{
 										// Load asset
-										const Asset* mat = mSelectedAssetInfo->GetAsset( );
+										const Asset* mat = mSelectedAssetInfo->GetAsset( ); 
 
 										// Open new editor window for this material
 										WindowParams params;
-										params.mWindow = new EditorMaterialEditWindow( mat );
+										//params.mWindowClass = Object::Class< EditorMaterialEditWindow( mat );
+										params.mWindowClass = Object::GetClass< EditorMaterialEditWindow >();
 										params.mName = mat->GetName( );
 										params.mWidth = 800;
 										params.mHeight = 400;
 										params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
-										Window::AddNewWindow( params );
+										params.mData = (void*)mat;
+										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 									} 
 									else if ( assetCls->InstanceOf< Scene >( ) )
 									{
@@ -315,12 +318,14 @@ namespace Enjon
 
 										// Open new edit window for this archetype
 										WindowParams params;
-										params.mWindow = new EditorArchetypeEditWindow( archType );
+										//params.mWindow = new EditorArchetypeEditWindow( archType );
+										params.mWindowClass = Object::GetClass< EditorArchetypeEditWindow >( );
 										params.mName = archType->GetName( );
 										params.mWidth = 1200;
 										params.mHeight = 800;
 										params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
-										Window::AddNewWindow( params );
+										params.mData = ( void* )archType;
+										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 									}
 								}
 							}

@@ -162,18 +162,23 @@ namespace Enjon
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
-		Vec2 displaySize = Window::GetDisplaySize();
-		mWindow = new Window( );
-		mWindow->Init( "Enjon", displaySize.x, displaySize.y, WindowFlags::RESIZABLE ); 
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+		Vec2 displaySize = ws->GetDisplaySize();
+		WindowParams params;
+		params.mFlags = WindowFlags::RESIZABLE;
+		params.mWindowClass = Object::GetClass< Window >( );
+		params.mWidth = displaySize.x;
+		params.mHeight = displaySize.y;
+		params.mName = "Enjon";
+		ws->AddNewWindow( params );;
+		ws->ForceInitWindows( );
+		mWindow = ws->GetWindows( ).at( 0 );
 		mWindow->MaximizeWindow( );
 		mWindows.push_back( mWindow ); 
 
 		// Set current window
 		mCurrentWindow = mWindow;
-		mWindow->MakeCurrent( );
-
-		// Initialize window sdl cursors
-		Window::InitSDLCursors( ); 
+		mWindow->MakeCurrent( ); 
 
 		// Initialize shader manager
 		Enjon::ShaderManager::Init(); 
@@ -319,7 +324,8 @@ namespace Enjon
 		mSSAOKernel.clear( ); 
 
 		// Clean up windows
-		Window::CleanupWindows( true );
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+		ws->CleanupWindows( true );
  
 		return Result::SUCCESS; 
 	}
@@ -651,8 +657,16 @@ namespace Enjon
 			set = true;
 		} 
 
-		for ( auto& w : mWindows )
+		// Have to change this from iterating over an array of pointers to opaque ids for the windows
+		// Need to change the gui passes to not happen in here logically
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+		for ( auto& w : ws->GetWindows() )
 		{ 
+			if ( !w )
+			{
+				continue;
+			}
+
 			// Set current window
 			mCurrentWindow = w;
 			// Set current window

@@ -27,6 +27,7 @@ namespace Enjon
 	class SceneManager;
 	class MetaClass;
 	class Subsystem;
+	class WindowSubsystem;
 	
 	class Engine;
 	class EngineConfig
@@ -255,6 +256,7 @@ namespace Enjon
 			SceneManager*		mSceneManager		= nullptr;
 			ImGuiManager*		mImGuiManager		= nullptr;
 			AnimationSubsystem* mAnimationSystem	= nullptr;
+			WindowSubsystem*	mWindowSubsystem	= nullptr;
 			World*				mWorld				= nullptr;
 
 			// Engine configuration settings

@@ -290,6 +290,7 @@ endforeach(dll)
 file(WRITE ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#target_dir \"${ENJON_DIR}\"\n") 
 file(WRITE ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
 file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#project_name \"Enjon\"\n") 
+file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#base_type_id 0\n") 
 file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#files\n") 
 
 # Add all reflection include files

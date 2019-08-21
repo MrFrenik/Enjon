@@ -142,6 +142,13 @@ namespace Enjon
 
 	//===================================================================================================
 
+	void GUIContext::SetGUIContextParams( const GUIContextParams& params )
+	{
+		mParams = params;
+	}
+
+	//===================================================================================================
+
 	void GUIContext::ClearContext( )
 	{ 
 		mGuiFuncs.clear();
@@ -193,15 +200,9 @@ namespace Enjon
 
 	//===================================================================================================
 
-	void GUIContext::Render( )
+	void GUIContext::RootDock( )
 	{ 
-	    // Make a new ImGui window frame
-		ImGui_ImplSdlGL3_NewFrame( mWindow->GetSDLWindow(), GetContext( ) ); 
-
-		// Set current context for ImGui manager and ImGui
-		ImGuiManager* manager = EngineSubsystem( ImGuiManager );
-		manager->SetContextByWindow( mWindow );
-
+		ImGui::SetCurrentContext( mContext );
 		s32 menu_height = MainMenu();
 
 		if (ImGui::GetIO().DisplaySize.y > 0) 
@@ -215,9 +216,24 @@ namespace Enjon
 			ImGui::SetNextWindowSize(ImVec2(size.x, 25.0f), ImGuiSetCond_Always);
 			ImGui::SetNextWindowPos(ImVec2(0, size.y - 6.0f), ImGuiSetCond_Always);
 			ImGui::Begin("statusbar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize);
-			//ImGui::Text("Frame: %.5f ms", 1000.0f / (f32)ImGui::GetIO().Framerate);
+			ImGui::Text("Frame: %.5f ms", 1000.0f / (f32)ImGui::GetIO().Framerate);
 			ImGui::End();
 		} 
+	} 
+
+	void GUIContext::Render( )
+	{ 
+	    // Make a new ImGui window frame
+		ImGui_ImplSdlGL3_NewFrame( mWindow->GetSDLWindow(), GetContext( ) ); 
+
+		// Set current context for ImGui manager and ImGui
+		ImGuiManager* manager = EngineSubsystem( ImGuiManager );
+		manager->SetContextByWindow( mWindow ); 
+
+		if ( mParams.mUseRootDock )
+		{
+			RootDock( ); 
+		}
 
 		// Display all registered windows
 		for (auto& wind : mWindows)
@@ -315,6 +331,11 @@ namespace Enjon
 	{ 
 	} 
 
+	void ImGuiManager::RemoveWindowFromContextMap( SDL_Window* window )
+	{
+		mImGuiContextMap.erase( window );
+	}
+
 	void ImGuiManager::AddWindowToContextMap( SDL_Window* window, ImGuiContext* ctx )
 	{
 		auto query = mImGuiContextMap.find( window );
@@ -349,7 +370,7 @@ namespace Enjon
 		ImGuiStyles();
 
 		// Initialize default windows/menus
-		InitializeDefaults(); 
+		//InitializeDefaults(); 
 
 		// Set imgui context
 		AddWindowToContextMap( window->GetSDLWindow(), ctx ); 
@@ -369,21 +390,21 @@ namespace Enjon
 		mDockingLayouts.clear( ); 
 
 		// Destroy all contexts ( if existing )
-		for ( auto& w : mImGuiContextMap )
-		{ 
-			if ( w.second )
-			{
-				// Set context
-				ImGui::SetCurrentContext( w.second );
+		//for ( auto& w : mImGuiContextMap )
+		//{ 
+		//	if ( w.second )
+		//	{
+		//		// Set context
+		//		ImGui::SetCurrentContext( w.second );
 
-				// Destroy device data
-				ImGui_ImplSdlGL3_InvalidateDeviceObjects( );
+		//		// Destroy device data
+		//		ImGui_ImplSdlGL3_InvalidateDeviceObjects( );
 
-				// Destroy context
-				ImGui::DestroyContext( w.second );
-			}
-			w.second = nullptr;
-		}
+		//		// Destroy context
+		//		ImGui::DestroyContext( w.second );
+		//	}
+		//	w.second = nullptr;
+		//}
 
 		// Shut down 
 		ImGui_ImplSdlGL3_Shutdown();
@@ -1161,6 +1182,8 @@ namespace Enjon
 
 	void ImGuiManager::InspectObject( const Object* object )
 	{ 
+		// Need to make sure that the correct context is set? 
+		ImGui::SetCurrentContext( mContext );
 		Result res = const_cast< Object* >( object )->OnEditorUI( );
 		if ( res == Result::INCOMPLETE )
 		{
@@ -1296,8 +1319,6 @@ namespace Enjon
 	//---------------------------------------------------
 	void ImGuiManager::Render(Window* window)
 	{ 
-		Window* w = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
-
 		// Render gui context
 		window->GetGUIContext( )->Render( ); 
 	}
@@ -1552,6 +1573,7 @@ namespace Enjon
 
 	void ImGuiManager::Text( const String& text )
 	{
+		BindContext( );
 		ImGui::Text( text.c_str( ) );
 	}
 

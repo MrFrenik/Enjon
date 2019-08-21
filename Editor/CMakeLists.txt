@@ -124,10 +124,20 @@ endif()
 # Reflection information
 set( TARGET_REFLECTION_DIR ${TARGET_BUILD_DIR}/Generator/ )
 
-# Create directory if doesn't exist
+# Create directory if doesn't exist 
+message("Editor Reflection Dir:" ${TARGET_REFLECTION_DIR})
 if (NOT IS_DIRECTORY ${TARGET_REFLECTION_DIR})
 	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR})
 	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Intermediate/)
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Linked/)
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Test)
+endif()
+
+if (NOT IS_DIRECTORY ${TARGET_REFLECTION_DIR}/Intermediate/)
+	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Intermediate/)
+endif()
+
+if (NOT IS_DIRECTORY ${TARGET_REFLECTION_DIR}/Linked/)
 	file(MAKE_DIRECTORY ${TARGET_REFLECTION_DIR}/Linked/)
 endif()
 
@@ -136,6 +146,7 @@ file(WRITE ${TARGET_REFLECTION_DIR}/reflection.cfg "#target_dir \"${TARGET_DIR}/
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#project_name \"${TARGET_NAME}\"\n") 
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#generate_app_bindings true \n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#base_type_id 10000 \n") 
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#files\n") 
 
 # Add all reflection include files

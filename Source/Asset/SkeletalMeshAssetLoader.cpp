@@ -253,15 +253,10 @@ namespace Enjon
 				}
 
 				// Bone Weights
-				f32 sum = 0.f;
 				for ( u32 wi = 0; wi < ENJON_MAX_NUM_JOINTS_PER_VERTEX; ++wi ) 
 				{
-					f32 weight = vertexJointData->at( vertID ).mWeights[ wi ];
-					sum += weight;
 					sm->mVertexData.Write< f32 >( vertexJointData->at( vertID ).mWeights[ wi ] );
 				} 
-
-				assert( sum != 0.f );
 			}
 		}
 

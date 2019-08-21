@@ -1,3 +1,7 @@
+ 
+#pragma once 
+#ifndef ENJON_MATERIAL_EDIT_WINDOW_H
+#define ENJON_MATERIAL_EDIT_WINDOW_H
 
 #include "EditorView.h"
 #include "EditorTransformWidget.h"
@@ -157,8 +161,11 @@ namespace Enjon
 			//virtual void CaptureState( ) override;
 	}; 
 
+	ENJON_CLASS( )
 	class EditorMaterialEditWindow : public Window
 	{
+		ENJON_CLASS_BODY( EditorMaterialEditWindow )
+
 		public: 
 
 			/**
@@ -166,7 +173,7 @@ namespace Enjon
 			*/
 			EditorMaterialEditWindow( const AssetHandle< Material >& mat );
 
-			virtual s32 Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override; 
+			virtual void Init( const WindowParams& params ) override; 
 
 		protected:
 
@@ -185,36 +192,9 @@ namespace Enjon
 			EditorViewport* mViewport = nullptr;
 			AssetHandle< Material > mMaterial;
 			StaticMeshRenderable mRenderable;
-			u32 mInitialized : 1;
+			b32 mInitialized = false;
 			bool mViewportOpen = true;
-	};
-
-	class EditorArchetypeEditWindow : public Window 
-	{
-		public: 
-
-			/**
-			* @brief
-			*/
-			EditorArchetypeEditWindow( const AssetHandle< Archetype >& archetype );
-
-			virtual s32 Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE ) ) override; 
-
-		protected:
-
-			virtual void ExplicitDestroy( ) override;
-
-			void ConstructScene( ); 
-
-		protected: 
-			AssetHandle< Archetype > mArchetype;
-			EditorWorldOutlinerView* mWorldOutlinerView = nullptr;
-			EditorViewport* mViewport = nullptr;
-			EditorInspectorView* mInspectorView = nullptr;
-			u32 mInitialized : 1;
-			bool mViewportOpen = true;
-			EntityHandle mRootEntity;
-			EditorTransformWidget mTransformWidget;
-	};
-
+	}; 
 }
+
+#endif

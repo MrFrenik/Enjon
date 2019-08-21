@@ -204,6 +204,12 @@ namespace Enjon
 		// Grab channel data for bone
 		const ChannelData* data = &mChannelData.at( boneID );
 
+		// Return default transform if empty channel data
+		if ( data->mRotationKeys.empty( ) || data->mPositionKeys.empty( ) || data->mScaleKeys.empty( ) )
+		{
+			return Transform( );
+		}
+
 		// Need to get appropriate keyframe for data
 		u32 rotationID = data->GetRotationFrameID( time );
 		u32 positionID = data->GetPositionFrameID( time );

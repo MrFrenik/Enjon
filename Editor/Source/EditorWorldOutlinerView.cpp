@@ -3,6 +3,7 @@
 
 #include "EditorWorldOutlinerView.h"
 #include "EditorMaterialEditWindow.h"
+#include "EditorArchetypeEditWindow.h"
 #include "EditorApp.h"
 
 #include <Engine.h>
@@ -446,12 +447,14 @@ namespace Enjon
 
 				// Open new edit window for this archetype
 				WindowParams params;
-				params.mWindow = new EditorArchetypeEditWindow( archType );
+				//params.mWindow = new EditorArchetypeEditWindow( archType );
+				params.mWindowClass = Object::GetClass< EditorArchetypeEditWindow >( );
 				params.mName = archType->GetName( );
 				params.mWidth = 1200;
 				params.mHeight = 800;
+				params.mData = ( void* )archType;
 				params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
-				Window::AddNewWindow( params ); 
+				EngineSubsystem( WindowSubsystem )->AddNewWindow( params ); 
 			}
 		}
 

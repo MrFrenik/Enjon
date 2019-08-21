@@ -809,11 +809,13 @@ namespace ImGui
 				ImVec2 lineRightStart; 
 				ImVec2 lineRightEnd;
 
+				ImVec2 prevSize;
+
 				while (dock_tab)
 				{
-					SameLine(0, 15);
+					SameLine(prevSize.x, 15);
 
-					float tabOffset = -8.0f;
+					float tabOffset = -8.0f; 
 
 					const char* text_end = FindRenderedTextEnd(dock_tab->label);
 					ImVec2 size(CalcTextSize(dock_tab->label, text_end).x, line_height);
@@ -831,7 +833,8 @@ namespace ImGui
 
 					bool hovered = IsItemHovered();
 					ImVec2 pos = GetItemRectMin();
-					size.x += 20 + GetStyle().ItemSpacing.x;
+					float cboffset = close_button ? 20.f : 0.f;
+					size.x += cboffset + GetStyle().ItemSpacing.x;
 					
 					tab_base = pos.y;
 
@@ -913,6 +916,8 @@ namespace ImGui
 					}
 
 					dock_tab = dock_tab->next_tab;
+					size.x += close_button ? cboffset : 20.f;
+					prevSize = size;
 				}
 
 				// Dividing line underneath tab with shadow

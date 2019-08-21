@@ -319,6 +319,7 @@ struct ReflectionConfig
 	std::string mProjectName; 
 	std::vector< std::string > mFilesToParse;
 	std::vector< std::string > mAdditionalIncludes;
+	u32 mBaseId = 50000;
 	bool mIsApplication = false;
 }; 
 
@@ -378,6 +379,8 @@ class Introspection
 		void Compile( const ReflectionConfig& config );
 
 		void Link( const ReflectionConfig& config );
+
+		void WriteConfigFile( const ReflectionConfig& config );
 
 		PropertyType GetTypeFromString( const std::string& str );
 		std::string GetTypeAsString( PropertyType type );

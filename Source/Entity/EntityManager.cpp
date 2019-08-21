@@ -316,21 +316,32 @@ namespace Enjon
 
 	void Entity::RemoveComponent( const MetaClass* cls )
 	{
-		EngineSubsystem( EntityManager )->RemoveComponent( cls, GetHandle( ) );
+		if ( cls )
+		{
+			EngineSubsystem( EntityManager )->RemoveComponent( cls, GetHandle( ) ); 
+		}
 	}
 
 	//====================================================================================================
 
 	Component* Entity::GetComponent( const MetaClass* compCls )
-	{
-		return EngineSubsystem( EntityManager )->GetComponent( compCls, GetHandle() );
+	{ 
+		if (compCls) 
+		{ 
+			return EngineSubsystem( EntityManager )->GetComponent( compCls, GetHandle() );
+		}
+		return nullptr;
 	}
 
 	//====================================================================================================
 
 	Component* Entity::AddComponent( const MetaClass* compCls )
 	{
-		return EngineSubsystem( EntityManager )->AddComponent( compCls, GetHandle( ) );
+		if ( compCls )
+		{
+			return EngineSubsystem( EntityManager )->AddComponent( compCls, GetHandle( ) ); 
+		}
+		return nullptr;
 	}
 
 	//====================================================================================================

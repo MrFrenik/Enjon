@@ -16,98 +16,81 @@
 
 namespace Enjon 
 { 
-	SDL_GLContext Window::mGLContext = nullptr;
-	HashMap< CursorType, SDL_Cursor* > Window::mSDLCursors;
-	Vector< WindowParams > Window::mWindowsToInit;
-	Vector< Window* > Window::mWindowsToDestroy;
-	SDL_Surface* Window::mWindowIcon = nullptr;
+	// This ALL needs to be held within an object in the engine
+	//SDL_GLContext Window::mGLContext = nullptr;
+	//HashMap< CursorType, SDL_Cursor* > Window::mSDLCursors;
+	//Vector< WindowParams > Window::mWindowsToInit;
+	//Vector< Window* > Window::mWindowsToDestroy;
+	//SDL_Surface* Window::mWindowIcon = nullptr; 
 
-	Window::Window()
-		: m_isfullscreen(false)
+	void Window::InitInternal( const WindowParams& params )
 	{
-	} 
+		m_screenWidth = params.mWidth;
+		m_screenHeight = params.mHeight;
+		WindowFlagsMask currentFlags = WindowFlagsMask( params.mFlags );
 
-	Window::~Window()
-	{
-	}
+		Uint32 flags = SDL_WINDOW_OPENGL;
 
-	s32 Window::Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags ) 
-	{
-		m_screenWidth = screenWidth;
-		m_screenHeight = screenHeight; 
-
-		Uint32 flags = SDL_WINDOW_OPENGL; 
-		
-		if((currentFlags & WindowFlagsMask(WindowFlags::INVISIBLE)) != 0)
+		if ( ( currentFlags & WindowFlagsMask( WindowFlags::INVISIBLE ) ) != 0 )
 		{
 			flags |= SDL_WINDOW_HIDDEN;
 		}
-		
-		
-		if((currentFlags & WindowFlagsMask(WindowFlags::FULLSCREEN)) != 0)
+
+
+		if ( ( currentFlags & WindowFlagsMask( WindowFlags::FULLSCREEN ) ) != 0 )
 		{
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 			m_isfullscreen = true;
 		}
 
-
-		if((currentFlags & WindowFlagsMask(WindowFlags::BORDERLESS)) != 0)
+		if ( ( currentFlags & WindowFlagsMask( WindowFlags::BORDERLESS ) ) != 0 )
 		{
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
-		if((currentFlags & WindowFlagsMask(WindowFlags::RESIZABLE)) != 0)
+		if ( ( currentFlags & WindowFlagsMask( WindowFlags::RESIZABLE ) ) != 0 )
 		{
 			flags |= SDL_WINDOW_RESIZABLE;
 		}
 
 		//Open an SDL window
-		m_sdlWindow = SDL_CreateWindow( windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, flags );
-		if (m_sdlWindow == NULL) {
-			Utils::FatalError("ENJON::WINDOW::CREATE::WINDOW_NOT_CREATED");
+		m_sdlWindow = SDL_CreateWindow( params.mName.c_str( ), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, params.mWidth, params.mHeight, flags );
+		if ( m_sdlWindow == NULL ) {
+			Utils::FatalError( "ENJON::WINDOW::CREATE::WINDOW_NOT_CREATED" );
 		}
 
 		//Set up our OpenGL context
-		if ( !mGLContext )
-		{
-			mGLContext = SDL_GL_CreateContext(m_sdlWindow);
-			if (mGLContext == nullptr) {
-				Utils::FatalError("ENJON::WINDOW::CREATE::SD_GL_CONTEXT_NOT_CREATED");
-			} 
-		}
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+		ws->AttemptLoadGLContext( m_sdlWindow );
 
 		//Set up glew (optional but recommended)
-		GLenum error = glewInit();
-		if (error != GLEW_OK) {
-			Utils::FatalError("ENJON::WINDOW::CREATE::GLEW_NOT_INITIALIZED");
+		GLenum error = glewInit( );
+		if ( error != GLEW_OK ) {
+			Utils::FatalError( "ENJON::WINDOW::CREATE::GLEW_NOT_INITIALIZED" );
 		}
-   
+
 		//Set glewExperimental to true
-		glewExperimental = GL_TRUE; 
+		glewExperimental = GL_TRUE;
 
 		//Set Vsync to enabled
-		SDL_GL_SetSwapInterval(0);
+		SDL_GL_SetSwapInterval( 0 );
 
 		// Construct gui context
 		mGUIContext = GUIContext( this );
 
 		// Initialize ImGUI context and set
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 		mGUIContext.mContext = igm->Init( this );
 
 		// Set window icon
-		if ( !mWindowIcon )
+		SDL_Surface* icon = ws->AttemptLoadWindowIcon( );
+		if ( icon )
 		{
-			mWindowIcon = SDL_LoadBMP( ( Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Textures/enjonicon_32x32.bmp" ).c_str( ) );
-		}
-
-		if ( mWindowIcon )
-		{
-			SDL_SetWindowIcon( m_sdlWindow, mWindowIcon );
+			SDL_SetWindowIcon( m_sdlWindow, icon );
 		} 
 
-		return 0;
-	}
+		this->Init( params );
+	} 
 
 	//=================================================================================================================
 
@@ -119,8 +102,9 @@ namespace Enjon
  
 	void Window::MakeCurrent( )
 	{
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
 		// Set current window in SDL
-		SDL_GL_MakeCurrent( m_sdlWindow, mGLContext );
+		SDL_GL_MakeCurrent( m_sdlWindow, ws->GetGLContext() );
 
 		// Set current ImGuiContext 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
@@ -339,7 +323,8 @@ namespace Enjon
 						if ( event.window.windowID == SDL_GetWindowID( m_sdlWindow ) )
 						{
 							// Need to push back into static window for destruction at top of frame
-							Window::DestroyWindow( this );
+							WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+							ws->DestroyWindow( this );
 							//return Result::FAILURE;
 						}
 					} break; 
@@ -399,7 +384,8 @@ namespace Enjon
 	void Window::SetWindowCursor( CursorType type )
 	{
 		// Error checks are for pussies.
-		SDL_SetCursor( mSDLCursors[ type ] );
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+		SDL_SetCursor( ws->GetCursor(type) );
 	}
 
 	//==============================================================================
@@ -414,21 +400,7 @@ namespace Enjon
 	bool Window::IsFocused( )
 	{
 		return ( m_sdlWindow == SDL_GetMouseFocus( ) );
-	}
-
-	//==============================================================================
-
-	void Window::InitSDLCursors( )
-	{
-		mSDLCursors[ CursorType::Arrow ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_ARROW );
-		mSDLCursors[ CursorType::IBeam ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_IBEAM );
-		mSDLCursors[ CursorType::SizeAll ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEALL );
-		mSDLCursors[ CursorType::SizeNESW ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENESW );
-		mSDLCursors[ CursorType::SizeNWSE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENWSE );
-		mSDLCursors[ CursorType::SizeWE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEWE );
-		mSDLCursors[ CursorType::SizeNS ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENS );
-		mSDLCursors[ CursorType::Hand ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_HAND );
-	}
+	} 
 
 	//==============================================================================
 
@@ -442,35 +414,173 @@ namespace Enjon
 		return mWorld;
 	}
 
-	void Window::AddNewWindow( const WindowParams& params )
-	{
-		mWindowsToInit.push_back( params );
-	}
 
-	void Window::DestroyWindow( Window* window )
+	//==============================================================================================
+
+	Result WindowSubsystem::Initialize( )
 	{ 
-		mWindowsToDestroy.push_back( window );
+		AttemptLoadWindowIcon( );
+		InitSDLCursors( );
+		return Result::SUCCESS;
 	}
 
-	void Window::CleanupWindows( bool destroyAll )
-	{
-		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+	//==============================================================================================
 
+	void WindowSubsystem::Update( const f32 dT )
+	{ 
+		// Cleanup all previous windows that need destruction
+		CleanupWindows( );
+		// Initialize any new windows
+		InitializeWindows( ); 
+	}
+
+	//==============================================================================================
+	
+	Result WindowSubsystem::Shutdown( )
+	{ 
+		// Release things
+		return Result::SUCCESS;
+	}
+
+	//============================================================================================== 
+
+	void WindowSubsystem::AttemptLoadGLContext( SDL_Window* window )
+	{ 
+		if (mGLContext == nullptr )
+		{
+			mGLContext = SDL_GL_CreateContext( window );
+			if (mGLContext == nullptr) {
+				Utils::FatalError("ENJON::WINDOW::CREATE::SD_GL_CONTEXT_NOT_CREATED");
+			} 
+		}
+		
+	}
+
+	//============================================================================================== 
+
+	SDL_Surface* WindowSubsystem::AttemptLoadWindowIcon( )
+	{
+		if ( !mWindowIcon )
+		{
+			mWindowIcon = SDL_LoadBMP( ( Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Textures/enjonicon_32x32.bmp" ).c_str( ) );
+		} 
+		return mWindowIcon;
+	}
+
+	//============================================================================================== 
+
+	void WindowSubsystem::InitSDLCursors( )
+	{ 
+		mSDLCursors[ CursorType::Arrow ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_ARROW );
+		mSDLCursors[ CursorType::IBeam ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_IBEAM );
+		mSDLCursors[ CursorType::SizeAll ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEALL );
+		mSDLCursors[ CursorType::SizeNESW ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENESW );
+		mSDLCursors[ CursorType::SizeNWSE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENWSE );
+		mSDLCursors[ CursorType::SizeWE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEWE );
+		mSDLCursors[ CursorType::SizeNS ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENS );
+		mSDLCursors[ CursorType::Hand ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_HAND );
+	}
+
+	//============================================================================================== 
+
+	void WindowSubsystem::InitializeWindows( )
+	{
+		// Initialize new windows
+		for ( auto& wp : mWindowsToInit )
+		{
+			// TODO(John): Assert that the given class is derived from Window
+			const MetaClass* cls = wp.mWindowClass;
+			if ( !cls ) 
+			{ 
+				continue;
+			}
+
+			// ...Otherwise this will fail
+			Window* window = (Window*)cls->Construct();
+			if ( !window ) 
+			{
+				continue;
+			}
+			// Initialize window
+			window->InitInternal( wp );
+			// Late initialize gui context
+			window->GetGUIContext( )->LateInit( );
+			// Resize viewport
+			window->SetViewport( iVec2( wp.mWidth, wp.mHeight ) );
+			// Add window id
+			window->mID = wp.id;
+			// Add to id map
+			mWindowIDMap[ wp.id ] = window;
+
+			mWindows.push_back( window );
+		}
+
+		// Clear window set
+		mWindowsToInit.clear( ); 
+	}
+
+	// TODO(): This is crashing currently when existing the program
+	void WindowSubsystem::DestroyAll( )
+	{ 
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 		Vector< Window* > postDestroy;
 
-		for ( auto& w : ( destroyAll ? gfx->GetWindows() : mWindowsToDestroy ) )
+		for ( auto& w : mWindows )
 		{
 			if ( w )
 			{
+				// Remove from windows list
+				auto it = std::remove( mWindows.begin( ), mWindows.end( ), w );
+				mWindows.erase( it );
+
 				for ( auto& win : w->Destroy( ) )
 				{
 					postDestroy.push_back( win );
 				}
-				
+
+				mWindowIDMap.erase( w->mID );
+				igm->RemoveWindowFromContextMap( w->m_sdlWindow );
 				delete w;
-				w = nullptr; 
+				w = nullptr;
 			}
+		} 
+	}
+
+	void WindowSubsystem::CleanupWindows( b32 destroyAll )
+	{
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+		Vector< Window* > postDestroy;
+
+		if ( destroyAll )
+		{
+			DestroyAll( );
 		}
+		else
+		{
+			for ( auto& id : mWindowsToDestroy )
+			{
+				Window* w = mWindowIDMap.find( id )->second;
+				if ( w )
+				{
+					// Remove from windows list
+					auto it = std::remove( mWindows.begin( ), mWindows.end( ), w );
+					mWindows.erase( it );
+
+					for ( auto& win : w->Destroy( ) )
+					{
+						postDestroy.push_back( win );
+					}
+
+					mWindowIDMap.erase( id ); 
+					igm->RemoveWindowFromContextMap( w->m_sdlWindow ); 
+					delete w;
+					w = nullptr; 
+				}
+			} 
+		} 
 
 		// Clear windows
 		mWindowsToDestroy.clear( );
@@ -486,7 +596,30 @@ namespace Enjon
 		} 
 	}
 
-	void Window::WindowsUpdate( )
+	SDL_Cursor* WindowSubsystem::GetCursor( CursorType type )
+	{
+		return mSDLCursors[ type ];
+	} 
+
+	s32 WindowSubsystem::AddNewWindow( WindowParams params )
+	{
+		params.id = mFreeWindowID++;
+		mWindowsToInit.push_back( params ); 
+		return params.id;
+	}
+
+	void WindowSubsystem::DestroyWindow( Window* window )
+	{ 
+		mWindowsToDestroy.push_back( window->mID );
+	}
+
+	// Want to destroy a window by a given id
+	void WindowSubsystem::DestroyWindow( const u32& id )
+	{ 
+		mWindowsToDestroy.push_back( id );
+	}
+ 
+	void WindowSubsystem::WindowsUpdate( )
 	{
 		// Cleanup all previous windows that need destruction
 		CleanupWindows( );
@@ -494,31 +627,9 @@ namespace Enjon
 		InitializeWindows( ); 
 	}
 
-	void Window::InitializeWindows( )
-	{ 
-		// Initialize new windows
-		for ( auto& wp : mWindowsToInit )
-		{
-			Window* window = wp.mWindow;
-			if ( !window ) 
-			{
-				continue;
-			}
-			// Initialize window
-			window->Init( wp.mName, wp.mWidth, wp.mHeight, wp.mFlags );
-			// Late initialize gui context
-			window->GetGUIContext( )->LateInit( );
-			// Resize viewport
-			window->SetViewport( iVec2( wp.mWidth, wp.mHeight ) );
-		}
-
-		// Clear window set
-		mWindowsToInit.clear( );
-	} 
-
 	//==============================================================================================
 
-	bool Window::AnyWindowHovered( )
+	b32 WindowSubsystem::AnyWindowHovered( )
 	{
 		for ( auto& w : EngineSubsystem( GraphicsSubsystem )->GetWindows( ) )
 		{
@@ -533,7 +644,7 @@ namespace Enjon
 
 	//==============================================================================================
 
-	u32 Window::NumberOfHoveredWindows( )
+	u32 WindowSubsystem::NumberOfHoveredWindows( )
 	{
 		u32 count = 0;
 		for ( auto& w : EngineSubsystem( GraphicsSubsystem )->GetWindows( ) ) 
@@ -549,7 +660,7 @@ namespace Enjon
 
 	//==============================================================================================
 
-	Vec2 Window::GetDisplaySize( const u32& displayIndex )
+	Vec2 WindowSubsystem::GetDisplaySize( const u32& displayIndex )
 	{ 
 		if ( displayIndex > SDL_GetNumVideoDisplays( ) )
 		{
@@ -560,5 +671,32 @@ namespace Enjon
 		return Vec2( curr.w, curr.h );
 	}
 
-	//==============================================================================================
+	SDL_GLContext WindowSubsystem::GetGLContext( )
+	{
+		return mGLContext;
+	} 
+
+	Vector< Window* > WindowSubsystem::GetWindows( ) 
+	{
+		return mWindows;
+	}
+
+	Window* WindowSubsystem::GetWindow( const u32& id )
+	{
+		if ( mWindowIDMap.find( id ) != mWindowIDMap.end( ) )
+		{
+			return mWindowIDMap[ id ];
+		}
+		return nullptr;
+	}
+
+	void WindowSubsystem::ForceInitWindows( )
+	{
+		InitializeWindows( );
+	}
+
+	void WindowSubsystem::ForceCleanupWindows( )
+	{
+		CleanupWindows( );
+	}
 }

@@ -91,8 +91,10 @@ namespace Enjon
 		ImGui::SetCursorScreenPos( ImVec2( mSceneViewWindowPosition.x + mSceneViewWindowSize.x - 100.0f, mSceneViewWindowPosition.y + mSceneViewWindowSize.y * 0.01f ) );
 		RenderToolBar( );
 
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+
 		EditorAssetBrowserView* abv = mApp->GetEditorAssetBrowserView( );
-		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) && Window::NumberOfHoveredWindows() == 1 )
+		if ( abv->GetGrabbedAsset( ) && mWindow->IsMouseInWindow( ) && ws->NumberOfHoveredWindows() == 1 )
 		{
 			mWindow->SetFocus( );
 		}

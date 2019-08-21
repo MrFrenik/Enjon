@@ -11,6 +11,7 @@
 #include "Base/Object.h"
 #include "Graphics/Vertex.h"
 #include "System/Types.h"
+#include "Subsystem.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,6 +19,7 @@
 
 namespace Enjon 
 {
+	class WindowSubsystem;
 	class GraphicsSubsystem;
 	class iVec2;
 
@@ -58,34 +60,33 @@ namespace Enjon
 	typedef std::bitset<static_cast<size_t>(WindowFlags::COUNT)> WindowFlagsMask;
 
 	struct WindowParams
-	{
-		Window* mWindow;
+	{ 
+		const MetaClass* mWindowClass;
 		String mName;
 		u32 mWidth;
 		u32 mHeight;
-		WindowFlagsMask mFlags;
+		WindowFlagsMask mFlags = WindowFlags::DEFAULT;
+		s32 id = -1;
+		void* mData;
 	};
 
+	ENJON_CLASS( )
 	class Window : public Enjon::Object
 	{
 		friend GraphicsSubsystem;
+		friend WindowSubsystem;
+
+		ENJON_CLASS_BODY( Window )
 
 		public: 
 
 			/*
 			* @brief
 			*/
-			Window();
-
-			/*
-			* @brief
-			*/
-			~Window();
-
-			/*
-			* @brief
-			*/
-			virtual s32 Init( const String& windowName, const s32& screenWidth, const s32& screenHeight, WindowFlagsMask currentFlags = WindowFlagsMask( (u32)WindowFlags::DEFAULT ) ); 
+			virtual void Init( const WindowParams& params ) 
+			{
+				// Nothing by default
+			}
 
 			/*
 			* @brief
@@ -243,25 +244,18 @@ namespace Enjon
 
 			// TOTAL HACKS FOR NOW
 			void SetWorld( World* world );
-			World* GetWorld( );
-
-			static Vec2 GetDisplaySize( const u32& displayIndex = 0 );
-			static u32 NumberOfHoveredWindows( );
-			static bool AnyWindowHovered( );
-			static void AddNewWindow( const WindowParams& params ); 
-			static void DestroyWindow( Window* window ); 
-			static void InitializeWindows( ); 
-			static void CleanupWindows( bool destroyAll = false );
-			static void WindowsUpdate( );
+			World* GetWorld( ); 
 
 		protected:
+
+			void InitInternal( const WindowParams& params );
 
 			/** 
 			* @brief
 			*/
 			Vector< Window* > Destroy( );
 
-			static void InitSDLCursors( );
+			//static void InitSDLCursors( );
 
 			void ClearDroppedFiles( );
 
@@ -272,21 +266,112 @@ namespace Enjon
 			void NukeAllNextFrame( );
 
 		protected:
-			static SDL_GLContext mGLContext;
-			SDL_Window* m_sdlWindow;
-			int m_screenWidth;
-			int m_screenHeight;
+
+			ENJON_PROPERTY( ReadOnly )
+			s32 m_screenWidth;
+			
+			ENJON_PROPERTY( ReadOnly )
+			s32 m_screenHeight;
+
+			ENJON_PROPERTY( ReadOnly )
 			bool m_isfullscreen; 
-			HashSet<String> mDroppedFiles;
-			bool mNeedToClearDroppedFiles = false;
-			static HashMap<CursorType, SDL_Cursor*> mSDLCursors; 
-			GUIContext mGUIContext;
-			bool mMouseIsHovering = false;
+ 
 			World* mWorld = nullptr; 
-			static Vector< WindowParams > mWindowsToInit;
-			static Vector< Window* > mWindowsToDestroy;
-			static bool mNukeAll;
-			static SDL_Surface* mWindowIcon;
+			bool mNeedToClearDroppedFiles = false; 
+			SDL_Window* m_sdlWindow;
+			HashSet<String> mDroppedFiles;
+			GUIContext mGUIContext;
+			bool mMouseIsHovering = false; 
+			s32 mID = -1;
+	};
+
+	ENJON_CLASS( )
+	class WindowSubsystem : public Subsystem
+	{ 
+		ENJON_CLASS_BODY( WindowSubsystem )
+
+		public: 
+
+			/**
+			*@brief
+			*/
+			virtual Result Initialize() override;
+
+			/**
+			*@brief
+			*/
+			virtual void Update( const f32 dT ) override;
+			
+			/**
+			*@brief
+			*/
+			virtual Result Shutdown() override;
+
+			/**
+			*@brief
+			*/
+			void AttemptLoadGLContext( SDL_Window* window );
+
+			/**
+			*@brief
+			*/
+			SDL_GLContext GetGLContext( );
+
+			/**
+			*@brief
+			*/
+			SDL_Surface* AttemptLoadWindowIcon( );
+
+			/**
+			*@brief
+			*/
+			SDL_Cursor* GetCursor( CursorType type );
+
+			/**
+			*@brief
+			*/
+			Vector< Window* > GetWindows( );
+
+			/**
+			*@brief
+			*/
+			Window* GetWindow( const u32& id );
+
+			/**
+			*@brief CAREFUL WHEN CALLING THIS
+			*/
+			void ForceInitWindows( );
+
+			/**
+			*@brief CAREFUL WHEN CALLING THIS
+			*/
+			void ForceCleanupWindows( );
+
+			Vec2 GetDisplaySize( const u32& displayIndex = 0 );
+			u32 NumberOfHoveredWindows( );
+			b32 AnyWindowHovered( );
+			s32 AddNewWindow( WindowParams params ); 
+			void DestroyWindow( Window* window ); 
+			void DestroyWindow( const u32& id );
+			void InitializeWindows( ); 
+			void CleanupWindows( b32 destroyAll = false );
+			void WindowsUpdate( );
+
+	private:
+			void InitSDLCursors( );
+			s32 FindNextFreeID( ); 
+			void DestroyAll( );
+
+		private:
+			SDL_GLContext mGLContext = nullptr;
+			HashMap<CursorType, SDL_Cursor*> mSDLCursors; 
+			Vector< Window* > mWindows;
+			Vector< WindowParams > mWindowsToInit;
+			HashMap< u32, Window* > mWindowIDMap;
+			Vector< u32 > mWindowsToDestroy;
+			b32 mNukeAll;
+			SDL_Surface* mWindowIcon = nullptr;
+			u32 mFreeWindowID = 0;
 	};
 }
 

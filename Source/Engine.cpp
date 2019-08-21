@@ -12,6 +12,7 @@
 #include "ImGui/ImGuiManager.h"
 #include "Physics/PhysicsSubsystem.h"
 #include "Graphics/AnimationSubsystem.h"
+#include "Graphics/Window.h"
 #include "Scene/SceneManager.h"
 #include "Utils/Timing.h"
 #include "SubsystemCatalog.h"
@@ -173,6 +174,7 @@ namespace Enjon
 		mImGuiManager	= mSubsystemCatalog->Register< ImGuiManager >( false ); 
 
 		// Register remaining subsystems
+		mWindowSubsystem	= mSubsystemCatalog->Register< WindowSubsystem >( );
 		mAssetManager		= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent 
 		mGraphics			= mSubsystemCatalog->Register< GraphicsSubsystem >( ); 
 		mInput				= mSubsystemCatalog->Register< Input >( ); 
@@ -255,8 +257,8 @@ namespace Enjon
 			dt = ( f32 )( ticks ) / 1000.0f;
 			lastTime = thisTime; 
 
-			// Process all new windows to be created ( pretty hacky right here... )
-			Window::WindowsUpdate( );
+			// Update window subsystem
+			mWindowSubsystem->Update( dt );
 
 			 // Update input manager
 			mInput->Update( dt ); 
@@ -569,7 +571,7 @@ namespace Enjon
 		// Grab imguimanager 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 		// Bind the context to this memory
-		igm->BindContext( );
+		//igm->BindContext( );
 	}
 	
 	//======================================================= 

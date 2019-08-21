@@ -46,13 +46,16 @@ int main( int argc, char** argv )
 	// Collect all necessary files for reflection
 	mConfig.CollectFiles( lexer );
 
-	std::cout << "Starting Reflection Generation on: " << mConfig.mConfigFilePath << "\n";
+	std::cout << "Starting Reflection Generation on: " << mConfig.mConfigFilePath << "\n"; 
 
 	// If not an engine project, then set id to last used engine id (for now just a large number)
-	if ( mConfig.mProjectName.compare( "Enjon" ) != 0 )
-	{
-		mIntrospection.SetTypeID( 1000 );
-	}
+	//if ( mConfig.mProjectName.compare( "Enjon" ) != 0 )
+	//{
+	//	mIntrospection.SetTypeID( 1000 );
+	//}
+
+	// Set base id for introspected types 
+	mIntrospection.SetTypeID( mConfig.mBaseId );
 
 	// Iterate over collected files and parse
 	for ( auto& f : mConfig.mFilesToParse )
@@ -83,8 +86,8 @@ int main( int argc, char** argv )
 
 	// Link all classes into one generated file
 	mIntrospection.Link( mConfig ); 
-}
- 
+} 
+
 //====================================================================================
 
 void ReflectionConfig::CollectFiles( Lexer* lexer )
@@ -152,6 +155,13 @@ void ReflectionConfig::CollectFiles( Lexer* lexer )
 							{
 								mIsApplication = true;
 							}
+						}
+					}
+					if ( nextToken.Equals( "base_type_id" ) )
+					{
+						if ( lexer->RequireToken( TokenType::Token_Number, true ) )
+						{
+							mBaseId = std::atoi( lexer->GetCurrentToken( ).ToString( ).c_str( ) );
 						}
 					}
 				}

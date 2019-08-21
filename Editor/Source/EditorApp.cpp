@@ -462,8 +462,7 @@ namespace Enjon
 			ImGui::SameLine( );
 			if ( ImGui::Button( "Reload" ) )
 			{ 
-				// Reload the dll
-				ReloadDLL( );
+				mNeedReload = true;
 			}
 
 			// Compile the project if available
@@ -472,21 +471,7 @@ namespace Enjon
 				ImGui::SameLine( ); 
 				if ( ImGui::Button( "Compile" ) )
 				{
-					Result res = mProject.CompileProject( );
-
-					AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
-
-					// Save the scene
-					if ( scene )
-					{
-						scene->Save( );
-					}
-
-					// Force reload the project after successful compilation
-					if ( res == Result::SUCCESS )
-					{
-						ReloadDLL( );
-					}
+					mNeedRecompile = true;
 				} 
 
 				ImGui::SameLine( );
@@ -909,6 +894,9 @@ namespace Enjon
 			e->ForceDestroy( );
 		}
 
+		// Force all windows to destroy that need it
+		EngineSubsystem( WindowSubsystem )->ForceCleanupWindows( );
+
 		// ReloadDLL without release scene asset
 		LoadDLL( false ); 
 
@@ -923,6 +911,8 @@ namespace Enjon
 		{
 			mWorldOutlinerView->SelectEntity( em->GetEntityByUUID( selectedEntityUUID ) );
 		} 
+
+		mNeedReload = false;
 	}
 
 	//================================================================================================================================
@@ -1527,7 +1517,8 @@ namespace Enjon
 						{ 
 							// Preload project for next frame
 							PreloadProject( p );
-							Window::DestroyWindow( mProjectSelectionWindow );
+							WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+							ws->DestroyWindow( mProjectSelectionWindow );
 						}
 					}
 					ImGui::EndCombo( );
@@ -1565,7 +1556,8 @@ namespace Enjon
 		{
 			if ( CreateProjectView( ) )
 			{
-				Window::DestroyWindow( mProjectSelectionWindow );
+				WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+				ws->DestroyWindow( mProjectSelectionWindow );
 			}
 		}
 		ImGui::EndDock( );
@@ -1582,10 +1574,14 @@ namespace Enjon
 		// Set the size of the window
 		window->HideWindow( );
 
-		mProjectSelectionWindow = new Window( );
-		mProjectSelectionWindow->Init( "Test", 1200, 500, WindowFlags::DEFAULT );
-		mProjectSelectionWindow->SetWindowTitle( "Enjon: Project Browser" ); 
-		EngineSubsystem( GraphicsSubsystem )->AddWindow( mProjectSelectionWindow ); 
+		WindowParams params;
+		params.mWindowClass = Object::GetClass< Window >();
+		params.mWidth = 1200;
+		params.mHeight = 500;
+		params.mName = "Enjon: Project Browser";;
+		EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
+		EngineSubsystem( WindowSubsystem )->ForceInitWindows( );
+		mProjectSelectionWindow = EngineSubsystem( WindowSubsystem )->GetWindows( ).back( );
 
 		GUIContext* guiCtx = mProjectSelectionWindow->GetGUIContext( );
 
@@ -1721,6 +1717,33 @@ namespace Enjon
 			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
 			mPrecreateNewProject = false;
 		} 
+
+		if ( mNeedReload )
+		{
+			// Reload the dll
+			ReloadDLL( ); 
+		}
+
+		if ( mNeedRecompile )
+		{
+			Result res = mProject.CompileProject( );
+
+			AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
+
+			// Save the scene
+			if ( scene )
+			{
+				scene->Save( );
+			} 
+
+			// Force reload the project after successful compilation
+			if ( res == Result::SUCCESS )
+			{
+				ReloadDLL( );
+			}
+
+			mNeedRecompile = false;
+		}
 
 		if ( mNeedsLoadProject )
 		{
@@ -2214,7 +2237,6 @@ namespace Enjon
 			{
 				// Call init to the base window class to initialize this window
 				Window::Init();			
-
 				GUIContext* guiContext = GetGUIContext( );
 				assert( guiContext->GetContext( ) != nullptr );
 
