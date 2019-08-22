@@ -13,12 +13,14 @@ namespace Enjon
 {
 	class AnimationSubsystem;
 	class SkeletalAnimationComponent;
+	class SkeletalMeshComponent;
 
 	ENJON_CLASS( )
 	class SkeletalMeshRenderable : public Renderable
 	{
 		friend AnimationSubsystem;
 		friend SkeletalAnimationComponent;
+		friend SkeletalMeshComponent;
 
 		ENJON_CLASS_BODY( SkeletalMeshRenderable )
 

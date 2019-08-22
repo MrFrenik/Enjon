@@ -138,6 +138,13 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
+		protected:
+
+			/**
+			* @brief
+			*/
+			void UpdateAndCalculateTransforms( ); 
+
 		protected: 
 			
 			ENJON_PROPERTY( )

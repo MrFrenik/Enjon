@@ -3,6 +3,7 @@
 
 #include "Graphics/AnimationSubsystem.h"
 #include "Entity/Components/SkeletalAnimationComponent.h"
+#include "Entity/Components/SkeletalMeshComponent.h"
 #include "Entity/EntityManager.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
@@ -20,18 +21,20 @@ namespace Enjon
 
 	void AnimationSubsystem::Update( const f32 dT )
 	{
-		EntityManager* em = EngineSubsystem( EntityManager );
-		Vector< Component* > comps = em->GetAllComponentsOfType< SkeletalAnimationComponent >( ); 
-		for ( auto& c : comps )
+		EntityManager* em = EngineSubsystem( EntityManager ); 
+		Vector< Component* > skelMeshComps = em->GetAllComponentsOfType< SkeletalMeshComponent >( );
+		for ( auto& c : skelMeshComps )
 		{
-			// Cast to skeletal animation component
-			SkeletalAnimationComponent* sac = c->ConstCast< SkeletalAnimationComponent >( );
-
-			if ( sac )
-			{
+			Entity* ent = c->GetEntity( );
+			SkeletalMeshComponent* smc = c->ConstCast< SkeletalMeshComponent >( );
+			SkeletalAnimationComponent* sac = ent->GetComponent< SkeletalAnimationComponent >( );
+			if ( sac ) {
 				// Calculate transforms for this frame
 				sac->UpdateAndCalculateTransforms(); 
-			} 
+			}
+			else {
+				smc->UpdateAndCalculateTransforms( );
+			}
 		}
 	}
 

@@ -56,6 +56,12 @@ namespace Enjon
 			*/
 			const AssetLoader* GetLoader( ) const; 
 
+
+			virtual void Reset( )
+			{ 
+				// Nothing by default
+			}
+
 		protected:
 
 			/*

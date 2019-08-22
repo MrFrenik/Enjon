@@ -24,57 +24,20 @@ namespace Enjon
 
 	//==================================================================== 
 
-	Vector< Mat4x4 > Skeleton::GetTransforms( const AssetHandle< SkeletalAnimation >& animationHandle, const f32& time ) const
-	{
-		Vector< Mat4x4 > matrices;
-
+	void Skeleton::GetBindJointTransforms( Vector< Mat4x4 >& outMatrices ) const
+	{ 
 		if ( mJoints.empty( ) || mRootID == -1 )
 		{
-			return matrices;
-		}
-
-		matrices.resize( mJoints.size( ) );
-		
-		CalculateTransform( mRootID, Mat4x4::Identity( ), matrices, animationHandle.Get(), time );
-
-		return matrices;
-	}
-
-	//==================================================================== 
-
-	void Skeleton::CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, const SkeletalAnimation* animation, const f32& time ) const
-	{
-		// Get joint
-		const Joint* joint = &mJoints.at( jointID );
-
-		// Calculate bone transform ( bone space ) // Identity for now ( No animation )
-		Mat4x4 jointTransform = Mat4x4::Identity( );
-		if ( animation )
-		{
-			Transform t =  animation->CalculateInterpolatedTransform( time, jointID );
-			jointTransform = t.ToMat4x4( );
+			return;
 		} 
 
-		// Calculate relative to parent
-		Mat4x4 globalTransform = parentMatrix * jointTransform;
+		outMatrices.resize( mJoints.size( ) );
 
-		// Calculate and set local space matrix
-		//if ( animation != nullptr )
-		//{
-		//	//outMatrices.at( joint->mID ) = mGlobalInverseTransform * relativeTransform * joint->mInverseBindMatrix; 
-		//	//outMatrices.at( joint->mID ) = globalTransform * joint->mInverseBindMatrix; 
-		//}
-		outMatrices.at( joint->mID ) = mGlobalInverseTransform * globalTransform * joint->mInverseBindMatrix; 
-		//else
-		//{
-		//	outMatrices.at( joint->mID ) = mGlobalInverseTransform * joint->mInverseBindMatrix;
-		//}
-
-		// Iterate through children 
-		for ( u32 i = 0; i < joint->mChildren.size(); ++i )
-		{
-			CalculateTransform( joint->mChildren.at( i ), globalTransform, outMatrices, animation, time );				
-		}
+		for ( u32 i = 0; i < mJoints.size( ); ++i )
+		{ 
+			//outMatrices.at( mJoints[ i ].mID ) = mGlobalInverseTransform * mJoints[ i ].mInverseBindMatrix; 
+			outMatrices.at( mJoints[ i ].mID ) = mGlobalInverseTransform;
+		} 
 	} 
 
 	//==================================================================== 

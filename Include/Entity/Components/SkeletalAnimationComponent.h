@@ -20,6 +20,22 @@ namespace Enjon
 
 		ENJON_COMPONENT( SkeletalAnimationComponent, Requires[ SkeletalMeshComponent ] ) 
 
+		public:
+
+			/**
+			* @brief
+			*/
+			AssetHandle< SkeletalAnimation > GetAnimation( ) const
+			{
+				return mAnimation;
+			}
+
+			f32 GetCurrentAnimationTime( ) const 
+			{
+				return mCurrentAnimationTime;
+			}
+
+
 		protected: 
 
 			/**

@@ -128,6 +128,12 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
+		protected: 
+			/*
+			* @brief
+			*/
+			void CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, const f32& time ) const;
+
 		protected:
 			Vector< ChannelData > mChannelData;
 

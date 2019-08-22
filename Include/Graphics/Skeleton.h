@@ -21,6 +21,7 @@ namespace Enjon
 	class SkeletalMeshAssetLoader;
 	class SkeletonAssetLoader;
 	class SkeletalAnimationComponent;
+	class SkeletalMeshComponent;
 	class Skeleton;
 
 	ENJON_CLASS( )
@@ -31,6 +32,7 @@ namespace Enjon
 		friend SkeletonAssetLoader;
 		friend SkeletalMeshAssetLoader;
 		friend Skeleton;
+		friend SkeletalAnimation;
 
 		public: 
 			/*
@@ -81,9 +83,11 @@ namespace Enjon
 	{ 
 		ENJON_CLASS_BODY( Skeleton )
 
+		friend SkeletalAnimation;
 		friend SkeletonAssetLoader;
 		friend SkeletalMeshAssetLoader;
 		friend SkeletalAnimationComponent;
+		friend SkeletalMeshComponent;
 
 		public: 
 
@@ -96,6 +100,11 @@ namespace Enjon
 			* @brief
 			*/
 			Vector< Mat4x4 > GetTransforms( const AssetHandle< SkeletalAnimation >& animation, const f32& time ) const; 
+
+			/*
+			* @brief
+			*/
+			void GetBindJointTransforms( Vector< Mat4x4 >& outMatrices ) const;
 
 			/*
 			* @brief
@@ -120,14 +129,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			s32 GetRootID( ) const;
-
-		protected:
-
-			/*
-			* @brief
-			*/
-			void CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, const SkeletalAnimation* animation, const f32& time ) const;
+			s32 GetRootID( ) const; 
 
 		protected: 
 			ENJON_PROPERTY( HideInEditor )

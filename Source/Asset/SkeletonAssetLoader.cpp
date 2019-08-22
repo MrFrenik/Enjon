@@ -150,7 +150,7 @@ namespace Enjon
 		skeleton->mGlobalInverseTransform = AIMat4x4ToMat4x4( scene->mRootNode->mTransformation.Inverse( ) ); 
 
 		// Process skeleton
-		ProcessNodeSkeletal( scene->mRootNode, scene, skeleton );
+		ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, 0 );
 
 		// Build the bone heirarchy for this skeleton
 		BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
@@ -166,8 +166,14 @@ namespace Enjon
 
 	//=========================================================================
 
-	void SkeletonAssetLoader::ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleton )
+	void SkeletonAssetLoader::ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleton, u32 indent )
 	{
+		for ( u32 i = 0; i < scene->mNumMeshes; ++i )
+		{
+			aiMesh* aim = scene->mMeshes[ i ];
+			aiString name = aim->mName;
+		}
+
 		// Process all meshes in node
 		for ( u32 i = 0; i < node->mNumMeshes; ++i  ) 
 		{
@@ -182,6 +188,11 @@ namespace Enjon
 				// Get joint id ( which is the amount of bones )
 				u32 jointID = skeleton->mJoints.size( );
 				String jointName( aBone->mName.data ); 
+
+				for ( u32 in = 0; in < indent; ++in ) {
+					std::cout << " "; 
+				}
+				std::cout << jointName << "\n";
 
 				// If joint not found in skeleton name lookup then construct new bone and push back
 				if ( skeleton->mJointNameLookup.find( jointName ) == skeleton->mJointNameLookup.end( ) )
@@ -210,7 +221,7 @@ namespace Enjon
 		// Process all children in node
 		for ( u32 i = 0; i < node->mNumChildren; ++i )
 		{
-			ProcessNodeSkeletal( node->mChildren[ i ], scene, skeleton );
+			ProcessNodeSkeletal( node->mChildren[ i ], scene, skeleton, indent + 1 );
 		} 
 	}
 

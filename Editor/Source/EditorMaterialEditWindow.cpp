@@ -181,7 +181,25 @@ namespace Enjon
 		}
 		else if ( grabbedAsset->Class( )->InstanceOf< SkeletalMesh >( ) )
 		{
-			// Do things...
+			// Do things...  
+			// Construct new entity in front of camera
+			SkeletalMesh* mesh = grabbedAsset->ConstCast< SkeletalMesh >( );
+			if ( mesh )
+			{
+				// Instantiate the archetype right in front of the camera for now
+				GraphicsSubsystemContext* gfxCtx = GetWindow( )->GetWorld( )->GetContext< GraphicsSubsystemContext >( );
+				Camera* cam = gfxCtx->GetGraphicsScene( )->GetActiveCamera( );
+				Vec3 position = cam->GetPosition() + cam->Forward( ) * 5.0f; 
+				EntityHandle handle = EngineSubsystem( EntityManager )->Allocate( mWindow->GetWorld( ) );
+				if ( handle )
+				{
+					Entity* newEnt = handle.Get( );
+					SkeletalMeshComponent* smc = newEnt->AddComponent< SkeletalMeshComponent >( );
+					smc->SetMesh( mesh );
+					newEnt->SetLocalPosition( position );
+					newEnt->SetName( mesh->GetName( ) );
+				}
+			}
 		}
 		else if ( grabbedAsset->Class( )->InstanceOf< Mesh >( ) )
 		{

@@ -53,7 +53,7 @@ namespace Enjon
 		} 
 		
 		// Calculate matrix transforms for skeletal mesh
-		skeleton.Get( )->CalculateTransform( rootID, Mat4x4::Identity( ), mats, mAnimation.Get(), mCurrentAnimationTime ); 
+		mAnimation.Get( )->CalculateTransform( rootID, Mat4x4::Identity( ), mats, mCurrentAnimationTime );
 
 		// Increment current animation time ( this is hacked to just use a single animation for now... )
 		// Only increment if playing an animation

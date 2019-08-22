@@ -48,6 +48,11 @@ namespace Enjon
 			*/
 			AssetHandle< Skeleton > GetSkeleton( ) const;
 
+			/*
+			* @brief
+			*/
+			virtual void Reset( ) override;
+
 		protected:
 
 			/*

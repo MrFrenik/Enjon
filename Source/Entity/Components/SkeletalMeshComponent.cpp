@@ -237,4 +237,29 @@ namespace Enjon
 	}
 
 	//==================================================================== 
+
+	// This is assuming NO skeletal animation component
+	void SkeletalMeshComponent::UpdateAndCalculateTransforms( )
+	{ 
+		// Grab renderable from skeletal mesh component
+		SkeletalMeshRenderable* renderable = &mRenderable;
+		const Skeleton* skeleton = renderable->GetSkeleton( ).Get();
+
+		if ( !skeleton )
+		{
+			return;
+		} 
+
+		// If not valid skeleton, then return
+		s32 rootID = skeleton->GetRootID( );
+		if ( !skeleton->GetNumberOfJoints( ) || rootID == -1 )
+		{
+			return;
+		}
+
+		// Grab matrices to affect from renderable
+		skeleton->GetBindJointTransforms( renderable->mFinalJointTransforms );
+	}
+
+	//==================================================================== 
 }

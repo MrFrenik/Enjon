@@ -294,6 +294,9 @@ namespace Enjon
 			saal->DirectImport( options );
 		}
 
+		// Reset mesh options
+		meshOptions->Reset( );
+
 		// Return mesh constructed ( or null )
 		return mesh;
 	}
@@ -548,6 +551,16 @@ namespace Enjon
 	AssetHandle< Skeleton > MeshImportOptions::GetSkeleton( ) const
 	{
 		return mSkeletonAsset;
+	}
+
+	//=====================================================================================================
+
+	void MeshImportOptions::Reset( )
+	{
+		mShowMeshCreateDialogue = false;
+		mShowAnimationCreateDialogue = false;
+		mShowSkeletonCreateDialogue = false;
+		mSkeletonAsset = nullptr;
 	}
 
 	//=====================================================================================================

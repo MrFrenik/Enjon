@@ -304,4 +304,47 @@ namespace Enjon
 	}
 
 	//=============================================================== 
+
+	/*
+	* @brief
+	*/
+	void SkeletalAnimation::CalculateTransform( const u32& jointID, const Mat4x4& parentMatrix, Vector<Mat4x4>& outMatrices, const f32& time ) const
+	{
+		const Skeleton* skeleton = mSkeleton.Get( ); 
+
+		// Get joint
+		const Joint* joint = &skeleton->mJoints.at( jointID );
+
+		// Calculate bone transform ( bone space ) // Identity for now ( No animation )
+		Mat4x4 jointTransform = Mat4x4::Identity( );
+		//if ( animation )
+		{
+			Transform t = CalculateInterpolatedTransform( time, jointID );
+			jointTransform = t.ToMat4x4( );
+		}
+
+		// Calculate relative to parent
+		Mat4x4 globalTransform = parentMatrix * jointTransform;
+
+		// Calculate and set local space matrix
+		//if ( animation != nullptr )
+		//{
+		//	//outMatrices.at( joint->mID ) = mGlobalInverseTransform * relativeTransform * joint->mInverseBindMatrix; 
+		//	//outMatrices.at( joint->mID ) = globalTransform * joint->mInverseBindMatrix; 
+		//}
+		outMatrices.at( joint->mID ) = skeleton->mGlobalInverseTransform * globalTransform * joint->mInverseBindMatrix;
+		//else
+		//{
+		//	outMatrices.at( joint->mID ) = mGlobalInverseTransform * joint->mInverseBindMatrix;
+		//}
+
+		// Iterate through children 
+		for ( u32 i = 0; i < joint->mChildren.size( ); ++i )
+		{
+			CalculateTransform( joint->mChildren.at( i ), globalTransform, outMatrices, time );
+		}
+
+	}
+
+	//=============================================================== 
 }
