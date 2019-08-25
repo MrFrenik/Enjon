@@ -6,10 +6,8 @@ layout (location = 2) in vec3 aVertexTangent;
 layout (location = 3) in vec2 aVertexUV;
 layout (location = 4) in ivec4 aJointIndices;
 layout (location = 5) in ivec4 aJointIndices2;
-layout (location = 6) in ivec4 aJointIndices3;
-layout (location = 7) in vec4 aJointWeights;
-layout (location = 8) in vec4 aJointWeights2;
-layout (location = 9) in vec4 aJointWeights3;
+layout (location = 6) in vec4 aJointWeights;
+layout (location = 7) in vec4 aJointWeights2;
 const int MAX_JOINTS = 210;
 
 out VS_OUT
@@ -48,10 +46,6 @@ void main()
 	int i5 = int( aJointIndices2[1] );
 	int i6 = int( aJointIndices2[2] );
 	int i7 = int( aJointIndices2[3] );
-	int i8 = int( aJointIndices3[0] );
-	int i9 = int( aJointIndices3[1] );
-	int i10 = int( aJointIndices3[2] );
-	int i11 = int( aJointIndices3[3] );
 	
 	// Calculate joint transform
 	mat4 jointTransform = uJointTransforms[i0] * aJointWeights[0];
@@ -62,10 +56,6 @@ void main()
 	jointTransform += uJointTransforms[i5] * aJointWeights2[1];
 	jointTransform += uJointTransforms[i6] * aJointWeights2[2];
 	jointTransform += uJointTransforms[i7] * aJointWeights2[3];
-	jointTransform += uJointTransforms[i8] * aJointWeights3[0];
-	jointTransform += uJointTransforms[i9] * aJointWeights3[1];
-	jointTransform += uJointTransforms[i10] * aJointWeights3[2];
-	jointTransform += uJointTransforms[i11] * aJointWeights3[3];
 	
 	vec4 posL = jointTransform * vec4( aVertexPosition, 1.0 );
 	vec3 worldPosition = ( uModel * posL ).xyz;

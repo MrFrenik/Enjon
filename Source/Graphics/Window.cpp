@@ -526,14 +526,11 @@ namespace Enjon
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 		Vector< Window* > postDestroy;
 
+		// Destroy all windows
 		for ( auto& w : mWindows )
 		{
 			if ( w )
-			{
-				// Remove from windows list
-				auto it = std::remove( mWindows.begin( ), mWindows.end( ), w );
-				mWindows.erase( it );
-
+			{ 
 				for ( auto& win : w->Destroy( ) )
 				{
 					postDestroy.push_back( win );
@@ -545,6 +542,8 @@ namespace Enjon
 				w = nullptr;
 			}
 		} 
+
+		mWindows.clear( );
 	}
 
 	void WindowSubsystem::CleanupWindows( b32 destroyAll )
