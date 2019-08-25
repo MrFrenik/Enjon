@@ -12,7 +12,7 @@
 #include "Asset/Asset.h" 
 #include "Graphics/Mesh.h"
 
-#define ENJON_MAX_NUM_JOINTS_PER_VERTEX		4
+#define ENJON_MAX_NUM_JOINTS_PER_VERTEX		8
 
 namespace Enjon
 {

@@ -37,7 +37,21 @@ namespace Enjon
 		Assimp::Importer importer;
 
 		// Read aiscene
-		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights ); 
+		//const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights ); 
+		//const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace ); 
+		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), 
+												aiProcess_Triangulate | 
+												aiProcess_GenSmoothNormals | 
+												aiProcess_CalcTangentSpace | 
+												aiProcess_OptimizeMeshes | 
+												//aiProcess_SplitLargeMeshes | 
+												aiProcess_JoinIdenticalVertices |
+												//aiProcess_FindDegenerates | 
+												//aiProcess_FindInvalidData | 
+												aiProcess_ImproveCacheLocality | 
+												//aiProcess_SortByPType | 
+												aiProcess_GenUVCoords
+		); 
 		if ( !scene || !scene->mRootNode )
 		{
 			// Error
@@ -53,8 +67,10 @@ namespace Enjon
 		decl.Add( VertexAttributeFormat::Float3 );			// Normal
 		decl.Add( VertexAttributeFormat::Float3 );			// Tangent
 		decl.Add( VertexAttributeFormat::Float2 );			// UV
-		decl.Add( VertexAttributeFormat::UnsignedInt4 );	// BoneIndices
+		decl.Add( VertexAttributeFormat::UnsignedInt4 );	// BoneIndices1
+		decl.Add( VertexAttributeFormat::UnsignedInt4 );	// BoneIndices2
 		decl.Add( VertexAttributeFormat::Float4 );			// BoneWeights
+		decl.Add( VertexAttributeFormat::Float4 );			// BoneWeights2
 
 		// Set vertex decl for mesh
 		mesh->SetVertexDecl( decl );

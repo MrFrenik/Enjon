@@ -53,7 +53,21 @@ namespace Enjon
 		// Construct new mesh from filepath 
 		Assimp::Importer importer;
 
-		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights );
+		//const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights );
+		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace ); 
+		//const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), 
+		//										aiProcess_Triangulate | 
+		//										aiProcess_GenSmoothNormals | 
+		//										aiProcess_CalcTangentSpace | 
+		//										aiProcess_OptimizeMeshes | 
+		//										aiProcess_SplitLargeMeshes | 
+		//										aiProcess_JoinIdenticalVertices |
+		//										aiProcess_FindDegenerates | 
+		//										aiProcess_FindInvalidData | 
+		//										aiProcess_ImproveCacheLocality | 
+		//										aiProcess_SortByPType | 
+		//										aiProcess_GenUVCoords
+		//); 
 		if ( !scene ||!scene->mRootNode )
 		{
 			// Error 
@@ -112,7 +126,7 @@ namespace Enjon
 			if ( jointID < 0 )
 			{
 				// Error...
-				std::cout << "Joint node found on skeleton: " + channelName + "\n";
+				std::cout << "Joint node not found on skeleton: " + channelName + "\n";
 				continue; 
 			}
 

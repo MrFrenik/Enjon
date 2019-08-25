@@ -1028,7 +1028,9 @@ namespace Enjon
 				code += OutputLine( "layout (location = 2) in vec3 aVertexTangent;" );
 				code += OutputLine( "layout (location = 3) in vec2 aVertexUV;" );
 				code += OutputLine( "layout (location = 4) in ivec4 aJointIndices;" );
-				code += OutputLine( "layout (location = 5) in vec4 aJointWeights;" );
+				code += OutputLine( "layout (location = 5) in ivec4 aJointIndices2;" );
+				code += OutputLine( "layout (location = 6) in vec4 aJointWeights;" );
+				code += OutputLine( "layout (location = 7) in vec4 aJointWeights2;" );
 			} break;
 		}
 
@@ -1477,6 +1479,10 @@ namespace Enjon
 				code += OutputTabbedLine( "int i1 = int( aJointIndices[1] );" );
 				code += OutputTabbedLine( "int i2 = int( aJointIndices[2] );" );
 				code += OutputTabbedLine( "int i3 = int( aJointIndices[3] );" );
+				code += OutputTabbedLine( "int i4 = int( aJointIndices2[0] );" );
+				code += OutputTabbedLine( "int i5 = int( aJointIndices2[1] );" );
+				code += OutputTabbedLine( "int i6 = int( aJointIndices2[2] );" );
+				code += OutputTabbedLine( "int i7 = int( aJointIndices2[3] );" );
 				code += OutputTabbedLine( "" );
 
 				code += OutputTabbedLine( "// Calculate joint transform" );
@@ -1484,6 +1490,10 @@ namespace Enjon
 				code += OutputTabbedLine( "jointTransform += uJointTransforms[i1] * aJointWeights[1];" );
 				code += OutputTabbedLine( "jointTransform += uJointTransforms[i2] * aJointWeights[2];" );
 				code += OutputTabbedLine( "jointTransform += uJointTransforms[i3] * aJointWeights[3];" );
+				code += OutputTabbedLine( "jointTransform += uJointTransforms[i4] * aJointWeights2[0];" );
+				code += OutputTabbedLine( "jointTransform += uJointTransforms[i5] * aJointWeights2[1];" );
+				code += OutputTabbedLine( "jointTransform += uJointTransforms[i6] * aJointWeights2[2];" );
+				code += OutputTabbedLine( "jointTransform += uJointTransforms[i7] * aJointWeights2[3];" );
 				code += OutputTabbedLine( "" ); 
 
 				code += OutputTabbedLine( "vec4 posL = jointTransform * vec4( aVertexPosition, 1.0 );" );

@@ -58,10 +58,14 @@ namespace Enjon
 
 			/**
 			* @brief 
-			*/
-
+			*/ 
 			void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleton, u32 indent );
 			//void ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleton ); 
+
+			/**
+			* @brief 
+			*/ 
+			void FinalizeBoneHierarchy( Skeleton* skeleton );
 
 			void DisplaySkeletonHeirarchyRecursive( const Skeleton* skeleton, u32 index, u32 indent );
 	}; 

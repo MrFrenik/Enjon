@@ -35,6 +35,10 @@
 #include <ctime>
 #include <nfd/include/nfd.h>
 
+/*
+	- This define is funky. Delete all the engine assets in the engine asset cache. Set this define to 1. Load the editor to 
+		recreate all engine assets. STOP the editor. Set this define back to 0. Then you're go to run like normal. 
+*/
 #define LOAD_ENGINE_RESOURCES	0
 
 typedef void( *funcSetEngineInstance )( Enjon::Engine* instance );

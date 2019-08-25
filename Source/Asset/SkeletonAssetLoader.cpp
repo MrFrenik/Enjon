@@ -137,6 +137,19 @@ namespace Enjon
 
 		// NOTE(): Flipping UVs FUCKS IT ALL because I'm already flipping UVs in the shader generation process (shadergraph). Need to fix this.  
 		const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights ); 
+		//const aiScene* scene = importer.ReadFile( meshOptions->GetResourceFilePath( ), 
+		//										aiProcess_Triangulate | 
+		//										aiProcess_GenSmoothNormals | 
+		//										aiProcess_CalcTangentSpace | 
+		//										aiProcess_OptimizeMeshes | 
+		//										aiProcess_SplitLargeMeshes | 
+		//										aiProcess_JoinIdenticalVertices |
+		//										aiProcess_FindDegenerates | 
+		//										aiProcess_FindInvalidData | 
+		//										aiProcess_ImproveCacheLocality | 
+		//										aiProcess_SortByPType | 
+		//										aiProcess_GenUVCoords
+		//); 
 		if ( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
 		{
 			// Error 
@@ -150,28 +163,54 @@ namespace Enjon
 		skeleton->mGlobalInverseTransform = AIMat4x4ToMat4x4( scene->mRootNode->mTransformation.Inverse( ) ); 
 
 		// Process skeleton
+		std::cout << "Bones: \n";
 		ProcessNodeSkeletal( scene->mRootNode, scene, skeleton, 0 );
 
 		// Build the bone heirarchy for this skeleton
 		BuildBoneHeirarchy( scene->mRootNode, nullptr, skeleton );
 
-		DisplaySkeletonHeirarchyRecursive( skeleton, 0, 0 );
+		// Finalize skeletal creation
+		FinalizeBoneHierarchy( skeleton );
 
-		// Set root id for skeleton
-		skeleton->mRootID = skeleton->mJoints.empty() ? -1 : skeleton->mJoints.at( 0 ).mID;
+		std::cout << "Skeleton Hierarchy: \n";
+		DisplaySkeletonHeirarchyRecursive( skeleton, skeleton->mRootID, 0 ); 
 
 		// Return skeleton after processing
 		return skeleton; 
 	} 
 
-	//=========================================================================
+	//========================================================================= 
 
 	void SkeletonAssetLoader::ProcessNodeSkeletal( aiNode* node, const aiScene* scene, Skeleton* skeleton, u32 indent )
 	{
+		static HashSet< const char* > bones; 
+
+		//if ( bones.find( node->mName.C_Str() ) == bones.end( ) )
+		//{
+		//	std::cout << "*" << node->mName.C_Str( ) << "\n";
+		//	bones.insert( node->mName.C_Str( ) );
+		//}
+
 		for ( u32 i = 0; i < scene->mNumMeshes; ++i )
 		{
 			aiMesh* aim = scene->mMeshes[ i ];
 			aiString name = aim->mName;
+
+			//if ( bones.find( name.C_Str( ) ) == bones.end( ) )
+			//{
+			//	bones.insert( name.C_Str( ) );
+			//}
+ 
+			for ( u32 j = 0; j < aim->mNumBones; ++j )
+			{
+				aiBone* bone = aim->mBones[ j ]; 
+				String bn = Utils::FindReplaceAll( bone->mName.C_Str(), " ", "" );
+				if ( bones.find( bn.c_str() ) == bones.end( ) )
+				{
+					std::cout << "*" << bn << "\n"; 
+					bones.insert( bn.c_str() );
+				}
+			}
 		}
 
 		// Process all meshes in node
@@ -187,11 +226,11 @@ namespace Enjon
 
 				// Get joint id ( which is the amount of bones )
 				u32 jointID = skeleton->mJoints.size( );
-				String jointName( aBone->mName.data ); 
+				String jointName = Utils::FindReplaceAll(aBone->mName.data, " ", "" ); 
 
-				for ( u32 in = 0; in < indent; ++in ) {
-					std::cout << " "; 
-				}
+				//for ( u32 in = 0; in < indent; ++in ) {
+				//	std::cout << " "; 
+				//}
 				std::cout << jointName << "\n";
 
 				// If joint not found in skeleton name lookup then construct new bone and push back
@@ -301,6 +340,26 @@ namespace Enjon
 	}
 
 	//=======================================================================================
+
+	void SkeletonAssetLoader::FinalizeBoneHierarchy( Skeleton* skeleton )
+	{
+		// Already have a root set
+		if ( skeleton->mRootID != -1 )
+		{
+			return;
+		}
+
+		// Otherwise, iterate through bones, stop until you find root bone (whose parent id == -1)
+		for ( u32 i = 0; i < skeleton->mJoints.size( ); ++i )
+		{
+			Joint& j = skeleton->mJoints.at( i );
+			if ( j.mParentID == -1 )
+			{
+				skeleton->mRootID = j.mID;
+				return;
+			}
+		}
+	}
 
 	String SkeletonAssetLoader::GetAssetFileExtension( ) const
 	{

@@ -226,8 +226,8 @@ namespace Enjon
 
 		// Current frame's Time stamps
 		const f32& posTime = data->mPositionKeys.at( positionID ).mTimeStamp;
-		const f32& rotTime = data->mPositionKeys.at( rotationID ).mTimeStamp;
-		const f32& sclTime = data->mPositionKeys.at( scaleID ).mTimeStamp;
+		const f32& rotTime = data->mRotationKeys.at( rotationID ).mTimeStamp;
+		const f32& sclTime = data->mScaleKeys.at( scaleID ).mTimeStamp;
 
 		// Next frame's transform
 		const Vec3& nextPosition = data->mPositionKeys.at( nextPositionID ).mValue;
@@ -236,8 +236,8 @@ namespace Enjon
 
 		// Next frame's Time stamps
 		const f32& nextPosTime = data->mPositionKeys.at( nextPositionID ).mTimeStamp;
-		const f32& nextRotTime = data->mPositionKeys.at( nextRotationID ).mTimeStamp;
-		const f32& nextSclTIme = data->mPositionKeys.at( nextScaleID ).mTimeStamp; 
+		const f32& nextRotTime = data->mRotationKeys.at( nextRotationID ).mTimeStamp;
+		const f32& nextSclTIme = data->mScaleKeys.at( nextScaleID ).mTimeStamp; 
 
 		f32 posFactor = Map01( posTime, nextPosTime, time );
 		f32 rotFactor = Map01( rotTime, nextRotTime, time );
