@@ -516,22 +516,22 @@ namespace ImGui
 
 		static ImRect getSlotRectOnBorder(ImRect parent_rect, DockSlotType dock_slot)
 		{
-			ImVec2 size = parent_rect.Max - parent_rect.Min;
+			ImVec2 size = parent_rect.Max - parent_rect.Min * 10.f;
 			ImVec2 center = parent_rect.Min + size * 0.5f;
 			switch (dock_slot)
 			{
 				case Slot_Top:
-					return ImRect(ImVec2(center.x - 10, parent_rect.Min.y + 10),
-						ImVec2(center.x + 10, parent_rect.Min.y + 10));
+					return ImRect(ImVec2(center.x - 20, parent_rect.Min.y + 10),
+						ImVec2(center.x + 20, parent_rect.Min.y + 30));
 				case Slot_Left:
-					return ImRect(ImVec2(parent_rect.Min.x + 10, center.y - 10),
-						ImVec2(parent_rect.Min.x + 10, center.y + 10));
+					return ImRect(ImVec2(parent_rect.Min.x + 10, center.y - 20),
+						ImVec2(parent_rect.Min.x + 30, center.y + 20));
 				case Slot_Bottom:
-					return ImRect(ImVec2(center.x - 10, parent_rect.Max.y - 10),
-						ImVec2(center.x + 10, parent_rect.Max.y - 10));
+					return ImRect(ImVec2(center.x - 20, parent_rect.Max.y - 30),
+						ImVec2(center.x + 20, parent_rect.Max.y - 10));
 				case Slot_Right:
-					return ImRect(ImVec2(parent_rect.Max.x - 10, center.y - 10),
-						ImVec2(parent_rect.Max.x - 10, center.y + 10));
+					return ImRect(ImVec2(parent_rect.Max.x - 30, center.y - 20),
+						ImVec2(parent_rect.Max.x - 10, center.y + 20));
 				default: ASSERT(false);
 			}
 			IM_ASSERT(false);
@@ -565,29 +565,33 @@ namespace ImGui
 					on_border ? getSlotRectOnBorder(rect, (DockSlotType)i) : getSlotRect(rect, (DockSlotType)i);
 				bool hovered = r.Contains(mouse_pos);
 
-				float borderSize = 3.0f;
-				canvas->AddRectFilled(r.Min - ImVec2(borderSize, borderSize), r.Max + ImVec2(borderSize, borderSize), hovered ? ImColor(0.3f, 0.3f, 0.3f, 0.3f) : ImColor(0.1f, 0.1f, 0.1f, 0.8f), 2.0f);
-				canvas->AddRect(r.Min, r.Max, hovered ? color_hovered : color);
-				canvas->AddRectFilled(r.Min, r.Min + ImVec2(r.GetSize().x, 3.0f), hovered ? color_hovered : color);
+				//float borderSize =  5.0f;
+				//canvas->AddRectFilled(r.Min - ImVec2(borderSize, borderSize), r.Max + ImVec2(borderSize, borderSize), hovered ? ImColor(0.3f, 0.3f, 0.3f, 0.3f) : ImColor(0.1f, 0.1f, 0.1f, 0.8f), 2.0f);
+				//canvas->AddRect(r.Min, r.Max, hovered ? color_hovered : color);
+				//canvas->AddRectFilled(r.Min, r.Min + ImVec2(r.GetSize().x, borderSize), hovered ? color_hovered : color);
+
+				float borderSize =  2.5f;
+				canvas->AddRectFilled( r.Min - ImVec2( borderSize, borderSize ), r.Max + ImVec2( borderSize, borderSize ), hovered ? ImColor( 0.3f, 0.3f, 0.3f, 0.3f ) : ImColor( 0.1f, 0.1f, 0.1f, 0.8f ), 2.0f );
+				canvas->AddRect( r.Min, r.Max, hovered ? color_hovered : color );
 
 				switch ( DockSlotType( i ) )
 				{
 					case Slot_Top:
 					{
-
+						canvas->AddRectFilled(r.Min, r.Min + ImVec2(r.GetSize().x, borderSize), hovered ? color_hovered : color); 
 					} break;
 					case Slot_Left:
 					{
-
+						canvas->AddRectFilled(r.Min, r.Min + ImVec2(borderSize, r.GetSize().y), hovered ? color_hovered : color); 
 					} break;
 					case Slot_Bottom:
 					{
-
+						canvas->AddRectFilled(r.Min + ImVec2(0.f, r.GetSize().y - borderSize), r.Min + ImVec2(r.GetSize().x, r.GetSize().y), hovered ? color_hovered : color); 
 					} break;
 					case Slot_Right:
 					{
-
-					} break;
+						canvas->AddRectFilled(r.Min + ImVec2(r.GetSize().x - borderSize, 0.f), r.Min + ImVec2(r.GetSize().x, r.GetSize().y), hovered ? color_hovered : color); 
+					} break; 
 				}
 				
 				if (!hovered) continue;
@@ -1196,9 +1200,11 @@ namespace ImGui
 			auto dl = ImGui::GetWindowDrawList( );
 			ImVec4* colors = ImGui::GetStyle( ).Colors;
 			dl->AddRectFilled( dock.pos + ImVec2(5.0f, tabbar_height + 8.0f), dock.pos + ImVec2(-5.0f, tabbar_height - 20.0f) + dock.size, ImColor(colors[ImGuiCol_FrameBgActive]) );
-			ImVec2 la = dock.pos + ImVec2( 5.0f, tabbar_height - 20.0f );
-			ImVec2 lb = ImVec2( dock.pos.x - 5.0f + dock.size.x, la.y );
-			dl->AddLine( la, lb, ImColor( 0.0f, 0.0f, 0.0f, 0.4f ) );
+
+			// Shadow underneath dock window
+			ImVec2 la = dock.pos + ImVec2( 5.f, tabbar_height - 20.f + dock.size.y );
+			ImVec2 lb = dock.pos + ImVec2( -5.f + dock.size.x, tabbar_height - 20.f + dock.size.y ); 
+			dl->AddLine( la, lb, ImColor( 0.0f, 0.0f, 0.0f, 0.2f ) );
 
 			if (tabbar(dock.getFirstTab(), opened != nullptr))
 			{
@@ -1223,7 +1229,6 @@ namespace ImGui
 			PopStyleColor();
 			return ret;
 		}
-
 
 		void end()
 		{
