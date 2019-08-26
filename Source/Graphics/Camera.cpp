@@ -180,6 +180,13 @@ namespace Enjon
 
 	//=======================================================================================================
 
+	Mat4x4 Camera::GetPerspectiveProjection( ) const
+	{
+		return Mat4x4::Perspective( mFOV, mViewPortAspectRatio, mNearPlane, mFarPlane ); 
+	}
+
+	//=======================================================================================================
+
 	Mat4x4 Camera::GetProjection() const
 	{
 		Mat4x4 projection;

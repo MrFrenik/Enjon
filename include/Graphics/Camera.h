@@ -107,6 +107,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			Mat4x4 GetPerspectiveProjection( ) const;
+
+			/*
+			* @brief
+			*/
 			Mat4x4 GetView() const;
 
 			/*
