@@ -89,4 +89,13 @@ namespace Enjon
 	}
 
 	//==================================================================== 
+
+	Result CameraComponent::OnEditorUI( )
+	{
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		igm->DebugDumpObject( &mCamera );
+		return Result::SUCCESS;
+	}
+
+	//==================================================================== 
 }

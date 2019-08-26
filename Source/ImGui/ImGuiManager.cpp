@@ -1478,7 +1478,7 @@ namespace Enjon
 		style.ButtonTextAlign 		= ImVec2(0.5f, 0.5f); 
 		style.WindowPadding			= ImVec2(10, 8);
 		style.WindowRounding		= 0.0f;
-		style.FramePadding			= ImVec2(6, 3);
+		style.FramePadding			= ImVec2(6, 4);
 		style.FrameRounding			= 2.0f;
 		style.ItemSpacing			= ImVec2(8, 3);
 		style.ItemInnerSpacing		= ImVec2(2, 3);
@@ -1494,18 +1494,18 @@ namespace Enjon
 		ImVec4* colors = ImGui::GetStyle( ).Colors;
 		colors[ ImGuiCol_Text ] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
 		colors[ ImGuiCol_TextDisabled ] = ImVec4( 0.50f, 0.50f, 0.50f, 0.57f );
-		colors[ ImGuiCol_WindowBg ] = ImVec4( 0.16f, 0.16f, 0.16f, 1.00f );
+		colors[ ImGuiCol_WindowBg ] = ImVec4( 0.13f, 0.13f, 0.13f, 1.00f );
 		colors[ ImGuiCol_ChildBg ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
 		colors[ ImGuiCol_PopupBg ] = ImVec4( 0.12f, 0.12f, 0.12f, 1.00f );
 		colors[ ImGuiCol_Border ] = ImVec4( 0.12f, 0.12f, 0.12f, 0.45f );
 		colors[ ImGuiCol_BorderShadow ] = ImVec4( 0.00f, 0.00f, 0.00f, 1.00f );
-		colors[ ImGuiCol_FrameBg ] = ImVec4( 0.08f, 0.08f, 0.10f, 0.39f );
+		colors[ ImGuiCol_FrameBg ] = ImVec4( 0.03f, 0.03f, 0.03f, 0.39f );
 		colors[ ImGuiCol_FrameBgHovered ] = ImVec4( 0.09f, 0.09f, 0.09f, 1.00f );
-		colors[ ImGuiCol_FrameBgActive ] = ImVec4( 0.21f, 0.21f, 0.21f, 1.00f );
+		colors[ ImGuiCol_FrameBgActive ] = ImVec4( 0.16f, 0.16f, 0.16f, 1.00f );
 		colors[ ImGuiCol_TitleBg ] = ImVec4( 0.04f, 0.04f, 0.04f, 1.00f );
-		colors[ ImGuiCol_TitleBgActive ] = ImVec4( 0.10f, 0.57f, 0.35f, 1.00f );
+		colors[ ImGuiCol_TitleBgActive ] = ImVec4( 0.15f, 0.53f, 0.61f, 1.00f );
 		colors[ ImGuiCol_TitleBgCollapsed ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.51f );
-		colors[ ImGuiCol_MenuBarBg ] = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
+		colors[ ImGuiCol_MenuBarBg ] = ImVec4( 0.17f, 0.17f, 0.17f, 1.00f );
 		colors[ ImGuiCol_ScrollbarBg ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
 		colors[ ImGuiCol_ScrollbarGrab ] = ImVec4( 0.31f, 0.31f, 0.31f, 1.00f );
 		colors[ ImGuiCol_ScrollbarGrabHovered ] = ImVec4( 0.41f, 0.41f, 0.41f, 1.00f );
@@ -1513,10 +1513,10 @@ namespace Enjon
 		colors[ ImGuiCol_CheckMark ] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
 		colors[ ImGuiCol_SliderGrab ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_SliderGrabActive ] = ImVec4( 0.07f, 0.39f, 0.71f, 1.00f );
-		colors[ ImGuiCol_Button ] = ImVec4( 0.21f, 0.21f, 0.21f, 1.00f );
-		colors[ ImGuiCol_ButtonHovered ] = ImVec4( 0.25f, 0.25f, 0.25f, 1.00f );
-		colors[ ImGuiCol_ButtonActive ] = ImVec4( 0.09f, 0.09f, 0.09f, 1.00f );
-		colors[ ImGuiCol_Header ] = ImVec4( 0.06f, 0.06f, 0.06f, 0.31f );
+		colors[ ImGuiCol_Button ] = ImVec4( 0.24f, 0.24f, 0.24f, 1.00f );
+		colors[ ImGuiCol_ButtonHovered ] = ImVec4( 0.27f, 0.27f, 0.27f, 1.00f );
+		colors[ ImGuiCol_ButtonActive ] = ImVec4( 0.17f, 0.17f, 0.17f, 1.00f );
+		colors[ ImGuiCol_Header ] = ImVec4( 0.20f, 0.20f, 0.20f, 0.31f );
 		colors[ ImGuiCol_HeaderHovered ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_HeaderActive ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_Separator ] = ImVec4( 0.29f, 0.29f, 0.29f, 0.50f );
@@ -1546,9 +1546,6 @@ namespace Enjon
 		colors[ ImGuiCol_ListSelectionHovered ] = ImVec4( 0.88f, 0.40f, 0.18f, 1.00f );
 		colors[ ImGuiCol_ListSelectionActive ] = ImVec4( 0.88f, 0.40f, 0.18f, 1.00f );
 		colors[ ImGuiCol_ListSelectionRenamed ] = ImVec4( 0.88f, 0.40f, 0.18f, 1.00f );
-
-		// Load dock
-		// ImGui::LoadDock();
 	}
 
 	//=====================================================================

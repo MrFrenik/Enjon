@@ -24,6 +24,7 @@
 #include <Entity/Components/RigidBodyComponent.h>
 #include <Entity/Components/PointLightComponent.h>
 #include <Entity/Components/DirectionalLightComponent.h>
+#include <Entity/Components/CameraComponent.h>
 #include <Utils/FileUtils.h> 
 #include <Utils/Tokenizer.h> 
 
@@ -441,26 +442,42 @@ namespace Enjon
 		}
 		else
 		{
-			if ( ImGui::Button( "Play" ) )
+			// Do not play unless a scene is available!
+			
+			AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
+			if ( scene && !scene->IsDefault() )
 			{ 
-				mPlaying = true;
-				mMoveCamera = true;
-
-				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-				auto cam = gfx->GetGraphicsSceneCamera( );
-				mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) ); 
-
-				// Call start up function for game
-				if ( mProject.GetApplication() )
-				{
-					InitializeProjectApp( );
-				}
-				else
+				if ( ImGui::Button( "Play" ) )
 				{ 
-					std::cout << "Cannot play without game loaded!\n";
-					mPlaying = false;
-					mMoveCamera = false;
-				}
+					mPlaying = true;
+					mMoveCamera = true;
+
+					GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+					auto cam = gfx->GetGraphicsSceneCamera( );
+					mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) ); 
+
+					// Call start up function for game
+					if ( mProject.GetApplication() )
+					{
+						InitializeProjectApp( );
+					}
+					else
+					{ 
+						std::cout << "Cannot play without game loaded!\n";
+						mPlaying = false;
+						mMoveCamera = false;
+					}
+				} 
+			}
+			else
+			{
+				ImVec4 buttonCol = ImVec4( 0.25f, 0.25f, 0.25f, 1.f );
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.8f, 0.8f, 0.6f ) );
+				ImGui::PushStyleColor( ImGuiCol_Button, buttonCol );
+				ImGui::PushStyleColor( ImGuiCol_ButtonHovered, buttonCol );
+				ImGui::PushStyleColor( ImGuiCol_ButtonActive, buttonCol );
+				ImGui::Button( "Play" );
+				ImGui::PopStyleColor( 4 );
 			}
 
 			ImGui::SameLine( );
@@ -1316,11 +1333,99 @@ namespace Enjon
 			ImGui::EndDock( );
 		} );
 
-		auto createViewOption = [&]()
+		auto createEntity = [ & ] ( EditorApp* app )
 		{
-			if ( mProject.GetApplication() && !mPlaying )
+			if ( ImGui::MenuItem( "    Entity##options", NULL ) )
 			{
-				if ( ImGui::MenuItem( "Empty##options", NULL ) )
+				std::cout << "Creating entity...\n";
+				EntityManager* em = EngineSubsystem( EntityManager );
+				GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+				EntityHandle entity = em->Allocate( );
+				if ( entity )
+				{
+					Entity* ent = entity.Get( ); 
+					const Camera* cam = gs->GetGraphicsSceneCamera( );
+					ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 
+					ent->SetName( "Entity" );
+				}
+
+				// Select entity
+				app->mWorldOutlinerView->SelectEntity( entity );
+			} 
+		};
+
+		auto createCamera = [ & ] ( EditorApp* app )
+		{
+			if ( ImGui::MenuItem( "    Camera##options", NULL ) )
+			{
+				std::cout << "Creating camera...\n";
+				EntityManager* em = EngineSubsystem( EntityManager );
+				GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+				EntityHandle entity = em->Allocate( );
+				if ( entity )
+				{ 
+					Entity* ent = entity.Get( ); 
+					CameraComponent* cc = ent->AddComponent< CameraComponent >( );
+
+					const Camera* cam = gs->GetGraphicsSceneCamera( );
+					ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 
+					ent->SetName( "Camera" );
+				}
+
+				// Select entity
+				app->mWorldOutlinerView->SelectEntity( entity );
+			} 
+		};
+
+		auto createLights = [ & ] ( EditorApp* app )
+		{
+			if ( ImGui::MenuItem( "    Point Light##options", NULL ) )
+			{
+				std::cout << "Creating point light...\n";
+				EntityManager* em = EngineSubsystem( EntityManager );
+				GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+				EntityHandle pointLight = em->Allocate( );
+				if ( pointLight )
+				{
+					Entity* ent = pointLight.Get( ); 
+					PointLightComponent* plc = ent->AddComponent<PointLightComponent>( );
+
+					const Camera* cam = gs->GetGraphicsSceneCamera( );
+					ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 
+					ent->SetName( "PointLight" );
+				}
+
+				// Select entity
+				app->mWorldOutlinerView->SelectEntity( pointLight );
+			}
+
+			if ( ImGui::MenuItem( "    Directional Light##options", NULL ) )
+			{
+				std::cout << "Creating directional light...\n";
+				EntityManager* em = EngineSubsystem( EntityManager );
+				GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
+				EntityHandle directionalLight = em->Allocate( );
+				if ( directionalLight )
+				{
+					Entity* ent = directionalLight.Get( ); 
+					ent->AddComponent<DirectionalLightComponent>( );
+
+					const Camera* cam = gs->GetGraphicsSceneCamera( );
+					ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+
+					ent->SetName( "DirectionalLight" );
+				}
+
+				// Select entity
+				app->mWorldOutlinerView->SelectEntity( directionalLight );
+			} 
+		};
+
+		auto createPrimitives = [ & ] ( EditorApp* app )
+		{ 
+			if ( ImGui::BeginMenu( "    Primitives##options" ) )
+			{
+				if ( ImGui::MenuItem( "   Empty##options", NULL ) )
 				{
 					std::cout << "Creating empty entity...\n";
 					EntityManager* em = EngineSubsystem( EntityManager );
@@ -1328,10 +1433,10 @@ namespace Enjon
 					empty.Get( )->SetName( "Empty" );
 
 					// Set to selected entity
-					mWorldOutlinerView->SelectEntity( empty );
+					app->mWorldOutlinerView->SelectEntity( empty );
 				}
 
-				if ( ImGui::MenuItem( "Cube##options", NULL ) )
+				if ( ImGui::MenuItem( "   Cube##options", NULL ) )
 				{
 					std::cout << "Creating cube...\n";
 					EntityManager* em = EngineSubsystem( EntityManager );
@@ -1355,10 +1460,10 @@ namespace Enjon
 					}
 
 					// Select entity
-					mWorldOutlinerView->SelectEntity( cube );
+					app->mWorldOutlinerView->SelectEntity( cube );
 				}
 
-				if ( ImGui::MenuItem( "Sphere##options", NULL ) )
+				if ( ImGui::MenuItem( "   Sphere##options", NULL ) )
 				{
 					std::cout << "Creating sphere...\n";
 					EntityManager* em = EngineSubsystem( EntityManager );
@@ -1382,69 +1487,29 @@ namespace Enjon
 					}
 
 					// Select entity
-					mWorldOutlinerView->SelectEntity( sphere );
+					app->mWorldOutlinerView->SelectEntity( sphere );
 				}
 
-				if ( ImGui::MenuItem( "Point Light##options", NULL ) )
-				{
-					std::cout << "Creating point light...\n";
-					EntityManager* em = EngineSubsystem( EntityManager );
-					GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
-					EntityHandle pointLight = em->Allocate( );
-					if ( pointLight )
-					{
-						Entity* ent = pointLight.Get( ); 
-						PointLightComponent* plc = ent->AddComponent<PointLightComponent>( );
+				ImGui::EndMenu( );
+			}
+		};
 
-						const Camera* cam = gs->GetGraphicsSceneCamera( );
-						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f ); 
-						ent->SetName( "PointLight" );
-					}
+		auto createViewOption = [&]()
+		{
+			if ( mProject.GetApplication() && !mPlaying )
+			{
+				ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.3f, 0.3f, 0.3f, 1.f ) );
+				igm->Text( "GENERAL" );
+				ImGui::PopStyleColor( );
+				createEntity( this );
+				createCamera( this );
+				createPrimitives( this );
 
-					// Select entity
-					mWorldOutlinerView->SelectEntity( pointLight );
-				}
-
-				if ( ImGui::MenuItem( "Directional Light##options", NULL ) )
-				{
-					std::cout << "Creating directional light...\n";
-					EntityManager* em = EngineSubsystem( EntityManager );
-					GraphicsSubsystem* gs = EngineSubsystem( GraphicsSubsystem );
-					EntityHandle directionalLight = em->Allocate( );
-					if ( directionalLight )
-					{
-						Entity* ent = directionalLight.Get( ); 
-						ent->AddComponent<DirectionalLightComponent>( );
-
-						const Camera* cam = gs->GetGraphicsSceneCamera( );
-						ent->SetLocalPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
-
-						ent->SetName( "DirectionalLight" );
-					}
-
-					// Select entity
-					mWorldOutlinerView->SelectEntity( directionalLight );
-				}
-
-				if ( ImGui::MenuItem( "Scene##options", NULL ) )
-				{
-					// Construct scene and save it
-					AssetManager* am = EngineSubsystem( AssetManager );
-					AssetHandle< Scene > scene = am->ConstructAsset< Scene >( );
-
-					// Unload scene after saving it
-					// NOTE(): Shouldn't have to do this
-					scene.Unload( ); 
-				} 
-
-				if ( ImGui::MenuItem( "Material##Options", NULL ) )
-				{
-					// Construct material asset and save it
-					AssetManager* am = EngineSubsystem( AssetManager );
-
-					// Don't name it for now
-					AssetHandle< Material > mat = am->ConstructAsset< Material >( ); 
-				}
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.3f, 0.3f, 0.3f, 1.f ) );
+				igm->Text( "LIGHTING" );
+				ImGui::PopStyleColor( );
+				createLights( this );
 			}
 		}; 
 
@@ -1489,6 +1554,23 @@ namespace Enjon
 		//guiContext->RegisterMenuOption("File", "Load Project...##options", loadProjectMenuOption); 
 		guiContext->RegisterMenuOption("File", "Save Scene##options", saveSceneOption); 
 		guiContext->RegisterMenuOption( "Create", "Create", createViewOption );
+
+		static bool mShowStyles = false;
+		auto stylesMenuOption = [&]()
+		{
+        	ImGui::MenuItem("Styles##options", NULL, &mShowStyles);
+		};
+	 	auto showStylesWindowFunc = [&]()
+	 	{
+			if (ImGui::BeginDock("Styles##options", &mShowStyles))
+			{
+				ImGui::ShowStyleEditor();	
+			}
+			ImGui::EndDock();
+	 	}; 
+
+		guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
+		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
 
 		// Register docking layouts 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );

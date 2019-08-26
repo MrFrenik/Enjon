@@ -56,6 +56,11 @@ namespace Enjon
 			*/
 			void SetActiveCamera( );
 
+			/* 
+			* @brief Override for editor ui
+			*/
+			Result OnEditorUI( ) override;
+
 		private: 
 			
 			ENJON_PROPERTY( )

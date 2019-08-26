@@ -174,6 +174,16 @@ namespace Enjon
 				mFarPlane = far; 
 			}
 
+			inline void SetFar( const f32& far )
+			{
+				mFarPlane = far; 
+			}
+
+			inline void SetNear( const f32& near )
+			{
+				mNearPlane = near;
+			}
+
 			/*
 			* @brief
 			*/
@@ -269,7 +279,7 @@ namespace Enjon
 			f32 mNearPlane = 0.1f;
 
 			ENJON_PROPERTY()
-			f32 mFarPlane = 100.0f;
+			f32 mFarPlane = 1000.0f;
 
 			ENJON_PROPERTY()
 			f32 mViewPortAspectRatio;
