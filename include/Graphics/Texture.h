@@ -194,13 +194,13 @@ namespace Enjon
 
 		private:
 			
-			ENJON_PROPERTY( HideInEditor )
+			ENJON_PROPERTY( ReadOnly )
 			u32 mId;
 
-			ENJON_PROPERTY( HideInEditor )
+			ENJON_PROPERTY( ReadOnly )
 			u32 mWidth;
 
-			ENJON_PROPERTY( HideInEditor )
+			ENJON_PROPERTY( ReadOnly )
 			u32 mHeight; 
 
 			ENJON_PROPERTY( HideInEditor )
@@ -209,7 +209,7 @@ namespace Enjon
 			ENJON_PROPERTY( HideInEditor )
 			TextureFileExtension mFileExtension;
 
-			ENJON_PROPERTY( HideInEditor )
+			ENJON_PROPERTY( ReadOnly )
 			TextureFormat mFormat;
 
 			TextureSourceDataBase* mSourceData = nullptr;

@@ -114,6 +114,13 @@ namespace Enjon
 
 	//=======================================================================================================
 
+	void Camera::SetRotation( const Vec3& eulerAngles )
+	{
+		mTransform.SetEulerRotation( eulerAngles );
+	}
+
+	//=======================================================================================================
+
 	void Camera::OffsetOrientation(const f32& Yaw, const f32& Pitch)
 	{
 		Quaternion X = Quaternion::AngleAxis(Yaw, 	Vec3(0, 1, 0)); 	// Absolute Up

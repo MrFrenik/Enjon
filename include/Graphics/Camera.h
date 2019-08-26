@@ -230,6 +230,11 @@ namespace Enjon
 			{ 
 				return mTransform.GetPosition(); 
 			}
+
+			/*
+			* @brief
+			*/
+			void SetRotation( const Vec3& eulerAngles );
 			
 			/*
 			* @brief

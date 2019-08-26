@@ -423,7 +423,107 @@ namespace Enjon
 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Viewport", GUIDockSlotType::Slot_Left, 0.45f ) );
+		//guiContext->Finalize( );
 	} 
 
+	void EditorTextureEditWindow::Init( const WindowParams& params )
+	{ 
+		// Construct scene in world
+		if ( !mTexture )
+		{
+			// Initialize new world 
+			mWorld = new World( );
+			// Register contexts with world
+			mWorld->RegisterContext< GraphicsSubsystemContext >( );
+			// Set material from data
+			mTexture = ( Texture* )( params.mData );
 
+			ConstructScene( );
+		} 
+	} 
+
+	void EditorTextureEditWindow::ConstructScene( )
+	{
+		GUIContext* guiContext = GetGUIContext( );
+
+		// Add main menu options
+		guiContext->RegisterMainMenu( "File" );
+		guiContext->RegisterMainMenu( "View" );
+
+		// Create viewport
+		mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
+
+		guiContext->RegisterDockingLayout( GUIDockingLayout( mViewport->GetViewName( ).c_str( ), nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
+
+		// NOTE(): This should be done automatically for the user in the backend
+		// Add window to graphics subsystem ( totally stupid way to do this )
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		gfx->AddWindow( this );
+
+		World* world = GetWorld( );
+		GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+
+		// Need to create an external scene camera held in the viewport that can manipulate the scene view
+		Camera* cam = scene->GetActiveCamera( );
+		cam->SetNearFar( 0.1f, 1000.0f );
+		cam->SetProjection( ProjectionType::Perspective );
+		cam->SetRotation( Vec3( 180.f, 0.f, 180.f ) );
+		cam->SetPosition( Vec3( 1.0f, 1.0f, -2.5f ) );
+
+		mMaterial = new Material( ); 
+		mMaterial->SetShaderGraph( EngineSubsystem( AssetManager )->GetAsset< ShaderGraph >( "shaders.shadergraphs.defaultstaticgeom" ) );
+		mMaterial->SetUniform( "albedoMap", mTexture );
+		mMaterial->SetUniform( "metallicMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.black" ) );
+		mMaterial->SetUniform( "roughMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.white" ) );
+		mMaterial->SetUniform( "emissiveMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.black" ) );
+		mMaterial->SetUniform( "aoMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.white" ) );
+		mMaterial->SetUniform( "normalMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.blue" ) );
+
+		// Set as quad
+		// Need to set material of it
+		mRenderable.SetMesh( EngineSubsystem( AssetManager )->GetDefaultAsset< Mesh >( ) );
+		//mRenderable.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+		mRenderable.SetScale( 2.0f );
+		mRenderable.SetMaterial( mMaterial );
+		scene->AddStaticMeshRenderable( &mRenderable );
+
+		guiContext->RegisterWindow( "Properties", [ & ]
+		{
+			if ( ImGui::BeginDock( "Properties" ) )
+			{
+				if ( mTexture )
+				{
+
+					World* world = GetWorld( );
+					GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+					ImGui::Text( fmt::format( "Texture: {}", mTexture.Get( )->GetName( ) ).c_str( ) );
+					ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+					igm->InspectObject( mTexture.Get() ); 
+					igm->InspectObject( mMaterial );
+					//igm->InspectObject( &mRenderable );
+					//igm->InspectObject( scene->GetActiveCamera() ); 
+				} 
+
+				ImGui::EndDock( );
+			}
+		} );
+
+		auto saveTextureOption = [ & ] ( )
+		{
+			if ( ImGui::MenuItem( "Save##save_tex_options", NULL ) )
+			{
+				if ( mTexture )
+				{
+					//mTexture->Save( );
+				}
+			}
+		};
+
+		// Register menu options
+		guiContext->RegisterMenuOption( "File", "Save##save_tex_options", saveTextureOption );
+
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Viewport", GUIDockSlotType::Slot_Left, 0.45f ) );
+		//guiContext->Finalize( );
+	}
 }

@@ -195,6 +195,42 @@ namespace Enjon
 			b32 mInitialized = false;
 			bool mViewportOpen = true;
 	}; 
+
+	ENJON_CLASS( )
+	class EditorTextureEditWindow : public Window
+	{
+		ENJON_CLASS_BODY( EditorTextureEditWindow )
+
+		public:
+
+			virtual void Init( const WindowParams& params ) override;
+
+		protected:
+
+			virtual void ExplicitDestroy( ) override
+			{
+				if ( mViewport )
+				{
+					delete mViewport;
+					mViewport = nullptr;
+				} 
+
+				if ( mMaterial )
+				{
+					delete mMaterial;
+					mMaterial = nullptr;
+				}
+			}
+
+			void ConstructScene( );
+
+		protected:
+
+			EditorViewport* mViewport = nullptr;
+			AssetHandle< Texture > mTexture; 
+			StaticMeshRenderable mRenderable;
+			Material* mMaterial = nullptr;
+	};
 }
 
 #endif

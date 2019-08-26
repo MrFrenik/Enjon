@@ -5,7 +5,7 @@
 #include "EditorInspectorView.h"
 #include "EditorApp.h"
 #include "EditorMaterialEditWindow.h"
-#include "EditorArchetypeEditWindow.h"
+#include "EditorArchetypeEditWindow.h" 
 #include "Project.h"
 
 #include <Engine.h>
@@ -325,6 +325,20 @@ namespace Enjon
 										params.mHeight = 800;
 										params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
 										params.mData = ( void* )archType;
+										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
+									}
+									else if ( assetCls->InstanceOf< Texture >( ) )
+									{
+										const Asset* asset = mSelectedAssetInfo->GetAsset( );
+
+										// Open new params
+										WindowParams params;
+										params.mWindowClass = Object::GetClass< EditorTextureEditWindow >( );
+										params.mName = asset->GetName( );
+										params.mWidth = 1200;
+										params.mHeight = 800;
+										params.mFlags = WindowFlagsMask( ( u32 )WindowFlags::RESIZABLE );
+										params.mData = ( void* )asset;
 										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 									}
 								}
