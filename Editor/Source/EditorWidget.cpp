@@ -39,7 +39,7 @@ namespace Enjon
 
 		// Set scale of root based on distance from camera
 		f32 dist = Vec3::Distance( cam->GetPosition( ), mRootHeirarchy->mLocalTransform.GetPosition() );
-		f32 scale = Math::Clamp( dist / 60.0f, 0.001f, 100.0f );
+		f32 scale = cam->GetProjectionType() == ProjectionType::Perspective ?  Math::Clamp( dist / 60.0f, 0.001f, 100.0f ) : Math::Max( cam->GetOrthographicScale(), 1.f ) / 40.f;
 		mRootHeirarchy->mLocalTransform.SetScale( scale ); 
 
 		// Calculate world transforms for all heirarchies

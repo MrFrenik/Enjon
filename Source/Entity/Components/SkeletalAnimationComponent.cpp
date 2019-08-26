@@ -78,5 +78,19 @@ namespace Enjon
 	}
 
 	//================================================================================== 
+
+	AssetHandle< SkeletalAnimation > SkeletalAnimationComponent::GetAnimation( ) const
+	{
+		return mAnimation;
+	}
+
+	//================================================================================== 
+
+	f32 SkeletalAnimationComponent::GetCurrentAnimationTime( ) const 
+	{
+		return mCurrentAnimationTime;
+	} 
+
+	//================================================================================== 
 }
 

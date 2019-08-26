@@ -300,16 +300,16 @@ namespace Enjon
 	{
 		const AssetLoader* loader = GetLoaderByResourceFilePath( resourceFilePath );
 
+		if ( !loader )
+		{
+			return false;
+		}
+
 		// Get qualified name of asset
 		AssetStringInformation info = GetAssetQualifiedInformation( resourceFilePath, cacheDirectory, loader ); 
 
 		// Check if exists in asset loader
-		if ( loader )
-		{
-			return loader->Exists( info.mQualifiedName );
-		}
-
-		return false;
+		return loader->Exists( info.mQualifiedName );
 	}
 
 	//============================================================================================ 

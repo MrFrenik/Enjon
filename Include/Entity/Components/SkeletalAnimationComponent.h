@@ -25,23 +25,12 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			AssetHandle< SkeletalAnimation > GetAnimation( ) const
-			{
-				return mAnimation;
-			}
-
-			f32 GetCurrentAnimationTime( ) const 
-			{
-				return mCurrentAnimationTime;
-			}
-
-
-		protected: 
+			AssetHandle< SkeletalAnimation > GetAnimation( ) const; 
 
 			/**
 			* @brief
 			*/
-			void UpdateAndCalculateTransforms( ); 
+			f32 GetCurrentAnimationTime( ) const;
 
 			/**
 			* @brief
@@ -52,6 +41,14 @@ namespace Enjon
 			* @brief
 			*/
 			void SetPlaying( const b32& enabled );
+
+
+		protected: 
+
+			/**
+			* @brief
+			*/
+			void UpdateAndCalculateTransforms( ); 
 
 		private: 
 

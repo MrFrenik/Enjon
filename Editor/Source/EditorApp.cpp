@@ -1517,7 +1517,7 @@ namespace Enjon
 		{ 
 			AssetHandle< Scene > currentScene = EngineSubsystem( SceneManager )->GetScene( ); 
 			ImColor textColor = ImGui::GetColorU32( ImGuiCol_Text ); 
-			bool sceneValid = currentScene.IsValid( );
+			bool sceneValid = currentScene.IsValid( ) && !mPlaying;
 			if ( !sceneValid )
 			{
 				textColor.Value = ImVec4( 0.2f, 0.2f, 0.2f, 1.0f ); 
@@ -1525,14 +1525,17 @@ namespace Enjon
 			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4(textColor) );
 			if ( ImGui::MenuItem( "Save Scene##options", NULL ) )
 			{
-				if ( sceneValid )
+				// Ballsack
+				if ( sceneValid && !mPlaying )
 				{
 					currentScene->Save( );
 				} 
 			}
 			ImGui::PopStyleColor( );
 
-			if ( ImGui::MenuItem( "Load Project##options", NULL ) )
+			textColor = mPlaying ? ImVec4( 0.2f, 0.2f, 0.2f, 1.f ) : ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4(textColor) );
+			if ( ImGui::MenuItem( "Load Project##options", NULL ) && !mPlaying )
 			{
 				SceneManager* sm = EngineSubsystem( SceneManager );
 
@@ -1548,6 +1551,7 @@ namespace Enjon
 
 				mNeedsLoadProject = true;
 			}
+			ImGui::PopStyleColor( );
 		};
 
 		// Register menu options
