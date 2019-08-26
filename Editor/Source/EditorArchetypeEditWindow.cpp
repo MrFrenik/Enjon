@@ -235,7 +235,7 @@ namespace Enjon
 
 	void EditorTransformWidgetToolBar::UpdateView( )
 	{
-		ImGui::ListBoxHeader( "##TransformOptions", ImVec2( Math::Min( ImGui::GetWindowSize( ).x * 0.95f, 900.0f ), Math::Min( ImGui::GetWindowSize( ).y * 0.7f, 30.0f ) ) );
+		ImGui::ListBoxHeader( "##TransformOptions", ImVec2( Math::Min( ImGui::GetWindowSize( ).x * 0.95f, 900.0f ), Math::Min( ImGui::GetWindowSize( ).y * 0.7f, 35.0f ) ) );
 		{
 			// Translation snapping
 			bool tSnap = mApp->IsTransformSnappingEnabled( TransformationMode::Translation );
