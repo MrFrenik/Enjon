@@ -1636,8 +1636,6 @@ namespace Enjon
 					}
 				}
 			}
-			static f32 f = 0.f;
-			ImGui::InputFloat( "F", &f );
 		}
 		ImGui::EndDock( ); 
 	}
