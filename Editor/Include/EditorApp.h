@@ -166,7 +166,8 @@ namespace Enjon
 			void SceneView( bool* viewBool ); 
 
 			void LoadProjectContext( );
-			void LoadProjectSelectionContext( );
+			void LoadProjectSelectionContext( ); 
+			void UnloadPreviousProject( );
 
 			void PreloadProject( const Project& project );
 

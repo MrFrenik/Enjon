@@ -82,7 +82,8 @@ namespace Enjon
 		Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
 		Enjon::String dllName =  projectName + ".dll";
 
-		fs::path dllPath = rootDir + "Build/" + configuration + "/" + dllName;
+		// Removing the dll for this project (it's temporary, so we're going to name it a temp name)
+		fs::path dllPath = rootDir + "Build/" + configuration + "/" + "proj.dll";
 		if ( fs::exists( dllPath ) )
 		{
 			fs::remove( dllPath );
@@ -94,7 +95,7 @@ namespace Enjon
 		{
 			if ( fs::exists( dllPath.string( ) + "Build/" + configuration + "/" + dllName ) )
 			{
-				fs::copy( fs::path( dllPath.string( ) + "Build/" + configuration + "/" + dllName ), rootDir + "Build/" + configuration + "/" + dllName );
+				fs::copy( fs::path( dllPath.string( ) + "Build/" + configuration + "/" + dllName ), rootDir + "Build/" + configuration + "/" + "proj.dll" );
 			}
 		}
 	}
@@ -954,7 +955,8 @@ namespace Enjon
 		CopyLibraryContents( mProject.GetProjectName(), mProject.GetProjectPath() );
 
 		// Try to load library
-		dllHandle = LoadLibrary( ( mProject.GetProjectName() + ".dll" ).c_str() );
+		//dllHandle = LoadLibrary( ( mProject.GetProjectName() + ".dll" ).c_str() );
+		dllHandle = LoadLibrary( "proj.dll" );
 		//dllHandle = LoadLibrary( ( mProject.GetProjectPath() + "Build/" + configuration +"/" + mProject.GetProjectName() + ".dll" ).c_str() );
 
 		// If valid, then set address of procedures to be called
@@ -1655,8 +1657,20 @@ namespace Enjon
 
 	//================================================================================================================
 
-	void EditorApp::LoadProjectSelectionContext( )
+	void EditorApp::UnloadPreviousProject( )
+	{ 
+		// Delete all previous entities
+		EntityManager* em = EngineSubsystem( EntityManager );
+		em->DestroyAll( ); 
+
+		// Want to unload dll
+		UnloadDLL( ); 
+	}
+
+	void EditorApp::LoadProjectSelectionContext( ) 
 	{
+		UnloadPreviousProject( );
+
 		// Set the window to small
 		Window* window = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
 		assert( window != nullptr );
