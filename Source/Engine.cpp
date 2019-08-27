@@ -205,7 +205,7 @@ namespace Enjon
 		 mLimiter.Init( 60.0f );
 
 		// Late init for systems that need it
-		 mImGuiManager->LateInit( mGraphics->GetMainWindow( )->ConstCast< Window >( ) );
+		 //mImGuiManager->LateInit( mGraphics->GetMainWindow( )->ConstCast< Window >( ) );
 
 		return Enjon::Result::SUCCESS;
 	}
@@ -370,7 +370,7 @@ namespace Enjon
 		Vec2 mouseWheel( 0.0f );
 
 		// Grab windows from graphics subsystem
-		Vector< Window* > windows = mGraphics->GetWindows( );
+		Vector< Window* > windows = mWindowSubsystem->GetWindows( );
 
 		// If there are no windows left to process, end application
 		if ( windows.empty( ) )

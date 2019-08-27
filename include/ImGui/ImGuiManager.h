@@ -468,6 +468,12 @@ namespace Enjon
 			*/
 			bool DragFloat2( const String& label, Vec2* vec, f32 speed = 1.0f, f32 min = 0.0f, f32 max = 0.0f );
 
+			/**
+			* @brief
+			*/
+
+			bool InputText( const char* label, char* buffer, usize buffSize );
+
 		protected:
 			void BindContext( ); 
 			void ProcessEvent( SDL_Event* event );

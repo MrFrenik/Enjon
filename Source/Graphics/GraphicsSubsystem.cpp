@@ -170,9 +170,9 @@ namespace Enjon
 		params.mWidth = displaySize.x;
 		params.mHeight = displaySize.y;
 		params.mName = "Enjon";
-		ws->AddNewWindow( params );;
+		s32 wid = ws->AddNewWindow( params );
 		ws->ForceInitWindows( );
-		mWindow = ws->GetWindows( ).at( 0 );
+		mWindow = ws->GetWindow( wid );
 		mWindow->MaximizeWindow( );
 		mWindows.push_back( mWindow ); 
 

@@ -400,7 +400,7 @@ namespace Enjon
 				{
 					ImGui::Text( fmt::format( "Material: {}", mMaterial.Get()->GetName( ) ).c_str( ) ); 
 					ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-					igm->InspectObject( mMaterial.Get() );
+					igm->InspectObject( mMaterial.Get() ); 
 				}
 
 				ImGui::EndDock( );

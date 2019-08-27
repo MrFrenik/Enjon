@@ -1632,6 +1632,14 @@ namespace Enjon
 
 	//=====================================================================
 
+	bool ImGuiManager::InputText( const char* label, char* buffer, usize buffSize )
+	{
+		BindContext( );
+		return ImGui::InputText( label, buffer, buffSize );
+	}
+
+	//=====================================================================
+
 	GUIWidget::GUIWidget( const String& label )
 		: mLabel( label )
 	{ 

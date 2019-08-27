@@ -13,7 +13,7 @@ set (ENJON_RELEASE_DIR "${ENJON_BUILD_DIR}/Release/")
 set (ENJON_RELDEBUGINFO_DIR "${ENJON_BUILD_DIR}/RelWithDebInfo/")
 set (ENJON_DEBUG_DIR "${ENJON_BUILD_DIR}/Debug/")
 set (ENJON_GENERATED_DIR "${ENJON_BUILD_DIR}/Generator/Linked/")
-set (PROJECT_DIR "${ENJON_DIR}/IsoARPG/")
+set (PROJECT_DIR "${ENJON_DIR}")
 
 # Set build directory for solution
 set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
@@ -31,12 +31,12 @@ message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
 # Add additional sub-directories
 add_subdirectory( Generator )
 add_subdirectory( Editor )
-add_subdirectory( TestSuite )
+#add_subdirectory( TestSuite )
 
 # Add include directories
 include_directories(${ENJON_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
-					${ENJON_DIR}/IsoARPG/include)
+)
 
 # Output generation file
 if (NOT IS_DIRECTORY ${ENJON_GENERATED_DIR})
@@ -53,8 +53,6 @@ link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
 
 set(ENJON_SRC "${ENJON_DIR}/Source")
 set(ENJON_INC "${ENJON_DIR}/Include")
-set(GAME_INC "${ENJON_DIR}/IsoARPG/include}")
-set(GAME_SRC "${ENJON_DIR}/IsoARPG/src}")
 
 file(GLOB_RECURSE SRC_BASE
 	"${ENJON_INC}/Base/*.h"
@@ -124,19 +122,13 @@ file(GLOB_RECURSE SRC_SERIALIZE
 file(GLOB_RECURSE SRC_SCENE
 	"${ENJON_INC}/Scene/*.h"
 	"${ENJON_SRC}/Scene/*.cpp"
-	"${ENJON_INC}/Scene/*.inl")
-
-file(GLOB_RECURSE GAME_FILES
-	"${ENJON_DIR}/IsoARPG/include/Game.h"
-	"${ENJON_DIR}/IsoARPG/src/Game.cpp"
-	"${ENJON_DIR}/IsoARPG/src/main.cpp") 
+	"${ENJON_INC}/Scene/*.inl") 
 
 file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Assets/Shaders/*.glsl" ) 
 
 file(GLOB_RECURSE REFLECTION_INCLUDES
 	"${ENJON_INC}/*.h"
-	"${GAME_INC}/*.h"
-	)
+)
 
 # Add all engine source files
 set(
@@ -174,7 +166,6 @@ set(
 	${SRC_SCENE}
 	${SRC_SHADER_GRAPH}
 	${SRC_SERIALIZE}
-	${GAME_FILES}
 	${GENERAL_SOURCES}
 	${SHADERS}
 ) 
@@ -220,7 +211,6 @@ source_group("Asset"		FILES ${SRC_ASSET})
 source_group("ShaderGraph"	FILES ${SRC_SHADER_GRAPH}) 
 source_group("Serialize"	FILES ${SRC_SERIALIZE}) 
 source_group("Scene"		FILES ${SRC_SCENE}) 
-source_group("Game"			FILES ${GAME_FILES}) 
 source_group("Shaders"		FILES ${SHADERS}) 
 
 # Write to .user file for command arguments

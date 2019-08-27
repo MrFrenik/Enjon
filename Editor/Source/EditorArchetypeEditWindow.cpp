@@ -293,6 +293,11 @@ namespace Enjon
 				mApp->SetTransformSnap( TransformationMode::Rotation, rSnapVal );
 			}
 			ImGui::PopItemWidth( );
+
+			// Display the transform's transformation type
+			EditorTransformWidget* tw = mApp->GetTransformWidget( );
+			TransformSpace ts = tw->GetTransformSpace( );
+
 		}
 		ImGui::ListBoxFooter( );
 	}

@@ -15,6 +15,7 @@
 
 namespace Enjon 
 { 
+	ENJON_ENUM( )
 	enum class TransformSpace
 	{
 		Local,

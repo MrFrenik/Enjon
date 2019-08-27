@@ -17,6 +17,7 @@ namespace Enjon
 	class EditorApp;
 	class EditorViewport;
 
+	ENJON_ENUM( )
 	enum class TransformationMode
 	{
 		Translation,
@@ -25,12 +26,12 @@ namespace Enjon
 		Count
 	};
 
-	class EditorTransformWidget
+	ENJON_CLASS( )
+	class EditorTransformWidget : public Object
 	{ 
-		public:
-			EditorTransformWidget( ) = default;
-			~EditorTransformWidget( ) = default;
+		ENJON_CLASS_BODY( EditorTransformWidget )
 
+		public: 
 			void Initialize( EditorViewport* vp );
 			void Update( );
 
@@ -110,7 +111,6 @@ namespace Enjon
 			bool mEnabled = false;
 			bool mSetPreviousAngle = false;
 			f32 mPreviousAngle = 0.0f;
-			TransformSpace mTransformSpace = TransformSpace::World; 
 
 			bool mSnapEnabled[ ( u32 )TransformationMode::Count ];
 
@@ -122,6 +122,8 @@ namespace Enjon
 			f32 mAccumulatedAngleDelta = 0.0f;
 
 			Transform mRootTransform;
+
+			TransformSpace mTransformSpace = TransformSpace::World; 
 	}; 
 }
 

@@ -1636,6 +1636,8 @@ namespace Enjon
 					}
 				}
 			}
+			static f32 f = 0.f;
+			ImGui::InputFloat( "F", &f );
 		}
 		ImGui::EndDock( ); 
 	}
@@ -1682,10 +1684,10 @@ namespace Enjon
 		params.mWindowClass = Object::GetClass< Window >();
 		params.mWidth = 1200;
 		params.mHeight = 500;
-		params.mName = "Enjon: Project Browser";;
-		EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
+		params.mName = "Enjon: Project Browser";
+		s32 wid = EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 		EngineSubsystem( WindowSubsystem )->ForceInitWindows( );
-		mProjectSelectionWindow = EngineSubsystem( WindowSubsystem )->GetWindows( ).back( );
+		mProjectSelectionWindow = EngineSubsystem( WindowSubsystem )->GetWindow( wid );
 
 		GUIContext* guiCtx = mProjectSelectionWindow->GetGUIContext( );
 
@@ -1713,7 +1715,6 @@ namespace Enjon
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Project Browser", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) ); 
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "New Project", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
 		guiCtx->SetActiveDock( "Project Browser" );
-
 		guiCtx->Finalize( );
 	}
 
@@ -1774,6 +1775,8 @@ namespace Enjon
 		// Search for loaded project  
 		// NOTE(): ( this is hideous, by the way )
 		FindProjectOnLoad( );
+
+		//LoadProjectContext( );
 
 		if ( mProject.IsLoaded( ) || mPreloadProjectContext )
 		{
@@ -1888,6 +1891,11 @@ namespace Enjon
 	bool EditorApp::IsTransformSnappingEnabled( const TransformationMode& mode )
 	{
 		return mTransformWidget.IsSnapEnabled( mode );
+	}
+
+	EditorTransformWidget* EditorApp::GetTransformWidget( )
+	{
+		return &mTransformWidget;
 	}
 
 	f32 EditorApp::GetTransformSnap( const TransformationMode& mode )

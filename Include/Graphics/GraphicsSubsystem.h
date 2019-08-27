@@ -242,12 +242,7 @@ namespace Enjon
 			// NOTE(): HACK HACK HACK! Just for testing
 			Window* GetMainWindow( )
 			{
-				if ( mWindows.size( ) )
-				{
-					return mWindows.at( 0 );
-				}
-
-				return nullptr;
+				return mWindow;
 			}
 
 			void AddWindow( Window* window )
