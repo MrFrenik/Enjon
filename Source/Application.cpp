@@ -5,9 +5,13 @@
 
 namespace Enjon
 {
-	Enjon::Result Application::ProcessInput( f32 dt )
+	Result Application::ProcessInput( f32 dt )
 	{ 
 		return Result::PROCESS_RUNNING;
 	} 
+
+	void Application::OnLoad( )
+	{
+	}
 }
 

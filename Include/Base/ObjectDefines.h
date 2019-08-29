@@ -132,6 +132,7 @@ enum MetaPropertyEnumDefines
 				Enjon::Engine::SetInstance( engine );\
 				Enjon::Engine::BindImGuiContext();\
 				app->BindApplicationMetaClasses();\
+				app->OnLoad();\
 				return app;\
 			}\
 			return nullptr;\

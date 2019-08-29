@@ -30,11 +30,24 @@
 
 #include <Base/World.h> 
 
-#include <windows.h>
+#ifdef ENJON_SYSTEM_WINDOWS
+	#include <windows.h>
+	#ifdef GetObject
+		#undef GetObject
+	#endif
+#endif
+
 #include <fmt/format.h>
 #include <chrono>
 #include <ctime>
 #include <nfd/include/nfd.h>
+
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+
+using namespace rapidjson;
 
 /*
 	- This define is funky. Delete all the engine assets in the engine asset cache. Set this define to 1. Load the editor to 
@@ -715,7 +728,7 @@ namespace Enjon
 	{
 		char buffer[ 1024 ];
 		strncpy( buffer, mProjectsDir.c_str( ), 1024 ); 
-		if ( ImGui::Button( "Select Project Directory" ) )
+		if ( ImGui::Button( "..." ) )
 		{
 			nfdchar_t* outPath = NULL;
 			nfdresult_t res = NFD_PickFolder( NULL, &outPath );
@@ -730,8 +743,6 @@ namespace Enjon
 				} 
 			}
 		}
-		ImGui::SameLine( );
-		ImGui::Text( "Project Directory: %s", buffer ); 
 	}
 
 	//================================================================================================================================
@@ -1591,6 +1602,7 @@ namespace Enjon
 
 	//================================================================================================================
 
+	// Balls
 	void EditorApp::ProjectListView( )
 	{ 
 		// I don't like this...
@@ -1636,11 +1648,116 @@ namespace Enjon
 					}
 				}
 			}
+
+			ImGui::SameLine( );
+			SelectProjectDirectoryView( );
+
+			//FindBuildSystem( ); 
 		}
 		ImGui::EndDock( ); 
 	}
 
-	//================================================================================================================
+	//================================================================================================================ 
+
+#define STRSIZE( string ) static_cast< SizeType >( string.length() ) 
+
+	Result GetJSONDocumentFromFilePath( const Enjon::String& filePath, Document* document )
+	{
+		// Load file
+		std::ifstream f;
+		f.open( filePath );
+		std::stringstream buffer;
+		buffer << f.rdbuf( );
+
+		Enjon::String str = buffer.str( );
+
+		if ( document->Parse( str.c_str( ), STRSIZE( str ) ).HasParseError( ) )
+		{
+			auto parseError = document->Parse( str.c_str( ), STRSIZE( str ) ).GetParseError( );
+			std::cout << parseError << "\n";
+			return Result::FAILURE;
+		}
+		return Result::SUCCESS;
+	}
+
+	void EditorApp::FindBuildSystem( )
+	{ 
+		// Want to check for build configuration
+		static const char* vsDir = "";				// Obviously want to read these in at some point
+		static const char* msBuildDir = "";
+		static String buildSystemName = "";
+		String curDir = fs::current_path( ).string( );
+ 
+		if ( fs::exists( curDir + "/editor_build.json" ) )
+		{
+			rapidjson::Document doc;
+			Result res = GetJSONDocumentFromFilePath( curDir + "/editor_build.json", &doc );
+			if ( res == Result::SUCCESS )
+			{
+				// Parse shader name
+				if ( doc.HasMember( "Build" ) )
+				{
+					rapidjson::Value::MemberIterator build = doc.FindMember( "Build" );
+					if ( build->value.IsObject( ) )
+					{ 
+						// Get nodes object 
+						const Value& buildObj = build->value.GetObject( );
+
+						// Get name of build system
+						if ( buildObj.HasMember( "Name" ) )
+						{ 
+							buildSystemName = buildObj.FindMember( "Name" )->value.GetString( );
+						} 
+					}
+				} 
+			}
+		}
+
+		ImGui::Text( "Build System: %s", buildSystemName.c_str( ) );
+		//else
+		//{
+		//	// Going to create and write one for you,
+		//	Document editorBuildCfg; 
+		//}
+
+		//if ( !fs::exists( mProjectsDir ) && fs::exists( curDir + "/editor_build.json" ) )
+		{ 
+			// Find visual studio directory? 
+			ImGui::Text( "Visual Studio Location: " ); ImGui::SameLine( ); ImGui::Text( "%s", vsDir ); ImGui::SameLine( );
+			if ( ImGui::Button( "...##vs_dir" ) )
+			{ 
+				nfdchar_t* outPath = NULL;
+				nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+				if ( res == NFD_OKAY )
+				{
+					String dir = String( outPath ) + "/VC";
+					// Want to check if a particular folder exists within that, I imagine...
+					if ( fs::exists( dir ) && fs::is_directory( dir ) )
+					{
+						vsDir = outPath;
+					}
+				}
+			}
+
+			// Find MSBuild directory? 
+			ImGui::Text( "MSBuild Location: " ); ImGui::SameLine( ); ImGui::Text( "%s", msBuildDir ); ImGui::SameLine( );
+			if ( ImGui::Button( "...##ms_build_dir" ) )
+			{
+				nfdchar_t* outPath = NULL;
+				nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+				if ( res == NFD_OKAY )
+				{
+					String dir = String( outPath ) + "/MSBuild.exe";
+					// Want to check if a particular folder exists within that, I imagine...
+					if ( fs::exists( dir ) )
+					{
+						msBuildDir = outPath;
+					}
+				} 
+			} 
+		} 
+
+	}
 
 	void EditorApp::NewProjectView( )
 	{ 
@@ -1689,6 +1806,7 @@ namespace Enjon
 
 		GUIContext* guiCtx = mProjectSelectionWindow->GetGUIContext( );
 
+		// Need to change this to a list of recent available projects and their paths and not a directory
 		String curDir = fs::current_path( ).string( );
 		if ( !fs::exists( mProjectsDir ) && fs::exists( curDir + "/editor.cfg" ) )
 		{ 
@@ -1809,8 +1927,8 @@ namespace Enjon
 		if ( mPreloadProjectContext )
 		{
 			LoadProjectContext( );
-			LoadProject( mProject );
 			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
+			LoadProject( mProject );
 			mPreloadProjectContext = false;
 		}
 
@@ -1818,8 +1936,8 @@ namespace Enjon
 		{
 			CreateNewProject( mNewProjectName );
 			LoadProjectContext( );
-			LoadProject( mProject );
 			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
+			LoadProject( mProject );
 			mPrecreateNewProject = false;
 		} 
 

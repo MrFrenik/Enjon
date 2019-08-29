@@ -39,6 +39,48 @@ namespace Enjon
 		Rotate
 	};
 
+	// This doesn't necessarily make sense...
+	ENJON_CLASS( Construct )
+	class BuildSystemSettings : public Object
+	{
+		ENJON_CLASS_BODY( BuildSystemSettings )
+
+		ENJON_PROPERTY( )
+		String mName;
+
+		ENJON_PROPERTY( )
+		String mCompilerDirectory;
+
+		ENJON_PROPERTY( )
+		String mIDEDirectory;
+
+		ENJON_PROPERTY( )
+		String mCMakeFlags;
+
+	};
+
+	ENJON_CLASS( Construct )
+	class EditorConfigSettings : public Object
+	{
+		ENJON_CLASS_BODY( EditorConfigSettings )
+
+		/*
+			Config settings need: 
+				- Build system information:
+					- Name
+					- IDE Directory ( Same as compiler directory for certain build systems )
+					- Compiler Directory
+					- CMake Flags
+				- Recent project list ( manifest )
+					- Project names
+					- Project directories 
+				- Various editor settings for user config
+		*/	
+
+		ENJON_PROPERTY( )
+		BuildSystemSettings mBuildSystemSettings;
+	};
+
 	// TODO(john): Need to reflect over the editor app to get introspection meta data
 	ENJON_CLASS( Construct )
 	class EditorApp : public Application
@@ -170,6 +212,7 @@ namespace Enjon
 			void LoadProjectContext( );
 			void LoadProjectSelectionContext( ); 
 			void UnloadPreviousProject( );
+			void FindBuildSystem( );
 
 			void PreloadProject( const Project& project );
 

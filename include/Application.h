@@ -37,25 +37,31 @@ namespace Enjon
 			*		that is necessary for the application to begin properly.
 			* @return Enjon::Result
 			*/
-			virtual Enjon::Result Initialize() = 0;  
+			virtual Result Initialize() = 0;  
 
 			/**
 			* @brief Main update tick for application.
 			* @return Enjon::Result
 			*/
-			virtual Enjon::Result Update(f32 dt) = 0;
+			virtual Result Update(f32 dt) = 0;
 
 			/**
 			* @brief Processes input from input class 
 			* @return Enjon::Result
 			*/
-			virtual Enjon::Result ProcessInput(f32 dt);
+			virtual Result ProcessInput(f32 dt);
 
 			/**
 			* @brief Shuts down application and cleans up any memory that was allocated.
 			* @return Enjon::Result
 			*/
-			virtual Enjon::Result Shutdown() = 0; 
+			virtual Result Shutdown() = 0; 
+
+			/**
+			* @brief Will be called on successful loading of the application
+			* @return Enjon::Result
+			*/
+			virtual void OnLoad( );
 
 			/**
 			* @brief
