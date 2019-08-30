@@ -49,14 +49,10 @@ namespace Enjon
 		String mName;
 
 		ENJON_PROPERTY( )
-		String mCompilerDirectory;
+		String mCompilerDirectory; 
 
 		ENJON_PROPERTY( )
-		String mIDEDirectory;
-
-		ENJON_PROPERTY( )
-		String mCMakeFlags;
-
+		String mCMakeFlags; 
 	};
 
 	ENJON_CLASS( Construct )
@@ -68,7 +64,6 @@ namespace Enjon
 			Config settings need: 
 				- Build system information:
 					- Name
-					- IDE Directory ( Same as compiler directory for certain build systems )
 					- Compiler Directory
 					- CMake Flags
 				- Recent project list ( manifest )
@@ -79,6 +74,9 @@ namespace Enjon
 
 		ENJON_PROPERTY( )
 		BuildSystemSettings mBuildSystemSettings;
+
+		ENJON_PROPERTY( )
+		Vector< Project > mProjectList;
 	};
 
 	// TODO(john): Need to reflect over the editor app to get introspection meta data
@@ -222,6 +220,9 @@ namespace Enjon
 
 			void FindProjectOnLoad( );
 
+			void DeserializeEditorConfigSettings( ); 
+			void SerializeEditorConfigSettings( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
@@ -293,6 +294,9 @@ namespace Enjon
 			Vector< ReloadDLLCallback > mReloadDLLCallbacks;
 
 			Window* mProjectSelectionWindow = nullptr;
+
+			ENJON_PROPERTY( HideInEditor )
+			EditorConfigSettings mConfigSettings;
 	}; 
 
 	// Declaration for module export

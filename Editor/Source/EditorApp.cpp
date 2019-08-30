@@ -1843,6 +1843,31 @@ namespace Enjon
 	}
 
 	//================================================================================================================
+
+	void EditorApp::DeserializeEditorConfigSettings( )
+	{
+		// Try and load "editor.ini" 
+		ByteBuffer buffer;
+		buffer.ReadFromFile( fs::current_path( ).string( ) + "/editor.ini" );
+		if ( buffer.GetStatus( ) == BufferStatus::ReadyToRead )
+		{
+			ObjectArchiver::Deserialize( &buffer, &mConfigSettings ); 
+		}
+	}
+
+	//================================================================================================================
+
+	void EditorApp::SerializeEditorConfigSettings( )
+	{
+		ByteBuffer buffer;
+		Result res = ObjectArchiver::Serialize( &mConfigSettings, &buffer );
+		if ( res == Result::SUCCESS )
+		{
+			buffer.WriteToFile( fs::current_path( ).string( ) + "/editor.ini" ); 
+		}
+	}
+
+	//================================================================================================================
 	 
 	Enjon::Result EditorApp::Initialize( )
 	{ 
@@ -1884,6 +1909,9 @@ namespace Enjon
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/"; 
+
+		// Want to deserialize the editor config options here for users
+		DeserializeEditorConfigSettings( );
 
 #if LOAD_ENGINE_RESOURCES
 		LoadResources( );
