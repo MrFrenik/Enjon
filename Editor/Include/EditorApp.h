@@ -39,20 +39,52 @@ namespace Enjon
 		Rotate
 	};
 
+	enum class BuildSystemType
+	{
+		VS2015,
+		VS2017,
+		VS2019,
+		Count
+	};
+
+	typedef struct BuildSystemOption
+	{
+		BuildSystemOption( ) = default;
+		BuildSystemOption( const char* name, const char* flags )
+			: mName( name ), mCMakeFlags( flags )
+		{ 
+		}
+
+		const char* mName = nullptr;
+		const char* mCMakeFlags = nullptr;
+	} BuildSystemOption; 
+
+	// Possibly want different build system options that I can use easier than what I'm doing here...
+
 	// This doesn't necessarily make sense...
 	ENJON_CLASS( Construct )
 	class BuildSystemSettings : public Object
 	{
 		ENJON_CLASS_BODY( BuildSystemSettings )
 
-		ENJON_PROPERTY( )
-		String mName;
+		public:
 
-		ENJON_PROPERTY( )
-		String mCompilerDirectory; 
 
-		ENJON_PROPERTY( )
-		String mCMakeFlags; 
+		public:
+			ENJON_PROPERTY( )
+			String mName;
+
+			ENJON_PROPERTY( )
+			String mCompilerDirectory; 
+
+			ENJON_PROPERTY( )
+			String mCMakeFlags; 
+	};
+
+	// Possibly something like this?
+	class VS2015BuildSystemSettings : public BuildSystemSettings
+	{ 
+
 	};
 
 	ENJON_CLASS( Construct )
@@ -72,11 +104,12 @@ namespace Enjon
 				- Various editor settings for user config
 		*/	
 
-		ENJON_PROPERTY( )
-		BuildSystemSettings mBuildSystemSettings;
+		public:
+			ENJON_PROPERTY( )
+			BuildSystemSettings mBuildSystemSettings;
 
-		ENJON_PROPERTY( )
-		Vector< Project > mProjectList;
+			ENJON_PROPERTY( )
+			Vector< Project > mProjectList;
 	};
 
 	// TODO(john): Need to reflect over the editor app to get introspection meta data
@@ -223,6 +256,10 @@ namespace Enjon
 			void DeserializeEditorConfigSettings( ); 
 			void SerializeEditorConfigSettings( );
 
+			void BuildSystemView( );
+			
+			void InitializeBuildSystemOptions( );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
@@ -297,6 +334,8 @@ namespace Enjon
 
 			ENJON_PROPERTY( HideInEditor )
 			EditorConfigSettings mConfigSettings;
+
+			BuildSystemOption mBuildSystemOptions[ (u32)BuildSystemType::Count ];
 	}; 
 
 	// Declaration for module export

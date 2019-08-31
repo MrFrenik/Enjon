@@ -1650,9 +1650,7 @@ namespace Enjon
 			}
 
 			ImGui::SameLine( );
-			SelectProjectDirectoryView( );
-
-			//FindBuildSystem( ); 
+			SelectProjectDirectoryView( ); 
 		}
 		ImGui::EndDock( ); 
 	}
@@ -1680,85 +1678,6 @@ namespace Enjon
 		return Result::SUCCESS;
 	}
 
-	void EditorApp::FindBuildSystem( )
-	{ 
-		// Want to check for build configuration
-		static const char* vsDir = "";				// Obviously want to read these in at some point
-		static const char* msBuildDir = "";
-		static String buildSystemName = "";
-		String curDir = fs::current_path( ).string( );
- 
-		if ( fs::exists( curDir + "/editor_build.json" ) )
-		{
-			rapidjson::Document doc;
-			Result res = GetJSONDocumentFromFilePath( curDir + "/editor_build.json", &doc );
-			if ( res == Result::SUCCESS )
-			{
-				// Parse shader name
-				if ( doc.HasMember( "Build" ) )
-				{
-					rapidjson::Value::MemberIterator build = doc.FindMember( "Build" );
-					if ( build->value.IsObject( ) )
-					{ 
-						// Get nodes object 
-						const Value& buildObj = build->value.GetObject( );
-
-						// Get name of build system
-						if ( buildObj.HasMember( "Name" ) )
-						{ 
-							buildSystemName = buildObj.FindMember( "Name" )->value.GetString( );
-						} 
-					}
-				} 
-			}
-		}
-
-		ImGui::Text( "Build System: %s", buildSystemName.c_str( ) );
-		//else
-		//{
-		//	// Going to create and write one for you,
-		//	Document editorBuildCfg; 
-		//}
-
-		//if ( !fs::exists( mProjectsDir ) && fs::exists( curDir + "/editor_build.json" ) )
-		{ 
-			// Find visual studio directory? 
-			ImGui::Text( "Visual Studio Location: " ); ImGui::SameLine( ); ImGui::Text( "%s", vsDir ); ImGui::SameLine( );
-			if ( ImGui::Button( "...##vs_dir" ) )
-			{ 
-				nfdchar_t* outPath = NULL;
-				nfdresult_t res = NFD_PickFolder( NULL, &outPath );
-				if ( res == NFD_OKAY )
-				{
-					String dir = String( outPath ) + "/VC";
-					// Want to check if a particular folder exists within that, I imagine...
-					if ( fs::exists( dir ) && fs::is_directory( dir ) )
-					{
-						vsDir = outPath;
-					}
-				}
-			}
-
-			// Find MSBuild directory? 
-			ImGui::Text( "MSBuild Location: " ); ImGui::SameLine( ); ImGui::Text( "%s", msBuildDir ); ImGui::SameLine( );
-			if ( ImGui::Button( "...##ms_build_dir" ) )
-			{
-				nfdchar_t* outPath = NULL;
-				nfdresult_t res = NFD_PickFolder( NULL, &outPath );
-				if ( res == NFD_OKAY )
-				{
-					String dir = String( outPath ) + "/MSBuild.exe";
-					// Want to check if a particular folder exists within that, I imagine...
-					if ( fs::exists( dir ) )
-					{
-						msBuildDir = outPath;
-					}
-				} 
-			} 
-		} 
-
-	}
-
 	void EditorApp::NewProjectView( )
 	{ 
 		if ( ImGui::BeginDock( "New Project", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
@@ -1768,6 +1687,56 @@ namespace Enjon
 				WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
 				ws->DestroyWindow( mProjectSelectionWindow );
 			}
+		}
+		ImGui::EndDock( );
+	}
+
+	//================================================================================================================
+
+	void EditorApp::BuildSystemView( )
+	{ 
+		b32 needSerialize = false;
+		if ( ImGui::BeginDock( "Build System", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
+		{ 
+			if ( ImGui::BeginCombo( "Build##enumProps", mConfigSettings.mBuildSystemSettings.mName.c_str() ) )
+			{ 
+				// For each element in the enum
+				for ( u32 i = 0; i < (u32)BuildSystemType::Count; ++i )
+				{ 
+					BuildSystemOption& option = mBuildSystemOptions[ i ];
+					if ( ImGui::Selectable( option.mName ) )
+					{
+						mConfigSettings.mBuildSystemSettings.mName = option.mName; 
+						mConfigSettings.mBuildSystemSettings.mCMakeFlags = option.mCMakeFlags; 
+
+						// Just reset directory for now
+						mConfigSettings.mBuildSystemSettings.mCompilerDirectory = "";
+						needSerialize = true;
+					} 
+				} 
+
+				ImGui::EndCombo( );
+			} 
+
+			// Set compiler location
+			ImGui::Text( "Compiler Location: " ); ImGui::SameLine( ); ImGui::Text( "%s", mConfigSettings.mBuildSystemSettings.mCompilerDirectory.c_str() ); ImGui::SameLine( );
+			if ( ImGui::Button( "...##compiler_location" ) )
+			{
+				nfdchar_t* outPath = NULL;
+				nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+				if ( res == NFD_OKAY )
+				{
+					mConfigSettings.mBuildSystemSettings.mCompilerDirectory = outPath;
+					needSerialize = true;
+				}
+			}
+
+			ImGui::Text( "Cmake Flags: %s", mConfigSettings.mBuildSystemSettings.mCMakeFlags.c_str( ) );
+
+			if ( needSerialize )
+			{
+				SerializeEditorConfigSettings( ); 
+			} 
 		}
 		ImGui::EndDock( );
 	}
@@ -1826,10 +1795,17 @@ namespace Enjon
 			NewProjectView( );
 		};
 
+		auto buildSystemView = [ & ] ( )
+		{
+			BuildSystemView( );
+		}; 
+
 		guiCtx->RegisterWindow( "Projects", createProjectView ); 
 		guiCtx->RegisterWindow( "New Project", newProjectView ); 
+		guiCtx->RegisterWindow( "Build System", buildSystemView ); 
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Project Browser", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) ); 
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "New Project", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
+		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Build System", nullptr, GUIDockSlotType::Slot_Top, 0.5f ) ); 
 		guiCtx->SetActiveDock( "Project Browser" );
 		guiCtx->Finalize( );
 	}
@@ -1865,6 +1841,15 @@ namespace Enjon
 		{
 			buffer.WriteToFile( fs::current_path( ).string( ) + "/editor.ini" ); 
 		}
+	}
+
+	//================================================================================================================
+
+	void EditorApp::InitializeBuildSystemOptions( )
+	{
+		mBuildSystemOptions[ ( u32 )BuildSystemType::VS2015 ] = { "VisualStudio2015", "Visual Studio 14 2015" };
+		mBuildSystemOptions[ ( u32 )BuildSystemType::VS2017 ] = { "VisualStudio2017", "Visual Studio 15 2017" };
+		mBuildSystemOptions[ ( u32 )BuildSystemType::VS2019 ] = { "VisualStudio2019", "Visual Studio 16 2019" };
 	}
 
 	//================================================================================================================
@@ -1909,6 +1894,8 @@ namespace Enjon
 
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/"; 
+
+		InitializeBuildSystemOptions( );
 
 		// Want to deserialize the editor config options here for users
 		DeserializeEditorConfigSettings( );
@@ -1957,7 +1944,7 @@ namespace Enjon
 			LoadProjectContext( );
 			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
 			LoadProject( mProject );
-			mPreloadProjectContext = false;
+			mPreloadProjectContext = false; 
 		}
 
 		if ( mPrecreateNewProject )
