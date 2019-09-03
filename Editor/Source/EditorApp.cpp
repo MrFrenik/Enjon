@@ -1894,7 +1894,10 @@ namespace Enjon
 		for (u32 i = 0; i < proj_size; ++i) {
 			Project p;
 			ObjectArchiver::Deserialize(archiver, &p);
-			mProjectList.push_back(p);
+			// Add project only if the .eproj file exists (is valid project)
+			if (fs::exists(p.GetProjectPath() + "/" + p.GetProjectName() + ".eproj")) {
+				mProjectList.push_back(p); 
+			}
 		}
 
 		//ENJON_PROPERTY()
