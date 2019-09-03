@@ -49,11 +49,12 @@ namespace Enjon
 		
 	*/
 
-	class Project
+	ENJON_CLASS( Construct )
+	class Project : public Object
 	{
+		ENJON_CLASS_BODY( Project )
+
 		public:
-			Project( ) = default;
-			~Project( ) = default; 
 
 			void SetEditor( EditorApp* app );
 			void SetApplication( Enjon::Application* app ); 
@@ -78,10 +79,16 @@ namespace Enjon
 			String CreateBuildDirectory( );
 			
 		private:
+			ENJON_PROPERTY( )
 			String mProjectName = "";
-			Enjon::Application* mApp = nullptr; 
+
+			ENJON_PROPERTY( )
 			String mProjectPath = "";
+
+			ENJON_PROPERTY( )
 			String mBuildDirectory = "";
+
+			Enjon::Application* mApp = nullptr; 
 			EditorApp* mEditor = nullptr;
 	};
 }

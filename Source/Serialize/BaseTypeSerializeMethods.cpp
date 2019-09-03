@@ -339,7 +339,7 @@ namespace Enjon
 						} break;
 
 						case MetaPropertyType::Object:
-						{
+						{ 
 							const MetaPropertyArray< Object* >* arrProp = base->Cast < MetaPropertyArray< Object * > >( );
 							if ( arrProp )
 							{

@@ -5,7 +5,7 @@ pushd %1
 
 echo "Building %projName%..."
 cd Build
-cmake ../. -G"Visual Studio 14 2015"
+cmake ../. -G "#CMAKE_FLAGS" -A Win32
 
 echo "Running %projName%..."
 start %projName%.sln

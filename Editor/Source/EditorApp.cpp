@@ -627,11 +627,14 @@ namespace Enjon
 			fs::create_directory( projectDir + "Build/Generator/Linked/" );
 		}
 
+		String cmakeFlags = mConfigSettings.mToolChains[(u32)mConfigSettings.mToolChainID]->mCMakeFlags;
+
 		String includeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#HEADERFILEBEGIN", "#HEADERFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName );
 		String sourceFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#SOURCEFILEBEGIN", "#SOURCEFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName ); 
 		String cmakeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::FindReplaceAll( mProjectCMakeTemplate, "#PROJECTNAME", projectName ), "#ENJONDIRECTORY", Enjon::Utils::FindReplaceAll( Engine::GetInstance( )->GetConfig( ).GetRoot( ), "\\", "/" ) );
 		String delBatFile = mProjectDelBatTemplate;
-		String buildAndRunFIle = mProjectBuildAndRunTemplate;
+		String buildFile = Enjon::Utils::FindReplaceAll(mProjectBuildBatTemplate, "#CMAKE_FLAGS", cmakeFlags);
+		String buildAndRunFIle = Enjon::Utils::FindReplaceAll(mProjectBuildAndRunTemplate, "#CMAKE_FLAGS", cmakeFlags);
 
 		// Write to file
 		Enjon::Utils::WriteToFile( includeFile, projectDir + "Source/" + projectName + ".h" );
@@ -639,11 +642,10 @@ namespace Enjon
 		Enjon::Utils::WriteToFile( cmakeFile, projectDir + "CMakeLists.txt" ); 
 		Enjon::Utils::WriteToFile( delBatFile, projectDir + "Proc/" + "DelPDB.bat" ); 
 		Enjon::Utils::WriteToFile( buildAndRunFIle, projectDir + "Proc/" + "BuildAndRun.bat" ); 
-		Enjon::Utils::WriteToFile( mProjectBuildBatTemplate, projectDir + "Proc/" + "Build.bat" ); 
+		Enjon::Utils::WriteToFile( buildFile, projectDir + "Proc/" + "Build.bat" ); 
 		Enjon::Utils::WriteToFile( "", projectDir + "Build/Generator/Linked/" + projectName + "_Generated.cpp" ); 
 		Enjon::Utils::WriteToFile( projectDir + "\n" + Engine::GetInstance()->GetConfig().GetRoot(), projectDir + projectName + ".eproj" );
-		Enjon::Utils::WriteToFile( mCompileProjectBatTemplate, projectDir + "Proc/" + "CompileProject.bat" );
-
+		Enjon::Utils::WriteToFile( mCompileProjectBatTemplate, projectDir + "Proc/" + "CompileProject.bat" ); 
 
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
@@ -671,6 +673,12 @@ namespace Enjon
 
 			// Load the solution for the project
 			LoadProjectSolution( );
+
+			// Add project to project list
+			mConfigSettings.mProjectList.push_back( proj );
+
+			// Serialize editor configuration settings
+			SerializeEditorConfigSettings();
 		}
 		else
 		{
@@ -1510,18 +1518,25 @@ namespace Enjon
 		auto createViewOption = [&]()
 		{
 			if ( mProject.GetApplication() && !mPlaying )
-			{
-				ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.3f, 0.3f, 0.3f, 1.f ) );
-				igm->Text( "GENERAL" );
+			{ 
+				ImGuiManager* igm = EngineSubsystem(ImGuiManager);
+				// Label for scripting type of component class
+				ImGui::PushFont( igm->GetFont( "Roboto-MediumItalic_12" ) );
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
+				ImGui::Text( "General" );
 				ImGui::PopStyleColor( );
+				ImGui::PopFont( ); 
+
 				createEntity( this );
 				createCamera( this );
-				createPrimitives( this );
+				createPrimitives( this ); 
 
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.3f, 0.3f, 0.3f, 1.f ) );
-				igm->Text( "LIGHTING" );
+				ImGui::PushFont( igm->GetFont( "Roboto-MediumItalic_12" ) );
+				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 1.0f, 1.0f, 0.5f ) );
+				ImGui::Text( "Lighting" );
 				ImGui::PopStyleColor( );
+				ImGui::PopFont( ); 
+
 				createLights( this );
 			}
 		}; 
@@ -1610,12 +1625,12 @@ namespace Enjon
 
 		if ( ImGui::BeginDock( "Project Browser", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 		{
-			if ( projDirSet )
+			//if ( projDirSet )
 			{
 				String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
 				if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
 				{
-					for ( auto& p : mProjectsOnDisk )
+					for ( auto& p : mConfigSettings.mProjectList )
 					{
 						if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
 						{ 
@@ -1628,26 +1643,26 @@ namespace Enjon
 					ImGui::EndCombo( );
 				} 
 			}
-			else
-			{
+			//else
+			//{
 				// Load view for project
-				ImGui::Text( "Welcome to the Enjon Editor! You do not have a project directory selected currently. Please choose one now." );
-				if ( ImGui::Button( "Choose Project Directory" ) )
-				{
-					nfdchar_t* outPath = NULL;
-					nfdresult_t res = NFD_PickFolder( NULL, &outPath );
-					if ( res == NFD_OKAY )
-					{
-						// Set the path now
-						if ( fs::exists( outPath ) && fs::is_directory( outPath ) )
-						{
-							mProjectsDir = outPath;
-							CollectAllProjectsOnDisk( ); 
-							WriteEditorConfigFileToDisk( );
-						} 
-					}
-				}
-			}
+				//ImGui::Text( "Welcome to the Enjon Editor! You do not have a project directory selected currently. Please choose one now." );
+				//if ( ImGui::Button( "Choose Project Directory" ) )
+				//{
+				//	nfdchar_t* outPath = NULL;
+				//	nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+				//	if ( res == NFD_OKAY )
+				//	{
+				//		// Set the path now
+				//		if ( fs::exists( outPath ) && fs::is_directory( outPath ) )
+				//		{
+				//			mProjectsDir = outPath;
+				//			CollectAllProjectsOnDisk( ); 
+				//			WriteEditorConfigFileToDisk( );
+				//		} 
+				//	}
+				//} 
+			//}
 
 			ImGui::SameLine( );
 			SelectProjectDirectoryView( ); 
@@ -1693,45 +1708,39 @@ namespace Enjon
 
 	//================================================================================================================
 
-	void EditorApp::BuildSystemView( )
+	void EditorApp::ToolChainView( )
 	{ 
 		b32 needSerialize = false;
-		if ( ImGui::BeginDock( "Build System", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
+		if ( ImGui::BeginDock( "Tool Chain", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 		{ 
-			if ( ImGui::BeginCombo( "Build##enumProps", mConfigSettings.mBuildSystemSettings.mName.c_str() ) )
+			ToolChain* toolChain = mConfigSettings.mToolChains[(u32)mConfigSettings.mToolChainID];
+			if ( ImGui::BeginCombo( "Environment##enumProps", toolChain->mName.c_str() ) )
 			{ 
 				// For each element in the enum
-				for ( u32 i = 0; i < (u32)BuildSystemType::Count; ++i )
+				for ( u32 i = 0; i < (u32)ToolChainEnvironment::Count; ++i )
 				{ 
-					BuildSystemOption& option = mBuildSystemOptions[ i ];
-					if ( ImGui::Selectable( option.mName ) )
+					ToolChain* tc = mConfigSettings.mToolChains[(u32)i];
+					if ( ImGui::Selectable( tc->mName.c_str() ) )
 					{
-						mConfigSettings.mBuildSystemSettings.mName = option.mName; 
-						mConfigSettings.mBuildSystemSettings.mCMakeFlags = option.mCMakeFlags; 
+						mConfigSettings.mToolChainID = (ToolChainEnvironment)i;
+						toolChain = mConfigSettings.mToolChains[i];
 
-						// Just reset directory for now
-						mConfigSettings.mBuildSystemSettings.mCompilerDirectory = "";
+						// Try to auto detect paths
+						toolChain->FindPaths(); 
 						needSerialize = true;
 					} 
 				} 
-
 				ImGui::EndCombo( );
 			} 
 
-			// Set compiler location
-			ImGui::Text( "Compiler Location: " ); ImGui::SameLine( ); ImGui::Text( "%s", mConfigSettings.mBuildSystemSettings.mCompilerDirectory.c_str() ); ImGui::SameLine( );
-			if ( ImGui::Button( "...##compiler_location" ) )
+			// Want to display the tool chain options here
+			if (toolChain)
 			{
-				nfdchar_t* outPath = NULL;
-				nfdresult_t res = NFD_PickFolder( NULL, &outPath );
-				if ( res == NFD_OKAY )
-				{
-					mConfigSettings.mBuildSystemSettings.mCompilerDirectory = outPath;
+				Result res = toolChain->OnEditorUI();
+				if (res == Result::SUCCESS) {
 					needSerialize = true;
 				}
 			}
-
-			ImGui::Text( "Cmake Flags: %s", mConfigSettings.mBuildSystemSettings.mCMakeFlags.c_str( ) );
 
 			if ( needSerialize )
 			{
@@ -1795,17 +1804,17 @@ namespace Enjon
 			NewProjectView( );
 		};
 
-		auto buildSystemView = [ & ] ( )
+		auto toolChainView = [ & ] ( )
 		{
-			BuildSystemView( );
+			ToolChainView( );
 		}; 
 
 		guiCtx->RegisterWindow( "Projects", createProjectView ); 
 		guiCtx->RegisterWindow( "New Project", newProjectView ); 
-		guiCtx->RegisterWindow( "Build System", buildSystemView ); 
+		guiCtx->RegisterWindow( "Tool Chain", toolChainView ); 
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Project Browser", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) ); 
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "New Project", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
-		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Build System", nullptr, GUIDockSlotType::Slot_Top, 0.5f ) ); 
+		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Tool Chain", nullptr, GUIDockSlotType::Slot_Top, 0.5f ) ); 
 		guiCtx->SetActiveDock( "Project Browser" );
 		guiCtx->Finalize( );
 	}
@@ -1829,6 +1838,13 @@ namespace Enjon
 		{
 			ObjectArchiver::Deserialize( &buffer, &mConfigSettings ); 
 		}
+
+		// Try and auto load tool chain directories
+		ToolChain* tc = mConfigSettings.mToolChains[(u32)mConfigSettings.mToolChainID];
+		if (tc) {
+			tc->FindPaths();
+			SerializeEditorConfigSettings();
+		}
 	}
 
 	//================================================================================================================
@@ -1845,11 +1861,62 @@ namespace Enjon
 
 	//================================================================================================================
 
-	void EditorApp::InitializeBuildSystemOptions( )
+	Result EditorConfigSettings::SerializeData(ByteBuffer* archiver) const
 	{
-		mBuildSystemOptions[ ( u32 )BuildSystemType::VS2015 ] = { "VisualStudio2015", "Visual Studio 14 2015" };
-		mBuildSystemOptions[ ( u32 )BuildSystemType::VS2017 ] = { "VisualStudio2017", "Visual Studio 15 2017" };
-		mBuildSystemOptions[ ( u32 )BuildSystemType::VS2019 ] = { "VisualStudio2019", "Visual Studio 16 2019" };
+		//ENJON_PROPERTY( )
+		//Vector< Project > mProjectList;
+		archiver->Write< u32 >(mProjectList.size());
+		for (auto& p : mProjectList) {
+			ObjectArchiver::Serialize(&p, archiver);
+		}
+
+		//ENJON_PROPERTY()
+		//ToolChain* mToolChains[ (u32)ToolChainEnvironment::Count ]; 
+		for (u32 i = 0; i < (u32)ToolChainEnvironment::Count; ++i) {
+			ToolChain* tc = mToolChains[i];
+			ObjectArchiver::Serialize(tc, archiver);
+		}
+
+		//ENJON_PROPERTY()
+		//ToolChainEnvironment mToolChainID = ToolChainEnvironment::MSVC; 
+		archiver->Write< u32 >((u32)mToolChainID); 
+
+		return Result::SUCCESS;
+	}
+	
+	//================================================================================================================
+	
+	Result EditorConfigSettings::DeserializeData(ByteBuffer* archiver)
+	{
+		//ENJON_PROPERTY( )
+		//Vector< Project > mProjectList;
+		u32 proj_size = archiver->Read< u32 >();
+		for (u32 i = 0; i < proj_size; ++i) {
+			Project p;
+			ObjectArchiver::Deserialize(archiver, &p);
+			mProjectList.push_back(p);
+		}
+
+		//ENJON_PROPERTY()
+		//ToolChain* mToolChains[ (u32)ToolChainEnvironment::Count ]; 
+		for (u32 i = 0; i < (u32)ToolChainEnvironment::Count; ++i) {
+			ToolChain* tc = mToolChains[i];
+			ObjectArchiver::Deserialize(archiver, tc);
+		}
+
+		//ENJON_PROPERTY()
+		//ToolChainEnvironment mToolChainID = ToolChainEnvironment::MSVC; 
+		mToolChainID = (ToolChainEnvironment)archiver->Read< u32 >();
+
+		return Result::SUCCESS; 
+	}
+	
+	//================================================================================================================
+
+	void EditorApp::InitializeToolChains( )
+	{
+		mConfigSettings.mToolChains[(u32)ToolChainEnvironment::MSVC] = new ToolChainMSVC();
+		mConfigSettings.mToolChains[(u32)ToolChainEnvironment::MSVC]->mName = "MSVC"; 
 	}
 
 	//================================================================================================================
@@ -1895,7 +1962,7 @@ namespace Enjon
 		// Set up copy directory for project dll
 		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/"; 
 
-		InitializeBuildSystemOptions( );
+		InitializeToolChains( );
 
 		// Want to deserialize the editor config options here for users
 		DeserializeEditorConfigSettings( );
@@ -2396,9 +2463,162 @@ namespace Enjon
 		greenMat->Save( );
 		blueMat->Save( );
 		yellowMat->Save( ); 
-	}
-}
+	} 
 
+	//================================================================================================
+
+	Result ToolChainMSVC::FindPaths()
+	{
+		Result res = FindVisualStudioPath(); 
+		Result res2 = FindCompilerPath();
+		if (res == Result::SUCCESS && res2 == Result::SUCCESS) {
+			return Result::SUCCESS;
+		}
+		return Result::FAILURE;
+	}
+
+	//================================================================================================
+
+	Result ToolChainMSVC::FindCompilerPath() 
+	{
+		// Want to call some utility to find, what, the NMake path? The path for visual studio? Not sure
+		// What I'm supposed to be looking for here...
+		// This should be looking for MSBuild (so that it can process .sln files)
+		if (!mCompilerDirectory.empty()) {
+			return Result::SUCCESS;
+		}
+
+		return FindMSBuildPath();
+	} 
+
+	//================================================================================================
+
+	// I guess? This just seems odd though...
+	Result ToolChainMSVC::FindVisualStudioPath()
+	{ 
+		// Already exists, so do not try and override this path
+		if (!mVisualStudioDirectory.empty()) {
+			return Result::SUCCESS;
+		}
+
+		// Find all available versions of default install directories for visual studio (stop on latest release)
+
+		// Visual Studio 2019
+		if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/" ) ) {
+			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/"; 
+			mCMakeFlags = "Visual Studio 16 2019";
+			return Result::SUCCESS;
+		} 
+		// Visual Studio 2017
+		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/" ) ) {
+			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/"; 
+			mCMakeFlags = "Visual Studio 15 2017";
+			return Result::SUCCESS;
+		}
+		// Visual Studio 2015
+		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 14.0/" ) ) {
+			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 14.0/";
+			mCMakeFlags = "Visual Studio 14 2015";
+			return Result::SUCCESS;
+		}
+		// Visual Studio 2013
+		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 12.0/" ) ) {
+			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 12.0/";
+			mCMakeFlags = "Visual Studio 12 2013";
+			return Result::SUCCESS;
+		}
+		// Visual Studio 2012
+		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 11.0/" ) ) {
+			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 11.0/";
+			mCMakeFlags = "Visual Studio 11 2012";
+			return Result::SUCCESS;
+		}
+		// Visual Studio 2010
+		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 10.0/" ) ) {
+			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 10.0/";
+			mCMakeFlags = "Visual Studio 10 2010";
+			return Result::SUCCESS;
+		}
+		// Visual Studio 2008
+		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 9.0/" ) ) {
+			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 9.0/";
+			mCMakeFlags = "Visual Studio 9 2008";
+			return Result::SUCCESS;
+		}
+
+		return Result::FAILURE;
+	}
+
+	//================================================================================================
+
+	Result ToolChainMSVC::FindMSBuildPath()
+	{
+		// Look for usual suspects. If these directories exist, then we're golden. If not, then require that the user
+			//Locate these directories manually. 
+			// 64 bit framework (earlier versions of MSBuild located here by default)
+		if (fs::exists("C:/Windows/Microsoft.NET/Framework64/")) {
+			const char* path = "C:/Windows/Microsoft.NET/Framework64/";
+			// Recursively go through all available versions to find most recent one? 
+			for (auto& p : fs::recursive_directory_iterator(path))
+			{
+				if (fs::exists(String(p.path().string()) + "/MSBuild.exe"))
+				{
+					mCompilerDirectory = p.path().string(); 
+					return Result::SUCCESS;
+				}
+			}
+		} 
+
+		return Result::FAILURE;
+	} 
+
+	//================================================================================================
+
+	Result ToolChainMSVC::OnEditorUI()
+	{
+		Result retRes = Result::INCOMPLETE;
+
+		ImGui::PushItemWidth(250.f);
+		ImGui::Text("MSBuild: %s", mCompilerDirectory.c_str()); ImGui::SameLine(); 
+		ImGui::PopItemWidth();
+		if ( ImGui::Button( "...##ms_build_dir" ) )
+		{
+			nfdchar_t* outPath = NULL;
+			nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+			if ( res == NFD_OKAY )
+			{
+				// Set the path now
+				if ( fs::exists( outPath ) && fs::is_directory( outPath ) && fs::exists( String(outPath) + "/MSBuild.exe" ) ) 
+				{
+					mCompilerDirectory = outPath;
+					retRes = Result::SUCCESS;
+				} 
+			}
+		}
+
+		ImGui::PushItemWidth(250.f);
+		ImGui::Text("VSDir: %s", mVisualStudioDirectory.c_str()); ImGui::SameLine(); 
+		ImGui::PopItemWidth();
+		if ( ImGui::Button( "...##vs_dir" ) )
+		{
+			nfdchar_t* outPath = NULL;
+			nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+			if ( res == NFD_OKAY )
+			{
+				// Set the path now
+				if ( fs::exists( outPath ) && fs::is_directory( outPath ) && fs::exists( String(outPath) + "/VC/" ) ) 
+				{
+					mVisualStudioDir = outPath;
+					retRes = Result::SUCCESS;
+				} 
+			}
+		}
+
+		return retRes;
+	}
+
+	//================================================================================================
+} 
 
 /*
 

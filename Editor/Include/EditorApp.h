@@ -39,53 +39,102 @@ namespace Enjon
 		Rotate
 	};
 
-	enum class BuildSystemType
+	/*
+		// What does a tool chain look like? 
+		- Environment: 
+			- The actual tool chain 'heart'. For Windows platform, this could be: 
+				- MSVC
+				- Cygwin
+				- MinGW
+				- WSL
+		- For Visual Studio: 
+			- Need to detect the version to be called with CMake
+			- Need to detect location of MSBuild (or NMake)
+			- Need to find c++ compiler location (which is MSBuild, right?)
+			- Could use vswhere to detect locations for certain packages (or could attempt to detect things myself, 
+					using standard locations). If these things cannot be detected, then you should 
+					set them up yourself.
+		- The editor should hold a hashmap of tool chains that are serialized with its configuration information
+		- Users can create/edit/delete tool chains from within the editor
+		- It's totally possible to mix/match as well. For instance, what if the user wants to use visual studio, but 
+			the compiler they've chosen is mingw? This should be possible. Or they want to compile via NMake? This is getting 
+			complicated. Maybe CLion's set up is TOO restrictive? Perhaps I should instead go with something like 
+			VSCode's tasks? 
+		- What about per project setup? Such as additional include directories / library directories? Linking libraries? Dynamic and static
+			libs? 
+	*/
+
+	// Is this a fair distinction? I suppose for now?  
+	ENJON_ENUM()
+	enum class ToolChainEnvironment
 	{
-		VS2015,
-		VS2017,
-		VS2019,
+		MSVC,
 		Count
 	};
 
-	typedef struct BuildSystemOption
-	{
-		BuildSystemOption( ) = default;
-		BuildSystemOption( const char* name, const char* flags )
-			: mName( name ), mCMakeFlags( flags )
-		{ 
-		}
+	// Want the tool chain to attempt to auto-detect libraries
 
-		const char* mName = nullptr;
-		const char* mCMakeFlags = nullptr;
-	} BuildSystemOption; 
-
-	// Possibly want different build system options that I can use easier than what I'm doing here...
-
-	// This doesn't necessarily make sense...
-	ENJON_CLASS( Construct )
-	class BuildSystemSettings : public Object
-	{
-		ENJON_CLASS_BODY( BuildSystemSettings )
-
-		public:
-
-
-		public:
-			ENJON_PROPERTY( )
-			String mName;
-
-			ENJON_PROPERTY( )
-			String mCompilerDirectory; 
-
-			ENJON_PROPERTY( )
-			String mCMakeFlags; 
-	};
-
-	// Possibly something like this?
-	class VS2015BuildSystemSettings : public BuildSystemSettings
+	ENJON_CLASS( Abstract )
+	class ToolChain : public Object
 	{ 
+		ENJON_CLASS_BODY( ToolChain )
+			
+		public: 
 
+			virtual Result FindPaths() {
+				return Result::INCOMPLETE;
+			}
+
+			virtual Result FindCompilerPath() {
+				return Result::INCOMPLETE;
+			} 
+
+			virtual Result FindMakePath() {
+				return Result::INCOMPLETE;
+			} 
+
+		public:
+			ENJON_PROPERTY( )
+			ToolChainEnvironment mEnvironment;
+
+			ENJON_PROPERTY()
+			String mCompilerDirectory = "";
+
+			ENJON_PROPERTY()
+			String mMakeDirectory = "";
+
+			ENJON_PROPERTY()
+			String mCmakeDirectory = "";
+
+			ENJON_PROPERTY()
+			String mCMakeFlags = "";
+
+			ENJON_PROPERTY()
+			String mName = "";
 	};
+
+	ENJON_CLASS( Construct )
+	class ToolChainMSVC : public ToolChain
+	{ 
+		ENJON_CLASS_BODY( ToolChainMSVC )
+			
+		public:
+
+			virtual Result FindPaths();
+		
+			virtual Result FindCompilerPath();
+
+			// I guess? This just seems odd though...
+			virtual Result FindVisualStudioPath();
+
+			virtual Result OnEditorUI() override; 
+
+			Result FindMSBuildPath(); 
+
+		public: 
+			ENJON_PROPERTY()
+			String mVisualStudioDirectory = ""; 
+	}; 
 
 	ENJON_CLASS( Construct )
 	class EditorConfigSettings : public Object
@@ -105,11 +154,26 @@ namespace Enjon
 		*/	
 
 		public:
-			ENJON_PROPERTY( )
-			BuildSystemSettings mBuildSystemSettings;
 
+			/*
+			* @brief
+			*/
+			virtual Result SerializeData( ByteBuffer* archiver ) const override;
+			
+			/*
+			* @brief
+			*/
+			virtual Result DeserializeData( ByteBuffer* archiver ) override; 
+
+		public: 
 			ENJON_PROPERTY( )
 			Vector< Project > mProjectList;
+
+			ENJON_PROPERTY()
+			ToolChain* mToolChains[ (u32)ToolChainEnvironment::Count ];
+
+			ENJON_PROPERTY()
+			ToolChainEnvironment mToolChainID = ToolChainEnvironment::MSVC;
 	};
 
 	// TODO(john): Need to reflect over the editor app to get introspection meta data
@@ -256,9 +320,9 @@ namespace Enjon
 			void DeserializeEditorConfigSettings( ); 
 			void SerializeEditorConfigSettings( );
 
-			void BuildSystemView( );
+			void ToolChainView( );
 			
-			void InitializeBuildSystemOptions( );
+			void InitializeToolChains( );
 
 		private:
 			bool mViewBool = true;
@@ -333,9 +397,7 @@ namespace Enjon
 			Window* mProjectSelectionWindow = nullptr;
 
 			ENJON_PROPERTY( HideInEditor )
-			EditorConfigSettings mConfigSettings;
-
-			BuildSystemOption mBuildSystemOptions[ (u32)BuildSystemType::Count ];
+			EditorConfigSettings mConfigSettings; 
 	}; 
 
 	// Declaration for module export

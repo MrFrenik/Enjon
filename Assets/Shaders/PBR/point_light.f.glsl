@@ -25,7 +25,6 @@ uniform mat4 camMatrix;
 // Vertex information
 in DATA
 {
-    vec3 FragPos;
     vec2 TexCoords;
 }fs_in;
 
