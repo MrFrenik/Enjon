@@ -178,7 +178,7 @@ namespace Enjon
 			virtual Result SerializeData( ByteBuffer* archiver ) const override;
 			
 			/*
-			* @brief
+			* @brief //
 			*/
 			virtual Result DeserializeData( ByteBuffer* archiver ) override; 
 

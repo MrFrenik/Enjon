@@ -2017,6 +2017,7 @@ namespace Enjon
 		// Want to deserialize the editor config options here for users
 		DeserializeEditorConfigSettings( );
 
+		//
 		mProjectsDir = mConfigSettings.mLastUsedProjectDirectory;
 
 #if LOAD_ENGINE_RESOURCES
