@@ -767,13 +767,16 @@ namespace Enjon
 		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.8f, 0.8f, 1.f ) );
 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		f32 offset = 1.5f;
 		//ImGui::SetCursorPosX( ( ImGui::GetWindowWidth( ) - sz.x ) / 2.f );
 		ImGui::Text( "Welcome to the" ); 
 		ImGui::SameLine( );
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() - offset);
 		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.f, 1.f, 1.f, 1.f ) );
 		ImGui::Text( "Project Creation" );
 		ImGui::PopStyleColor( );
 		ImGui::SameLine( );
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() - offset);
 		ImGui::Text( "screen." );
 		ImGui::NewLine( );
 
@@ -802,8 +805,10 @@ namespace Enjon
 			nfdresult_t res = NFD_PickFolder( NULL, &folder );
 			if ( res == NFD_OKAY )
 			{
-				mProjectsDir = String( folder );
-			}
+				mProjectsDir = String( folder );	
+				mConfigSettings.mLastUsedProjectDirectory = String(folder);
+				SerializeEditorConfigSettings();
+			} 
 		}
 		ImGui::PopStyleColor( );
 
@@ -1620,28 +1625,74 @@ namespace Enjon
 	// Balls
 	void EditorApp::ProjectListView( )
 	{ 
+		ImGuiManager* igm = EngineSubsystem(ImGuiManager);
 		// I don't like this...
 		b32 projDirSet = fs::v1::exists( mProjectsDir );
 
 		if ( ImGui::BeginDock( "Project Browser", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 		{
 			//if ( projDirSet )
+			//{
+			//	String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
+			//	if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
+			//	{
+			//		for ( auto& p : mConfigSettings.mProjectList )
+			//		{
+			//			if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
+			//			{ 
+			//				// Preload project for next frame
+			//				PreloadProject( p );
+			//				WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+			//				ws->DestroyWindow( mProjectSelectionWindow );
+			//			}
+			//		}
+			//		ImGui::EndCombo( );
+			//	} 
+			//}
+
+			static Project* selectedProject = nullptr;
+			for ( auto& p : mConfigSettings.mProjectList )
 			{
-				String defaultText = mProject.GetApplication( ) == nullptr ? "Existing Projects..." : mProject.GetProjectName( );
-				if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
-				{
-					for ( auto& p : mConfigSettings.mProjectList )
-					{
-						if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
-						{ 
-							// Preload project for next frame
-							PreloadProject( p );
-							WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-							ws->DestroyWindow( mProjectSelectionWindow );
-						}
+				ImVec2 a = ImVec2(ImGui::GetCursorScreenPos().x - 2.f, ImGui::GetCursorScreenPos().y - 2.f);
+				ImVec2 b = ImVec2(a.x + 400.f, a.y + 35.f);
+				b32 hovered = ImGui::IsMouseHoveringRect(a, b);
+				b32 active = hovered && ImGui::IsMouseClicked(0);
+				b32 selected = selectedProject == &p;
+				ImColor color = selected ? ImGui::GetColorU32(ImGuiCol_HeaderActive) : 
+								hovered ? ImGui::GetColorU32(ImGuiCol_ButtonHovered) : 
+								ImGui::GetColorU32(ImGuiCol_ButtonActive);
+				ImDrawList* dl = ImGui::GetWindowDrawList();
+				dl->AddRect(a, b, color, 1.2f);
+				ImGui::Text("%s", p.GetProjectName().c_str()); 
+				if (selected) {
+					String lab = "Launch";
+					f32 margin = 10.f;
+					f32 pad = 2.f;
+					ImVec2 ts = ImGui::CalcTextSize(lab.c_str());
+					ImVec2 ba = ImVec2(b.x - ts.x - margin - pad, (b.y + a.y - ts.y) / 2.f - pad);
+					ImVec2 bb = ImVec2(ba.x + ts.x + 2.f * pad, ba.y + ts.y + 2.f * pad);
+					ImVec2 ta = ImVec2(b.x - ts.x - margin, (b.y + a.y - ts.y) / 2.f);
+					b32 bHovered = ImGui::IsMouseHoveringRect(ba, bb);
+					b32 bActive = bHovered && ImGui::IsMouseClicked(0);
+					ImColor bColor = bActive ? ImGui::GetColorU32(ImGuiCol_ButtonActive) :
+									bHovered ? ImGui::GetColorU32(ImGuiCol_ButtonHovered) :
+									ImGui::GetColorU32(ImGuiCol_Button);
+					dl->AddRectFilled(ba, bb, bColor, 1.5f);
+					dl->AddText(igm->GetFont("Roboto-MediumItalic_14"), 14, ta, ImColor(1.f, 1.f, 1.f, 0.5f), lab.c_str());
+					
+					if (bActive) { 
+						PreloadProject( p );
+						WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+						ws->DestroyWindow( mProjectSelectionWindow );
 					}
-					ImGui::EndCombo( );
-				} 
+				}
+				ImGui::PushFont(igm->GetFont("Roboto-MediumItalic_12"));
+				ImGui::Text("%s", p.GetProjectPath().c_str());
+				ImGui::PopFont();
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 7.f);
+				if (active) {
+					selectedProject = &p;	// Pretty unsafe, but oh well...
+				}
 			}
 			//else
 			//{
@@ -1664,8 +1715,8 @@ namespace Enjon
 				//} 
 			//}
 
-			ImGui::SameLine( );
-			SelectProjectDirectoryView( ); 
+			//ImGui::SameLine( );
+			//SelectProjectDirectoryView( ); 
 		}
 		ImGui::EndDock( ); 
 	}
@@ -1713,8 +1764,11 @@ namespace Enjon
 		b32 needSerialize = false;
 		if ( ImGui::BeginDock( "Tool Chain", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 		{ 
+			ImGui::Text("%s", "Environment"); ImGui::SameLine();
+			ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.2f);
+			ImGui::PushItemWidth(200.f);
 			ToolChain* toolChain = mConfigSettings.mToolChains[(u32)mConfigSettings.mToolChainID];
-			if ( ImGui::BeginCombo( "Environment##enumProps", toolChain->mName.c_str() ) )
+			if ( ImGui::BeginCombo( "##Environment_enumProps", toolChain->mName.c_str() ) )
 			{ 
 				// For each element in the enum
 				for ( u32 i = 0; i < (u32)ToolChainEnvironment::Count; ++i )
@@ -1732,6 +1786,7 @@ namespace Enjon
 				} 
 				ImGui::EndCombo( );
 			} 
+			ImGui::PopItemWidth();
 
 			// Want to display the tool chain options here
 			if (toolChain)
@@ -1877,11 +1932,7 @@ namespace Enjon
 			ObjectArchiver::Serialize(tc, archiver);
 		}
 
-		//ENJON_PROPERTY()
-		//ToolChainEnvironment mToolChainID = ToolChainEnvironment::MSVC; 
-		archiver->Write< u32 >((u32)mToolChainID); 
-
-		return Result::SUCCESS;
+		return Result::INCOMPLETE; 
 	}
 	
 	//================================================================================================================
@@ -1907,11 +1958,7 @@ namespace Enjon
 			ObjectArchiver::Deserialize(archiver, tc);
 		}
 
-		//ENJON_PROPERTY()
-		//ToolChainEnvironment mToolChainID = ToolChainEnvironment::MSVC; 
-		mToolChainID = (ToolChainEnvironment)archiver->Read< u32 >();
-
-		return Result::SUCCESS; 
+		return Result::INCOMPLETE; 
 	}
 	
 	//================================================================================================================
@@ -1969,6 +2016,8 @@ namespace Enjon
 
 		// Want to deserialize the editor config options here for users
 		DeserializeEditorConfigSettings( );
+
+		mProjectsDir = mConfigSettings.mLastUsedProjectDirectory;
 
 #if LOAD_ENGINE_RESOURCES
 		LoadResources( );
@@ -2487,10 +2536,6 @@ namespace Enjon
 		// Want to call some utility to find, what, the NMake path? The path for visual studio? Not sure
 		// What I'm supposed to be looking for here...
 		// This should be looking for MSBuild (so that it can process .sln files)
-		if (!mCompilerDirectory.empty()) {
-			return Result::SUCCESS;
-		}
-
 		return FindMSBuildPath();
 	} 
 
@@ -2499,55 +2544,50 @@ namespace Enjon
 	// I guess? This just seems odd though...
 	Result ToolChainMSVC::FindVisualStudioPath()
 	{ 
-		// Already exists, so do not try and override this path
-		if (!mVisualStudioDirectory.empty()) {
-			return Result::SUCCESS;
-		}
+		// Find all available versions of default install directories for visual studio (stop on latest release) 
+		// Reset paths? That seems odd...but maybe not? I mean, if you set them, then that's your fault, after all.
+		mVisualStudioDirectory = "Invalid";
+		mCMakeFlags = "Invalid";
 
-		// Find all available versions of default install directories for visual studio (stop on latest release)
+		switch (mVSVersion) 
+		{
+			case VisualStudioVersion::VS2013:
+			{
+				if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 12.0/" ) ) {
+					mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 12.0/";
+					mCMakeFlags = "Visual Studio 12 2013";
+					return Result::SUCCESS;
+				} 
+			} break;
 
-		// Visual Studio 2019
-		if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/" ) ) {
-			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/"; 
-			mCMakeFlags = "Visual Studio 16 2019";
-			return Result::SUCCESS;
+			case VisualStudioVersion::VS2015: 
+			{ 
+				if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 14.0/" ) ) {
+					mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 14.0/";
+					mCMakeFlags = "Visual Studio 14 2015";
+					return Result::SUCCESS;
+				}
+			} break;
+
+			case VisualStudioVersion::VS2017: 
+			{ 
+				if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/" ) ) {
+					mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/"; 
+					mCMakeFlags = "Visual Studio 15 2017";
+					return Result::SUCCESS;
+				}
+			} break;
+
+			case VisualStudioVersion::VS2019: 
+			{ 
+				// Visual Studio 2019
+				if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/" ) ) {
+					mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/"; 
+					mCMakeFlags = "Visual Studio 16 2019";
+					return Result::SUCCESS;
+				} 
+			} break;
 		} 
-		// Visual Studio 2017
-		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/" ) ) {
-			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/"; 
-			mCMakeFlags = "Visual Studio 15 2017";
-			return Result::SUCCESS;
-		}
-		// Visual Studio 2015
-		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 14.0/" ) ) {
-			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 14.0/";
-			mCMakeFlags = "Visual Studio 14 2015";
-			return Result::SUCCESS;
-		}
-		// Visual Studio 2013
-		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 12.0/" ) ) {
-			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 12.0/";
-			mCMakeFlags = "Visual Studio 12 2013";
-			return Result::SUCCESS;
-		}
-		// Visual Studio 2012
-		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 11.0/" ) ) {
-			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 11.0/";
-			mCMakeFlags = "Visual Studio 11 2012";
-			return Result::SUCCESS;
-		}
-		// Visual Studio 2010
-		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 10.0/" ) ) {
-			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 10.0/";
-			mCMakeFlags = "Visual Studio 10 2010";
-			return Result::SUCCESS;
-		}
-		// Visual Studio 2008
-		else if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 9.0/" ) ) {
-			mVisualStudioDirectory = "C:/Program Files (x86)/Microsoft Visual Studio 9.0/";
-			mCMakeFlags = "Visual Studio 9 2008";
-			return Result::SUCCESS;
-		}
 
 		return Result::FAILURE;
 	}
@@ -2557,9 +2597,17 @@ namespace Enjon
 	Result ToolChainMSVC::FindMSBuildPath()
 	{
 		// Look for usual suspects. If these directories exist, then we're golden. If not, then require that the user
-			//Locate these directories manually. 
-			// 64 bit framework (earlier versions of MSBuild located here by default)
-		if (fs::exists("C:/Windows/Microsoft.NET/Framework64/")) {
+		//Locate these directories manually. 
+		// 64 bit framework (earlier versions of MSBuild located here by default)
+		// Latest distributed version of MSBuild
+		mCompilerDirectory = "Invalid";
+
+		if (fs::exists("C:/Program Files(x86)/Microsoft Visual Studio/2019/BuildTools/MSBuild/Current/Bin/MSBuild.exe")) { 
+			mCompilerDirectory = "C:/Program Files(x86)/Microsoft Visual Studio/2019/BuildTools/MSBuild/Current/Bin/"; 
+			return Result::SUCCESS;
+		}
+
+		else if (fs::exists("C:/Windows/Microsoft.NET/Framework64/")) {
 			const char* path = "C:/Windows/Microsoft.NET/Framework64/";
 			// Recursively go through all available versions to find most recent one? 
 			for (auto& p : fs::recursive_directory_iterator(path))
@@ -2577,31 +2625,61 @@ namespace Enjon
 
 	//================================================================================================
 
+	b32 ToolChainMSVC::IsValid()
+	{ 
+		// When is the tool chain for msvc compiler valid? I suppose if the msbuild path and visual studio path are set?
+		return (!mCompilerDirectory.empty() && !mVisualStudioDirectory.empty() && !mCMakeFlags.empty());
+	}
+
+	//================================================================================================
+
 	Result ToolChainMSVC::OnEditorUI()
 	{
 		Result retRes = Result::INCOMPLETE;
 
-		ImGui::PushItemWidth(250.f);
-		ImGui::Text("MSBuild: %s", mCompilerDirectory.c_str()); ImGui::SameLine(); 
-		ImGui::PopItemWidth();
-		if ( ImGui::Button( "...##ms_build_dir" ) )
-		{
-			nfdchar_t* outPath = NULL;
-			nfdresult_t res = NFD_PickFolder( NULL, &outPath );
-			if ( res == NFD_OKAY )
-			{
-				// Set the path now
-				if ( fs::exists( outPath ) && fs::is_directory( outPath ) && fs::exists( String(outPath) + "/MSBuild.exe" ) ) 
-				{
-					mCompilerDirectory = outPath;
-					retRes = Result::SUCCESS;
-				} 
-			}
-		}
+		ImGuiManager* igm = EngineSubsystem(ImGuiManager);
 
-		ImGui::PushItemWidth(250.f);
-		ImGui::Text("VSDir: %s", mVisualStudioDirectory.c_str()); ImGui::SameLine(); 
+		ImGui::Text("%s", "Visual Studio Version"); ImGui::SameLine();
+	
+		// Visual studio version
+		String defaultText = mVSVersion == VisualStudioVersion::VS2013 ? "VS2013" :
+			mVSVersion == VisualStudioVersion::VS2015 ? "VS2015" :
+			mVSVersion == VisualStudioVersion::VS2017 ? "VS2017" :
+			mVSVersion == VisualStudioVersion::VS2019 ? "VS2019" :
+			"...";
+		ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.2f);
+		ImGui::PushItemWidth(200.f);
+		if ( ImGui::BeginCombo( "##Visual_Studio_Version", defaultText.c_str() ) )
+		{
+			for ( u32 i = 0; i < (u32)VisualStudioVersion::Count; ++i )
+			{
+				String txt;
+				switch ((VisualStudioVersion)i)
+				{ 
+					case VisualStudioVersion::VS2013: txt = "Visual Studio 2013"; break; 
+					case VisualStudioVersion::VS2015: txt = "Visual Studio 2015"; break; 
+					case VisualStudioVersion::VS2017: txt = "Visual Studio 2017"; break;
+					case VisualStudioVersion::VS2019: txt = "Visual Studio 2019"; break;
+				}
+				if ( ImGui::Selectable( txt.c_str( ) ) )
+				{ 
+					mVSVersion = (VisualStudioVersion)i;
+					FindPaths();
+				}
+			}
+
+			ImGui::EndCombo( );
+		} 
 		ImGui::PopItemWidth();
+
+		ImGui::Text( "%s", "VSDir: "); ImGui::SameLine(); 
+		ImGui::PushItemWidth(200.f);
+		ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() * 0.2f, ImGui::GetCursorPosY() + 1.f));
+		ImGui::PushFont( igm->GetFont( "Roboto-MediumItalic_14" ) );
+		ImGui::Text("%s", mVisualStudioDirectory.c_str()); ImGui::SameLine(); 
+		ImGui::PopFont();
+		ImGui::PopItemWidth();
+		ImGui::PushItemWidth(2.f);
 		if ( ImGui::Button( "...##vs_dir" ) )
 		{
 			nfdchar_t* outPath = NULL;
@@ -2616,6 +2694,31 @@ namespace Enjon
 				} 
 			}
 		}
+		ImGui::PopItemWidth();
+
+		ImGui::Text( "%s", "MSBuildDir: "); ImGui::SameLine(); 
+		ImGui::PushItemWidth(200.f);
+		ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() * 0.2f, ImGui::GetCursorPosY() + 1.f));
+		ImGui::PushFont( igm->GetFont( "Roboto-MediumItalic_14" ) );
+		ImGui::Text("%s", mCompilerDirectory.c_str()); ImGui::SameLine(); 
+		ImGui::PopFont();
+		ImGui::PopItemWidth();
+		ImGui::PushItemWidth(2.f);
+		if ( ImGui::Button( "...##ms_build_dir" ) )
+		{
+			nfdchar_t* outPath = NULL;
+			nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+			if ( res == NFD_OKAY )
+			{
+				// Set the path now
+				if ( fs::exists( outPath ) && fs::is_directory( outPath ) && fs::exists( String(outPath) + "/MSBuild.exe" ) ) 
+				{
+					mCompilerDirectory = outPath;
+					retRes = Result::SUCCESS;
+				} 
+			}
+		} 
+		ImGui::PopItemWidth();
 
 		return retRes;
 	}

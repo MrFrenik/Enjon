@@ -170,6 +170,8 @@ namespace Enjon
 
 	Result Project::CompileProject( )
 	{
+		// Need to figure this part out, unfortunately... I need to be able to compile from the editor.
+
 		if ( !mEditor )
 		{
 			std::cout << "EditorApp is null! Cannot continue!\n";

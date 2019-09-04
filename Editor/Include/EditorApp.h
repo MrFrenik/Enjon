@@ -93,6 +93,8 @@ namespace Enjon
 				return Result::INCOMPLETE;
 			} 
 
+			virtual b32 IsValid() = 0;
+
 		public:
 			ENJON_PROPERTY( )
 			ToolChainEnvironment mEnvironment;
@@ -113,6 +115,16 @@ namespace Enjon
 			String mName = "";
 	};
 
+	ENJON_ENUM()
+	enum class VisualStudioVersion
+	{ 
+		VS2013,
+		VS2015, 
+		VS2017, 
+		VS2019,
+		Count
+	};
+
 	ENJON_CLASS( Construct )
 	class ToolChainMSVC : public ToolChain
 	{ 
@@ -129,11 +141,16 @@ namespace Enjon
 
 			virtual Result OnEditorUI() override; 
 
+			virtual b32 IsValid() override;
+
 			Result FindMSBuildPath(); 
 
 		public: 
 			ENJON_PROPERTY()
 			String mVisualStudioDirectory = ""; 
+
+			ENJON_PROPERTY()
+			VisualStudioVersion mVSVersion = VisualStudioVersion::VS2015;
 	}; 
 
 	ENJON_CLASS( Construct )
@@ -166,14 +183,17 @@ namespace Enjon
 			virtual Result DeserializeData( ByteBuffer* archiver ) override; 
 
 		public: 
-			ENJON_PROPERTY( )
+			ENJON_PROPERTY( NonSerializeable )
 			Vector< Project > mProjectList;
 
-			ENJON_PROPERTY()
+			ENJON_PROPERTY( NonSerializeable )
 			ToolChain* mToolChains[ (u32)ToolChainEnvironment::Count ];
 
 			ENJON_PROPERTY()
 			ToolChainEnvironment mToolChainID = ToolChainEnvironment::MSVC;
+
+			ENJON_PROPERTY()
+			String mLastUsedProjectDirectory = "";
 	};
 
 	// TODO(john): Need to reflect over the editor app to get introspection meta data
