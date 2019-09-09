@@ -100,19 +100,19 @@ namespace Enjon
 			ToolChainEnvironment mEnvironment;
 
 			ENJON_PROPERTY()
-			String mCompilerDirectory = "";
+			String mCompilerDirectory = "invalid";
 
 			ENJON_PROPERTY()
-			String mMakeDirectory = "";
+			String mMakeDirectory = "invalid";
 
 			ENJON_PROPERTY()
-			String mCmakeDirectory = "";
+			String mCmakeDirectory = "invalid";
 
 			ENJON_PROPERTY()
-			String mCMakeFlags = "";
+			String mCMakeFlags = "invalid";
 
 			ENJON_PROPERTY()
-			String mName = "";
+			String mName = "invalid";
 	};
 
 	ENJON_ENUM()
@@ -132,12 +132,12 @@ namespace Enjon
 			
 		public:
 
-			virtual Result FindPaths();
+			virtual Result FindPaths() override;
 		
-			virtual Result FindCompilerPath();
+			virtual Result FindCompilerPath() override;
 
 			// I guess? This just seems odd though...
-			virtual Result FindVisualStudioPath();
+			Result FindVisualStudioPath();
 
 			virtual Result OnEditorUI() override; 
 
@@ -147,7 +147,7 @@ namespace Enjon
 
 		public: 
 			ENJON_PROPERTY()
-			String mVisualStudioDirectory = ""; 
+			String mVisualStudioDirectory = "invalid"; 
 
 			ENJON_PROPERTY()
 			VisualStudioVersion mVSVersion = VisualStudioVersion::VS2015;
@@ -204,25 +204,25 @@ namespace Enjon
 
 		public:
 
-			virtual Enjon::Result Initialize() override;  
+			virtual Result Initialize() override;  
 
 			/**
 			* @brief Main update tick for application.
-			* @return Enjon::Result
+			* @return Result
 			*/
-			virtual Enjon::Result Update(f32 dt) override;
+			virtual Result Update(f32 dt) override;
 
 			/**
 			* @brief Processes input from input class 
-			* @return Enjon::Result
+			* @return Result
 			*/
-			virtual Enjon::Result ProcessInput(f32 dt) override;
+			virtual Result ProcessInput(f32 dt) override;
 
 			/**
 			* @brief Shuts down application and cleans up any memory that was allocated.
 			* @return Enjon::Result
 			*/
-			virtual Enjon::Result Shutdown() override; 
+			virtual Result Shutdown() override; 
 
 			/**
 			* @brief 

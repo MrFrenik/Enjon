@@ -23,7 +23,7 @@ namespace Enjon
 			{ 
 			}
 
-			~CollisionCallbackSubscriptionBase( )
+			virtual ~CollisionCallbackSubscriptionBase( )
 			{
 			} 
 
@@ -40,7 +40,7 @@ namespace Enjon
 				static_assert( std::is_base_of<Component, T>::value, "CollisionCallbackSubscription::Constructor() - T must inherit from Component." ); 
 			}
 
-			~CollisionCallbackSubscription( )
+			virtual ~CollisionCallbackSubscription( )
 			{
 			} 
 

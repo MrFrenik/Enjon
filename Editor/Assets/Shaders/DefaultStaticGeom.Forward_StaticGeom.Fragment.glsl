@@ -40,7 +40,7 @@ uniform sampler2D aoMap;
 void main()
 {
 	// Base Color
-vec4 albedoMap_sampler = texture2D( albedoMap, fs_in.TexCoords );
+vec4 albedoMap_sampler = texture( albedoMap, fs_in.TexCoords );
 	AlbedoOut = vec4(albedoMap_sampler.rgb, 1.0);
 
 }

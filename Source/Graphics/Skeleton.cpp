@@ -67,7 +67,7 @@ namespace Enjon
 		buffer->Write< s32 >( mRootID );
 
 		// Write out size of joints
-		buffer->Write< usize >( GetNumberOfJoints( ) );
+		buffer->Write< u32 >( (u32)GetNumberOfJoints( ) );
 
 		// Write out joints
 		for ( auto& j : mJoints )
@@ -96,10 +96,10 @@ namespace Enjon
 		mRootID = buffer->Read< s32 >( ); 
 
 		// Resize number of joints
-		mJoints.resize( buffer->Read< usize >( ) );
+		mJoints.resize( buffer->Read< u32 >( ) );
 
 		// Write out joints
-		for ( usize i = 0; i < mJoints.size( ); ++i )
+		for ( u32 i = 0; i < (u32)mJoints.size( ); ++i )
 		{
 			mJoints.at( i ).DeserializeData( buffer );
 		}
@@ -133,7 +133,7 @@ namespace Enjon
 		buffer->Write< s32 >( mParentID );
 
 		// Write out children id size
-		buffer->Write< usize >( mChildren.size( ) );
+		buffer->Write< u32 >( (u32)mChildren.size( ) );
 
 		// Write out children ids
 		for ( auto& c : mChildren )
@@ -158,10 +158,10 @@ namespace Enjon
 		mParentID = buffer->Read< s32 >( );
 
 		// Read in children size
-		mChildren.resize( buffer->Read< usize >( ) );
+		mChildren.resize( buffer->Read< u32 >( ) );
 
 		// Read in children ids
-		for ( usize i = 0; i < mChildren.size( ); ++i )
+		for ( u32 i = 0; i < (u32)mChildren.size( ); ++i )
 		{
 			mChildren.at( i ) = buffer->Read< u32 >( );
 		}

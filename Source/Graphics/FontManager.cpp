@@ -1,3 +1,4 @@
+#include "Defines.h"
 #include "Graphics/FontManager.h" 
 #include "Engine.h"
 

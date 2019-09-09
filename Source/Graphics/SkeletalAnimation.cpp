@@ -16,7 +16,7 @@ namespace Enjon
 	Result ChannelData::SerializeData( ByteBuffer* buffer ) const
 	{ 
 		// Write out rotation key size
-		buffer->Write< usize >( mRotationKeys.size( ) );
+		buffer->Write< u32 >( (u32)mRotationKeys.size( ) );
 
 		// Write out rotation keys
 		for ( auto& k : mRotationKeys )
@@ -32,7 +32,7 @@ namespace Enjon
 		}
 
 		// Write out position key size
-		buffer->Write< usize >( mPositionKeys.size( ) ); 
+		buffer->Write< u32 >( (u32)mPositionKeys.size( ) ); 
 
 		// Write out position keys
 		for ( auto& k : mPositionKeys )
@@ -47,7 +47,7 @@ namespace Enjon
 		}
 
 		// Write out scale key size
-		buffer->Write< usize >( mScaleKeys.size( ) ); 
+		buffer->Write< u32 >( (u32)mScaleKeys.size( ) ); 
 
 		// Write out position keys
 		for ( auto& k : mScaleKeys )
@@ -69,10 +69,10 @@ namespace Enjon
 	Result ChannelData::DeserializeData( ByteBuffer* buffer )
 	{
 		// Read in rotation key size
-		mRotationKeys.resize( buffer->Read< usize >( ) );
+		mRotationKeys.resize( buffer->Read< u32 >( ) );
 
 		// Write out rotation keys
-		for ( usize i = 0; i < mRotationKeys.size( ); ++i )
+		for ( u32 i = 0; i < (u32)mRotationKeys.size( ); ++i )
 		{
 			// Grab reference to keyframe
 			KeyFrame< Quaternion >& k = mRotationKeys.at( i ); 
@@ -88,10 +88,10 @@ namespace Enjon
 		}
 
 		// Read in rotation key size
-		mPositionKeys.resize( buffer->Read< usize >( ) );
+		mPositionKeys.resize( buffer->Read< u32 >( ) );
 
 		// Write out rotation keys
-		for ( usize i = 0; i < mPositionKeys.size( ); ++i )
+		for ( u32 i = 0; i < (u32)mPositionKeys.size( ); ++i )
 		{
 			// Grab reference to keyframe
 			KeyFrame< Vec3 >& k = mPositionKeys.at( i ); 
@@ -106,10 +106,10 @@ namespace Enjon
 		}
 
 		// Read in scale key size
-		mScaleKeys.resize( buffer->Read< usize >( ) );
+		mScaleKeys.resize( buffer->Read< u32 >( ) );
 
 		// Write out rotation keys
-		for ( usize i = 0; i < mScaleKeys.size( ); ++i )
+		for ( u32 i = 0; i < (u32)mScaleKeys.size( ); ++i )
 		{
 			// Grab reference to keyframe
 			KeyFrame< Vec3 >& k = mScaleKeys.at( i ); 
@@ -255,7 +255,7 @@ namespace Enjon
 	Result SkeletalAnimation::SerializeData( ByteBuffer* buffer ) const
 	{ 
 		// Channel data size
-		buffer->Write< usize >( mChannelData.size( ) );
+		buffer->Write< u32 >( (u32)mChannelData.size( ) );
 
 		// Write out channel data
 		for ( auto& c : mChannelData )
@@ -280,10 +280,10 @@ namespace Enjon
 	Result SkeletalAnimation::DeserializeData( ByteBuffer* buffer )
 	{
 		// Read in channel data size
-		mChannelData.resize( buffer->Read< usize >( ) );
+		mChannelData.resize( buffer->Read< u32 >( ) );
 
 		// Read in channel data
-		for ( usize i = 0; i < mChannelData.size( ); ++i )
+		for ( u32 i = 0; i < (u32)mChannelData.size( ); ++i )
 		{ 
 			// Grab reference to channel data
 			ChannelData& c = mChannelData.at( i );

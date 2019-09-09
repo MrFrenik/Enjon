@@ -53,7 +53,7 @@ namespace Enjon
 			Quaternion GetRotation() const;
 
 			/* Offset rotation of transform */
-			void Renderable::OffsetRotation(const f32& Yaw, const f32& Pitch);
+			void OffsetRotation(const f32& Yaw, const f32& Pitch);
 
 			/* Get material of renderable */
 			AssetHandle< Material > GetMaterial( const u32& idx = 0 ) const; 

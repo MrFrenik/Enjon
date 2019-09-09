@@ -16,13 +16,13 @@
 #include "Utils/FileUtils.h"
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/AssetArchiver.h"
+#include "Utils/FileUtils.h"
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 
-#include <fmt/printf.h>
-#include <filesystem>
+#include "fs/filesystem.hpp"
 
-namespace FS = std::experimental::filesystem; 
+namespace FS = ghc::filesystem; 
 
 namespace Enjon
 {
@@ -558,6 +558,8 @@ namespace Enjon
 
 		// Get qualified name of asset
 		String qualifiedName = AssetLoader::GetQualifiedName( resourceFilePath );
+
+		std::cout << "Attempting: " << qualifiedName << "\n";
 
 		// Find loader by idx
 		auto query = mLoadersByAssetId.find( ( u32 )idx );

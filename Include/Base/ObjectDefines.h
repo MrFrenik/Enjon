@@ -40,7 +40,7 @@ enum MetaPropertyEnumDefines
 		{\
 			ExplicitConstructor( );\
 		}\
-		~ClassName()\
+		virtual ~ClassName()\
 		{\
 			ExplicitDestructor( );\
 		}\
@@ -61,7 +61,7 @@ enum MetaPropertyEnumDefines
 		{\
 			ExplicitConstructor( );\
 		}\
-		~ComponentName()\
+		virtual ~ComponentName()\
 		{\
 			ExplicitDestructor( );\
 		}\
@@ -92,8 +92,8 @@ enum MetaPropertyEnumDefines
 	protected:\
 		virtual const Enjon::MetaClass* GetClassInternal() const override;\
 	public:\
-		virtual Enjon::Result ModuleName::BindApplicationMetaClasses() override;\
-		virtual Enjon::Result ModuleName::UnbindApplicationMetaClasses() override;\
+		virtual Enjon::Result BindApplicationMetaClasses() override;\
+		virtual Enjon::Result UnbindApplicationMetaClasses() override;\
 
 #define ENJON_MODULE_BODY( ModuleName )\
 	ENJON_MODULE_BODY_INTERNAL( ModuleName )
@@ -106,7 +106,9 @@ enum MetaPropertyEnumDefines
 #define ENJON_STRUCT( ... )
 
 #ifdef ENJON_SYSTEM_WINDOWS
-#define ENJON_EXPORT __declspec(dllexport) 
+	#define ENJON_EXPORT __declspec(dllexport)
+#else
+	#define ENJON_EXPORT
 #endif
 
 #define ENJON_MODULE_DECLARE_INTERNAL( ModuleName )\

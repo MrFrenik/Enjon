@@ -1,4 +1,3 @@
-#pragma once
 #include "Graphics/FontPack.h"
 
 #include <vector>
@@ -91,7 +90,7 @@ struct node {
 	node* insert(rect_xywhf& img) {
 		if(c[0].pn && c[0].fill) {
 			node* newn;
-			if(newn = c[0].pn->insert(img)) return newn;
+			if((newn = c[0].pn->insert(img))) return newn;
 			return    c[1].pn->insert(img);
 		}
 
@@ -206,7 +205,7 @@ rect_wh _rect2D(rect_xywhf* const * v, int n, int max_s, vector<rect_xywhf*>& su
 	root.reset(min_bin);
 
 	for(i = 0; i < n; ++i) {
-		if(ret = root.insert(*v[i])) {
+		if((ret = root.insert(*v[i]))) {
 			v[i]->x = ret->rc.l;
 			v[i]->y = ret->rc.t;
 

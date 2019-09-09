@@ -47,7 +47,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			ColorRGBA32& GetColor() { return mLight.GetColor(); }
+			ColorRGBA32 GetColor() { return mLight.GetColor(); }
 
 			/*
 			* @brief
@@ -57,27 +57,27 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void SetAttenuationRate(float rate);
+			void SetAttenuationRate( const f32& rate );
 
 			/*
 			* @brief
 			*/
-			void SetPosition(Vec3& position);
+			void SetPosition( const Vec3& position );
 
 			/*
 			* @brief
 			*/
-			void SetColor(ColorRGBA32& color);
+			void SetColor(const ColorRGBA32& color );
 
 			/* 
 			* @brief
 			*/
-			void SetIntensity(float intensity);
+			void SetIntensity( const f32& intensity );
 
 			/* 
 			* @brief
 			*/
-			void SetRadius(float radius); 
+			void SetRadius( const f32& radius ); 
 
 		private:
 			ENJON_PROPERTY( )

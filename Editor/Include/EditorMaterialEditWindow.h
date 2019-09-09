@@ -115,7 +115,7 @@ namespace Enjon
 			Vec2 mMouseCoordsDelta = Vec2( 0.0f );
 			bool mStartedFocusing = false;
 			bool mFocusSet = false;
-			HashMap< ViewportCallbackType, ViewportCallback > mViewportCallbacks;
+			HashMap< u32, ViewportCallback > mViewportCallbacks;
 	}; 
 
 	class EditorTransformWidgetToolBar : public EditorView

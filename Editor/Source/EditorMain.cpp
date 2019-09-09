@@ -5,7 +5,7 @@
 
 #include "EditorApp.h"
  
-#include <filesystem> 
+#include <fs/filesystem.hpp> 
 
 // TODO(john): Have to figure out a good way of including this into the repo. For now, will just comment out. 
 //#define ENJON_MEMORY_LEAK_DETECTION 0
@@ -13,7 +13,7 @@
 //	#include <vld.h> 
 //#endif
 
-namespace FS = std::experimental::filesystem; 
+namespace FS = ghc::filesystem; 
 
 using namespace Enjon; 
 

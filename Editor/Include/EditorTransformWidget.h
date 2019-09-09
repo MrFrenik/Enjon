@@ -107,7 +107,7 @@ namespace Enjon
 			f32 mAngleDelta;
 			Quaternion mDeltaRotation;
 			Vec2 mPreviousMouseCoords;
-			bool mInteractingWithTransformWidget = true; 
+			bool mInteractingWithTransformWidget = false; 
 			bool mEnabled = false;
 			bool mSetPreviousAngle = false;
 			f32 mPreviousAngle = 0.0f;

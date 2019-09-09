@@ -6,8 +6,6 @@
 #include "Asset/Asset.h"
 #include "Defines.h"
 
-#include <unordered_map>
-
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/document.h> 
 
@@ -236,6 +234,8 @@ namespace Enjon
 
 			friend ShaderGraphAssetLoader; 
 
+			virtual void ExplicitConstructor() override;
+
 			virtual void ExplicitDestructor( ) override;
 
 			void Validate( );
@@ -264,7 +264,7 @@ namespace Enjon
 
 			static u32 TagCount( const Enjon::String& code, const Enjon::String& tag );
 
-			static Enjon::String ShaderGraph::TransformOutputType( const Enjon::String& code, const Enjon::String& type, const Enjon::String& requiredType );
+			static Enjon::String TransformOutputType( const Enjon::String& code, const Enjon::String& type, const Enjon::String& requiredType );
 
 			const ShaderGraphNode* GetNode( const Enjon::String& nodeName );
 
@@ -301,7 +301,7 @@ namespace Enjon
 		private:
 			static rapidjson::Document GetJSONDocumentFromFilePath( const Enjon::String& filePath, s32* status );
 
-			void ShaderGraph::ClearGraph( );
+			void ClearGraph( );
 
 		private:
 			void ConstructUniforms( const NodeLink& link );
@@ -338,13 +338,15 @@ namespace Enjon
 			u32 mTextureSamplerLocation = 0;
 
 			ENJON_PROPERTY( HideInEditor )
-			HashMap< ShaderPassType, String > mShaderPassCode;
+			String mShaderPassCode[ (u32)ShaderPassType::Count ];
 
 			ENJON_PROPERTY( HideInEditor )
 			HashMap< String, ShaderUniform* > mUniforms; 
-			
+
 			HashMap< String, ShaderGraphNode > mNodes;
-			HashMap< ShaderPassType, Shader* > mShaders;
+
+			Shader* mShaders[ (u32)ShaderPassType::Count ];
+
 			ShaderGraphNode mMainSurfaceNode;
 	};
 }

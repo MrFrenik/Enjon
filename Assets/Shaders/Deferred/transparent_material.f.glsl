@@ -17,7 +17,7 @@ uniform sampler2D emissiveMap;
 
 void main()
 {
-    vec4 Diffuse = texture2D(diffuseMap, fs_in.TexCoords);
+    vec4 Diffuse = texture(diffuseMap, fs_in.TexCoords);
     if (Diffuse.a < 0.5) discard;
     ColorOut = diffuseColor * Diffuse;
 }

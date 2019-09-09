@@ -65,7 +65,7 @@ float ShadowCalculation(vec4 FragPosLightSpace, float bias)
     {
         for (int y = -1; y <= 1; ++y)
         {
-            float PCFDepth = texture2D(ShadowMap, ProjCoords.xy + vec2(x, y) * TexelSize).r;
+            float PCFDepth = texture(ShadowMap, ProjCoords.xy + vec2(x, y) * TexelSize).r;
             Shadow += CurrentDepth - bias > PCFDepth ? 1.0 : 0.0;
         }
     }
@@ -103,7 +103,7 @@ void main()
     vec3 V = normalize(u_camPos - WorldPos);
 
     // Get material properties
-    vec4 MaterialProps = texture2D(u_matProps, TexCoords);
+    vec4 MaterialProps = texture(u_matProps, TexCoords);
 
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;

@@ -16,7 +16,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 namespace Enjon 
 {
 	class WindowSubsystem;
@@ -230,7 +229,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void Window::PrintDebugInfo( );
+			void PrintDebugInfo( );
 
 			/*
 			* @brief
@@ -245,6 +244,11 @@ namespace Enjon
 			// TOTAL HACKS FOR NOW
 			void SetWorld( World* world );
 			World* GetWorld( ); 
+
+			u32 GetWindowID()
+			{
+				return mID;
+			}
 
 		protected:
 
@@ -351,7 +355,7 @@ namespace Enjon
 			u32 NumberOfHoveredWindows( );
 			b32 AnyWindowHovered( );
 			s32 AddNewWindow( WindowParams params ); 
-			void DestroyWindow( Window* window ); 
+			// void DestroyWindow( Window* window ); 
 			void DestroyWindow( const u32& id );
 			void InitializeWindows( ); 
 			void CleanupWindows( b32 destroyAll = false );
@@ -364,7 +368,7 @@ namespace Enjon
 
 		private:
 			SDL_GLContext mGLContext = nullptr;
-			HashMap<CursorType, SDL_Cursor*> mSDLCursors; 
+			HashMap<u32, SDL_Cursor*> mSDLCursors; 
 			Vector< Window* > mWindows;
 			Vector< WindowParams > mWindowsToInit;
 			HashMap< u32, Window* > mWindowIDMap;

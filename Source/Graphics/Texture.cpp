@@ -375,7 +375,8 @@ namespace Enjon
 				glBindTexture( GL_TEXTURE_2D, 0 );
 
 				// Clean up pixel data once done
-				delete pixelData;
+				delete[] pixelData;
+				pixelData = nullptr;
 			} break;
 
 			case TextureFormat::LDR:
@@ -437,7 +438,8 @@ namespace Enjon
 				glBindTexture( GL_TEXTURE_2D, 0 ); 
 
 				// Clean up pixel data once done
-				delete pixelData; 
+				delete[] pixelData;
+				pixelData = nullptr; 
 
 			} break;
 		} 

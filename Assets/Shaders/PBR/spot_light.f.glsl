@@ -48,7 +48,7 @@ void main()
     vec3 WorldPos = texture(u_positionMap, TexCoords).xyz;
 
     // Get material properties
-    vec4 MaterialProps = texture2D(u_matProps, TexCoords);
+    vec4 MaterialProps = texture(u_matProps, TexCoords);
 
     // Roughness, Metallic, and AO
     float Metallic  = MaterialProps.r;

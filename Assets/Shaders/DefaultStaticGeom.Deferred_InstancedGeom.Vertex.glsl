@@ -57,6 +57,8 @@ void main()
 	vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );
 	vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;
 	vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;
+	vs_out.CurrentFragPositionClipSpace = gl_Position;
+	vs_out.PreviousFragPositionClipSpace = uPreviousViewProjection * uPreviousModel * vec4( aVertexPosition, 1.0 );
 	vs_out.TBN = TBN;
 	vs_out.ObjectID = uObjectID;
 }

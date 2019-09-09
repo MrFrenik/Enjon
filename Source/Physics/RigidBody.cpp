@@ -26,16 +26,18 @@ namespace Enjon
 
 	RigidBody::RigidBody( const CollisionShapeType& type )
 	{
+
 		switch ( type )
 		{
-		case CollisionShapeType::Box:
-		{
-			mShape = new BoxCollisionShape( );
-		} break;
-		case CollisionShapeType::Sphere:
-		{
-			mShape = new SphereCollisionShape( );
-		} break;
+			default: break;
+			case CollisionShapeType::Box:
+			{
+				mShape = new BoxCollisionShape( );
+			} break;
+			case CollisionShapeType::Sphere:
+			{
+				mShape = new SphereCollisionShape( );
+			} break;
 		}
 	}
 
@@ -567,13 +569,13 @@ namespace Enjon
 		BTransform bTransform;
 		bTransform.setIdentity( );
 
-		const Vec3* elp = &transform.GetPosition();
-		const Quaternion* elr = &transform.GetRotation();
-		const Vec3* els = &transform.GetScale();
-		Vec3 offset = *elr * mShape->GetOffset( ); 
+		Vec3 elp = transform.GetPosition();
+		Quaternion elr = transform.GetRotation();
+		Vec3 els = transform.GetScale();
+		Vec3 offset = elr * mShape->GetOffset( ); 
 
-		bTransform.setOrigin( BV3( elp->x + offset.x, elp->y + offset.y, elp->z + offset.z ) );
-		bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, elr->w ) );
+		bTransform.setOrigin( BV3( elp.x + offset.x, elp.y + offset.y, elp.z + offset.z ) );
+		bTransform.setRotation( BQuat( elr.x, elr.y, elr.z, elr.w ) );
 
 		// Set local scaling of shape
 		mShape->SetLocalScaling( transform.GetScale() ); 

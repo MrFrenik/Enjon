@@ -27,8 +27,8 @@ namespace Enjon
 		mUpAxisArrow.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cone" ) );
 		mXYAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
 		mXZAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
-		mYZAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) );
- 
+		mYZAxis.mRenderable.SetMesh( am->GetAsset< Mesh >( "models.unit_cube" ) ); 
+
 		// Set up materials
 		mRoot.mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) );
 		mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
@@ -40,7 +40,7 @@ namespace Enjon
 
 		mXYAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );
 		mXZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.GreenMaterial" ) );
-		mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) );
+		mYZAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.RedMaterial" ) ); 
 
 		mRoot.mLocalTransform.SetScale( 0.2f );
 
@@ -132,6 +132,8 @@ namespace Enjon
 		// Change material 
 		switch ( type )
 		{
+			default: break;
+
 			case TransformWidgetRenderableType::TranslationRoot:
 			{
 				mRoot.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
@@ -184,6 +186,8 @@ namespace Enjon
 		// Change material 
 		switch ( type )
 		{
+			default: break;
+			
 			case TransformWidgetRenderableType::TranslationRoot:
 			{
 				mRoot.mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) );

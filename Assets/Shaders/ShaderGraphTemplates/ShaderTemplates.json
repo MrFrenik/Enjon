@@ -552,7 +552,7 @@
 				}
 			},
 			"VariableDeclaration": "sampler2D #NODE_NAME;",
-			"VariableDefinition": "vec4 #NODE_NAME_sampler = texture2D( #NODE_NAME, #INPUT(UV) );"
+			"VariableDefinition": "vec4 #NODE_NAME_sampler = texture( #NODE_NAME, #INPUT(UV) );"
 		},
 
 		"TextureObjectTest": {
@@ -574,7 +574,7 @@
 				}
 			},
 			"VariableDeclaration": "vec4 #NODE_NAME;",
-			"VariableDefinition": "#NODE_NAME = texture2D( #INPUT(TextureObject), #TEXCOORDS );"
+			"VariableDefinition": "#NODE_NAME = texture( #INPUT(TextureObject), #TEXCOORDS );"
 		},
 
 		"ConstantFloatNode": {
@@ -753,7 +753,7 @@
 					"\tvec2 deltaTexCoords = P / numSteps;\n\n",
 
 					"\tvec2 currentTexCoords = #INPUT(UV);\n",
-					"\tfloat currentDepthMapValue = texture2D(#INPUT(HeightMap), currentTexCoords).r;\n\n",
+					"\tfloat currentDepthMapValue = texture(#INPUT(HeightMap), currentTexCoords).r;\n\n",
 
 					"\twhile( currentLayerDepth < currentDepthMapValue )\n",
 					"\t{\n",

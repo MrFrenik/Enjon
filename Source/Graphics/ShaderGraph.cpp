@@ -179,14 +179,30 @@ namespace Enjon
 
 	//=========================================================================================================================
 
+	void ShaderGraph::ExplicitConstructor()
+	{
+		// Set memory to null 
+		memset(mShaders, 0, sizeof(Shader*) * (u32)ShaderPassType::Count);
+		for (u32 i = 0; i < (u32)ShaderPassType::Count; ++i) {
+			assert( mShaders[ i ] == nullptr );
+		}
+	}
+
+	//=========================================================================================================================
+
 	void ShaderGraph::ExplicitDestructor( )
 	{ 
 		// Free all memory
-		for ( auto& s : mShaders )
+		// for ( auto& s : mShaders )
+		// {
+		// 	delete s.second;
+		// 	s.second = nullptr;
+		// } 
+		for ( u32 i = 0; i < (u32)ShaderPassType::Count; ++i )
 		{
-			delete s.second;
-			s.second = nullptr;
-		} 
+			delete mShaders[ i ];
+			mShaders[ i ] = nullptr;
+		}
 
 		for ( auto& u : mUniforms )
 		{
@@ -194,8 +210,8 @@ namespace Enjon
 			u.second = nullptr;
 		}
 
-		mShaderPassCode.clear( );
-		mShaders.clear( );
+		// mShaderPassCode.clear( );
+		// mShaders.clear( );
 		mNodes.clear( );
 		mUniforms.clear( );
 	}
@@ -295,14 +311,15 @@ namespace Enjon
 	Result ShaderGraph::DeserializeLateInit( )
 	{
 		// Need to create shaders now from shader code
-		for ( u32 i = 0; i < mShaderPassCode.size(); ++i ) 
+		// for ( u32 i = 0; i < mShaderPassCode.size(); ++i ) 
+		for ( u32 i = 0; i < (u32)ShaderPassType::Count; ++i ) 
 		{ 
 			ShaderPassType passType = ShaderPassType( i );
 			// Create shader TODO(): Need a way to detect that this created failed
 			Enjon::Shader* shader = new Shader( AssetHandle< ShaderGraph >( this ), passType, GetCode( passType, ShaderType::Vertex ), GetCode( passType, ShaderType::Fragment ) );
 
 			// Add shader
-			mShaders[ ShaderPassType( i ) ] = shader;
+			mShaders[ i ] = shader;
 		} 
 
 		return Result::SUCCESS;
@@ -588,14 +605,19 @@ namespace Enjon
 			u.second = nullptr;
 		}
 
-		// Delete shaders
-		for ( auto& s : mShaders )
+		// // Delete shaders
+		// for ( auto& s : mShaders )
+		// {
+		// 	delete s.second;
+		// 	s.second = nullptr;
+		// }
+		for ( u32 i = 0; i < (u32)ShaderPassType::Count; ++i )
 		{
-			delete s.second;
-			s.second = nullptr;
+			delete mShaders[ i ];
+			mShaders[ i ] = nullptr;
 		}
 
-		mShaders.clear( );
+		// mShaders.clear( );
 		mUniforms.clear( );
 	}
 
@@ -1000,6 +1022,7 @@ namespace Enjon
 
 		switch ( pass )
 		{
+			default: break;
 			case ShaderPassType::Forward_StaticGeom:
 			case ShaderPassType::Deferred_StaticGeom:
 			{
@@ -1064,6 +1087,8 @@ namespace Enjon
 		// Shader pass constants
 		switch ( pass )
 		{
+			default: break;
+
 			case ShaderPassType::Deferred_Skinned_Geom:
 			{
 				code += OutputLine( "const int MAX_JOINTS = 210;" );
@@ -1097,6 +1122,8 @@ namespace Enjon
 		// Additional uniforms required per pass
 		switch ( pass )
 		{
+			default: break;
+
 			case ShaderPassType::Deferred_Skinned_Geom:
 			{
 				code += OutputLine( "uniform mat4 uJointTransforms[MAX_JOINTS];" );
@@ -1109,6 +1136,8 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
+			default: break;
+
 			case ShaderPassType::Forward_StaticGeom:
 			case ShaderPassType::Deferred_InstancedGeom:
 			case ShaderPassType::Deferred_StaticGeom:
@@ -1140,7 +1169,8 @@ namespace Enjon
 
 	bool ShaderGraph::HasShader( ShaderPassType pass ) const
 	{
-		return ( mShaders.find( pass ) != mShaders.end( ) );
+		return true;
+		// return ( mShaders.find( (u32)pass ) != mShaders.end( ) );
 	}
 
 	//==================================================================================================================
@@ -1149,7 +1179,7 @@ namespace Enjon
 	{
 		if ( HasShader( pass ) )
 		{
-			return const_cast< ShaderGraph*>( this )->mShaders[ pass ];
+			return const_cast< ShaderGraph*>( this )->mShaders[ (u32)pass ];
 		}
 
 		return nullptr;
@@ -1342,6 +1372,8 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
+			default: break;
+
 			case ShaderPassType::Forward_StaticGeom:
 			case ShaderPassType::Deferred_StaticGeom:
 			{
@@ -1467,6 +1499,8 @@ namespace Enjon
 				code += OutputTabbedLine( "vs_out.TexCoords = vec2( aVertexUV.x, -aVertexUV.y );" );
 				code += OutputTabbedLine( "vs_out.ViewPositionTangentSpace = uViewPositionWorldSpace * TS_TBN;" );
 				code += OutputTabbedLine( "vs_out.FragPositionTangentSpace = vs_out.FragPositionWorldSpace * TS_TBN;" );
+				code += OutputTabbedLine( "vs_out.CurrentFragPositionClipSpace = gl_Position;" );
+				code += OutputTabbedLine( "vs_out.PreviousFragPositionClipSpace = uPreviousViewProjection * uPreviousModel * vec4( aVertexPosition, 1.0 );" );
 				code += OutputTabbedLine( "vs_out.TBN = TBN;" );
 				code += OutputTabbedLine( "vs_out.ObjectID = uObjectID;" );
 
@@ -1624,6 +1658,7 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
+			default: break;
 			case ShaderPassType::Forward_StaticGeom:
 			case ShaderPassType::Deferred_InstancedGeom:
 			case ShaderPassType::Deferred_StaticGeom:
@@ -1724,6 +1759,7 @@ namespace Enjon
 		// Output all variables to be used for vertex shader pass
 		switch ( pass )
 		{
+			default: break;
 			case ShaderPassType::Deferred_InstancedGeom:
 			case ShaderPassType::Deferred_StaticGeom:
 			case ShaderPassType::Deferred_Skinned_Geom:
@@ -2482,10 +2518,11 @@ for ( u32 i = 0; i < ShaderGraph::TagCount( code, find ); ++i )\
 
 	//========================================================================================================================= 
 
-	Enjon::String ShaderGraph::GetCode( ShaderPassType type, ShaderType shaderType )
+	Enjon::String ShaderGraph::GetCode( ShaderPassType sPType, ShaderType shaderType )
 	{
-		auto query = mShaderPassCode.find( type );
-		if ( query != mShaderPassCode.end( ) )
+		u32 type = (u32)sPType;
+		// auto query = mShaderPassCode.find( type );
+		// if ( query != mShaderPassCode.end( ) )
 		{
 			switch ( shaderType )
 			{
@@ -2598,7 +2635,7 @@ for ( u32 i = 0; i < ShaderGraph::TagCount( code, find ); ++i )\
 
 			if ( status > 0 )
 			{
-				mShaderPassCode[ ShaderPassType( i ) ] = code;
+				mShaderPassCode[ i ] = code;
 			}
 
 			// Write shaders to file ( for now )
@@ -2609,7 +2646,7 @@ for ( u32 i = 0; i < ShaderGraph::TagCount( code, find ); ++i )\
 			Enjon::Shader* shader = new Shader( AssetHandle< ShaderGraph >( this ), spt, GetCode( spt, ShaderType::Vertex ), GetCode( spt, ShaderType::Fragment ) );
 
 			// Add shader
-			mShaders[ ShaderPassType( i ) ] = shader;
+			mShaders[ i ] = shader;
 		}
 
 		// Get main node template

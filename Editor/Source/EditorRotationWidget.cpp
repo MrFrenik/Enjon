@@ -77,6 +77,8 @@ namespace Enjon
 		// Change material 
 		switch ( type )
 		{ 
+			default: break;
+
 			case TransformWidgetRenderableType::RotationForwardAxis:
 			{
 				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
@@ -106,6 +108,8 @@ namespace Enjon
 		// Change material 
 		switch ( type )
 		{
+			default: break;
+			
 			case TransformWidgetRenderableType::RotationForwardAxis:
 			{
 				mForwardAxis.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.BlueMaterial" ) );

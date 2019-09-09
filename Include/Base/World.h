@@ -7,6 +7,7 @@
 #include "System/Types.h"
 #include "Defines.h" 
 #include "Base/Object.h"
+#include "Base/SubsystemContext.h"
 
 namespace Enjon
 {
@@ -62,7 +63,7 @@ namespace Enjon
 		{
 			if ( HasContext< T >( ) )
 			{
-				return mContextMap[ Object::GetClass< T >( )->GetTypeId( ) ]->ConstCast< T >( );
+				return mContextMap[ Object::GetClass< T >( )->GetTypeId( ) ]->template ConstCast< T >( );
 			}
 
 			return nullptr;
@@ -73,7 +74,7 @@ namespace Enjon
 		{
 			if ( HasContext< T >( ) )
 			{
-				mContextMap[ Object::GetClass< T >( )->GetTypeId( ) ]->ConstCast< T >( )->SetUpdates( updates );
+				mContextMap[ Object::GetClass< T >( )->GetTypeId( ) ]->template ConstCast< T >( )->SetUpdates( updates );
 			}
 		}
 

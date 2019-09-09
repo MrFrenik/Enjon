@@ -56,17 +56,17 @@ void main()
     vec2 TexCoords = CalculateTexCoord();
 
     // Get diffuse color
-    vec3 albedo = texture2D(uAlbedoMap, TexCoords).rgb;
+    vec3 albedo = texture(uAlbedoMap, TexCoords).rgb;
     albedo = vec3(pow(albedo.r, 2.2), pow(albedo.g, 2.2), pow(albedo.b, 2.2));
 
-    vec4 emissive = texture2D(uEmissiveMap, TexCoords);
+    vec4 emissive = texture(uEmissiveMap, TexCoords);
     
 	// Get world position
 	float depth = texture( uDepthMap, TexCoords ).r;
 	vec3 worldPos = WorldPosFromDepth( depth, TexCoords );
     
 	// Obtain normal from normal map in range (world coords)
-    vec3 N = normalize(texture2D(uNormalMap, TexCoords).xyz); 
+    vec3 N = normalize(texture(uNormalMap, TexCoords).xyz); 
 
 	// View vector
 	vec3 V = normalize( uCamPos - worldPos ); 
@@ -75,7 +75,7 @@ void main()
 	 vec3 R = reflect(-V, N); 
 
 	// Material Properties
-	vec4 MaterialProps = texture2D( uMaterialMap, TexCoords );
+	vec4 MaterialProps = texture( uMaterialMap, TexCoords );
 	float metallic = MaterialProps.r;
 	float roughness = clamp( MaterialProps.g * MaterialProps.g, 0.08, 0.9 );
 	float specPower = 1.0 - metallic;
@@ -83,7 +83,7 @@ void main()
 	float a = pow(roughness, 2.0);
 	float ao = MaterialProps.b;
 
-	float ssao = texture2D( uSSAOMap, TexCoords ).r;
+	float ssao = texture( uSSAOMap, TexCoords ).r;
 	
 	// F0 mix
 	vec3 F0 = vec3(0.04); 

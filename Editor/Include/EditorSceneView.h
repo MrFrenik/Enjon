@@ -58,7 +58,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void CaptureState( );
+			virtual void CaptureState( ) override;
 
 			/**
 			* @brief

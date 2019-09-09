@@ -84,7 +84,7 @@ static inline std::string FindReplaceAll( const std::string& code, const std::st
 template <typename T>
 static inline T Clamp( const T& value, const T& min, const T& max )
 {
-	return value > max ? max : value < min : min : value;
+	return value > max ? max : value < min ? min : value;
 }
 
 template <typename T>

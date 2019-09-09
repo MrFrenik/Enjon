@@ -234,7 +234,36 @@ namespace Enjon
 
 		return UUID(bytes); 
 	}
+#endif
 
+#ifdef ENJON_SYSTEM_OSX
+	#include "CoreFoundation/CFUUID.h"
+	UUID UUID::NewUUID()
+	{
+		CFUUIDRef id = CFUUIDCreate( NULL );
+	  	CFUUIDBytes bytes = CFUUIDGetUUIDBytes( id );
+	  	CFRelease( id );
+	  	u8 byte_arr[16] 
+	  	{
+	  			(u8)bytes.byte0,
+	  			(u8)bytes.byte1,
+	  			(u8)bytes.byte2,
+	  			(u8)bytes.byte3,
+	  			(u8)bytes.byte4,
+	  			(u8)bytes.byte5,
+	  			(u8)bytes.byte6,
+	  			(u8)bytes.byte7,
+	  			(u8)bytes.byte8,
+	  			(u8)bytes.byte9,
+	  			(u8)bytes.byte10,
+	  			(u8)bytes.byte11,
+	  			(u8)bytes.byte12,
+	  			(u8)bytes.byte13,
+	  			(u8)bytes.byte14,
+	  			(u8)bytes.byte15
+	  	};
+	  	return UUID( byte_arr );
+	}
 #endif
 
 	//====================================================================

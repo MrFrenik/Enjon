@@ -65,23 +65,23 @@ namespace Enjon
 
 	void Input::SetButtonState( KeyCode code, bool currentState, bool previousState )
 	{
-		mKeyMap[ KeyCode( code ) ] = currentState;
-		mPreviousKeyMap[KeyCode( code )] = previousState;
+		mKeyMap[ (u32)code ] = currentState;
+		mPreviousKeyMap[ (u32)code ] = previousState;
 	}
 
 	void Input::PressKey( u32 code )
 	{ 
-		mKeyMap[(KeyCode)code] = true;
+		mKeyMap[code] = true;
 	}
 	
 	void Input::ReleaseKey( u32 code )
 	{
-		mKeyMap[(KeyCode)code] = false;
+		mKeyMap[code] = false;
 	}
 
 	bool Input::IsKeyReleased( KeyCode code ) const
 	{
-		auto query = mKeyMap.find( code );
+		auto query = mKeyMap.find( (u32)code );
 		if ( query != mKeyMap.end( ) )
 		{
 			bool isDown = query->second;
@@ -98,7 +98,7 @@ namespace Enjon
 	//Returns true if key held down	
 	bool Input::IsKeyDown( KeyCode code ) const
 	{ 
-		auto query = mKeyMap.find( code );
+		auto query = mKeyMap.find( (u32)code );
 
 		if ( query != mKeyMap.end() )
 		{
@@ -113,7 +113,7 @@ namespace Enjon
 
 	bool Input::WasKeyDown( KeyCode code ) const
 	{ 
-		auto query = mPreviousKeyMap.find( code );
+		auto query = mPreviousKeyMap.find( (u32)code );
 	
 		if( query != mPreviousKeyMap.end() )
 		{

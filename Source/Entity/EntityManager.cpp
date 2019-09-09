@@ -506,7 +506,7 @@ namespace Enjon
 
 	//===========================================================================
 
-	void Entity::SetLocalPosition( Vec3& position, bool propagateToComponents )
+	void Entity::SetLocalPosition( const Vec3& position, bool propagateToComponents )
 	{
 		mLocalTransform.SetPosition( position );
 		SetAllChildWorldTransformsDirty( ); 
@@ -521,14 +521,14 @@ namespace Enjon
 
 	//===========================================================================
 
-	void Entity::SetLocalScale( f32 scale, bool propagateToComponents )
+	void Entity::SetLocalScale( const f32& scale, bool propagateToComponents )
 	{
 		SetLocalScale( v3( scale ) ); 
 	}
 
 	//==============================================================================
 
-	void Entity::SetLocalScale( Vec3& scale, bool propagateToComponents )
+	void Entity::SetLocalScale( const Vec3& scale, bool propagateToComponents )
 	{
 		mLocalTransform.SetScale( scale );
 		SetAllChildWorldTransformsDirty( ); 
@@ -543,7 +543,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Entity::SetLocalRotation( Quaternion& rotation, bool propagateToComponents )
+	void Entity::SetLocalRotation( const Quaternion& rotation, bool propagateToComponents )
 	{
 		mLocalTransform.SetRotation( rotation );
 		SetAllChildWorldTransformsDirty( ); 
@@ -558,7 +558,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Entity::SetLocalRotation( Vec3& eulerAngles, bool propagateToComponents )
+	void Entity::SetLocalRotation( const Vec3& eulerAngles, bool propagateToComponents )
 	{
 		mLocalTransform.SetEulerRotation( eulerAngles );
 		SetAllChildWorldTransformsDirty( ); 
@@ -594,7 +594,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Entity::SetWorldPosition( Vec3& position, bool propagateToComponents )
+	void Entity::SetWorldPosition( const Vec3& position, bool propagateToComponents )
 	{ 
 		mWorldTransform.SetPosition( position );
 		CalculateLocalTransform( ); 
@@ -608,7 +608,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Entity::SetWorldScale( Vec3& scale, bool propagateToComponents )
+	void Entity::SetWorldScale( const Vec3& scale, bool propagateToComponents )
 	{
 		mWorldTransform.SetScale( scale );
 		SetAllChildWorldTransformsDirty( ); 
@@ -636,7 +636,7 @@ namespace Enjon
 
 	//==============================================================================
 
-	void Entity::SetWorldRotation( Quaternion& rotation, bool propagateToComponents )
+	void Entity::SetWorldRotation( const Quaternion& rotation, bool propagateToComponents )
 	{
 		mWorldTransform.SetRotation( rotation );
 		SetAllChildWorldTransformsDirty( ); 
@@ -650,7 +650,7 @@ namespace Enjon
 
 	//==============================================================================
 	
-	void Entity::SetWorldRotation( Vec3& eulerAngles, bool propagateToComponents )
+	void Entity::SetWorldRotation( const Vec3& eulerAngles, bool propagateToComponents )
 	{
 		mWorldTransform.SetEulerRotation( eulerAngles );
 		SetAllChildWorldTransformsDirty( ); 

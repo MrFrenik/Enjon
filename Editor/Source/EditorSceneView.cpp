@@ -15,8 +15,7 @@
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
 #include <Graphics/FrameBuffer.h>
-
-#include <fmt/format.h>
+#include <Utils/FileUtils.h>
 
 namespace Enjon
 {
@@ -55,7 +54,7 @@ namespace Enjon
 		mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
 		mSceneViewWindowSize = Vec2( width, height );
 
-		ImTextureID img = ( ImTextureID )currentTextureId;
+		ImTextureID img = ( ImTextureID )Int2VoidP(currentTextureId);
 		ImGui::Image( img, ImVec2( width, height ),
 			ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
 
@@ -79,12 +78,12 @@ namespace Enjon
 			// Draw shadow text
 			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.0f, 0.0f, 0.0f, 1.0f ) );
 			ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x + 1.0f, b.y - sz.y - padding.y + 1.0f ) ); 
-			ImGui::Text( sceneLabel.c_str( ) );
+			ImGui::Text( "%s", sceneLabel.c_str( ) );
 			ImGui::PopStyleColor( );
 
 			// Draw text
 			ImGui::SetCursorScreenPos( ImVec2( b.x - sz.x - padding.x, b.y - sz.y - padding.y ) ); 
-			ImGui::Text( sceneLabel.c_str( ) );
+			ImGui::Text( "%s", sceneLabel.c_str( ) );
 		} 
 
 		// Render tool bar
@@ -104,13 +103,13 @@ namespace Enjon
 			if ( mWindow->IsMouseInWindow( ) && mWindow->IsFocused( ) )
 			{ 
 				{
-					String label = fmt::format( "Asset: {}", abv->GetGrabbedAsset( )->GetName( ) ).c_str( );
+					String label = Utils::format( "Asset: %s", abv->GetGrabbedAsset( )->GetName().c_str() ).c_str( );
 					ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
 					ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
 					ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
 					ImGui::Begin( "##grabbed_asset_window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
 					{
-						ImGui::Text( label.c_str( ) );
+						ImGui::Text( "%s", label.c_str( ) );
 					}
 					ImGui::End( ); 
 				}

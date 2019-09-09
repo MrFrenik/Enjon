@@ -43,12 +43,12 @@ void main()
     vec4 albedo = texture(u_albedoMap, fs_in.TexCoords);
     if (albedo.a < 0.5) discard;
 
-    Metallic  = texture2D(u_metallicMap, fs_in.TexCoords).r;
-    Roughness = texture2D(u_roughnessMap, fs_in.TexCoords).r;
-    AO        = texture2D(u_aoMap, fs_in.TexCoords).r;
+    Metallic  = texture(u_metallicMap, fs_in.TexCoords).r;
+    Roughness = texture(u_roughnessMap, fs_in.TexCoords).r;
+    AO        = texture(u_aoMap, fs_in.TexCoords).r;
 
     AlbedoOut  = albedo * vec4(u_albedoColor.xyz, 1.0);
     NormalsOut  = vec4(normal, 1.0);
-    EmissiveOut = vec4(texture2D(u_emissiveMap, fs_in.TexCoords).xyz * u_emissiveIntensity, 1.0);
+    EmissiveOut = vec4(texture(u_emissiveMap, fs_in.TexCoords).xyz * u_emissiveIntensity, 1.0);
     MatPropsOut = vec4(Metallic, Roughness, AO, 1.0);
 }

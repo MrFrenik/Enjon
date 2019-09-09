@@ -269,13 +269,13 @@ namespace Enjon {
 			* @brief Calculates magnitude of this vector
 			* @return f32 - magnitude of vector
 			*/	
-			f32 Vec3::Length() const;
+			f32 Length() const;
 
 			/** 
 			* @brief Calculate squared magnitude of vector
 			* @return f32 - squared magnitude of vector
 			*/	
-			f32 Vec3::Length2() const;
+			f32 Length2() const;
 
 			/** 
 			* @brief Calculates distance between two vectors

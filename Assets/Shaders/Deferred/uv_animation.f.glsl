@@ -36,7 +36,7 @@ void main()
     DiffuseOut  = color;
     NormalsOut  = vec4(normal, 1.0);
     PositionOut = vec4(fs_in.FragPos, 1.0);
-    EmissiveOut = texture2D(emissiveMap, fs_in.TexCoords) * vec4(4, 4, 4, 1);
+    EmissiveOut = texture(emissiveMap, fs_in.TexCoords) * vec4(4, 4, 4, 1);
     MatOut      = vec4(0.1, 1.0, 0.0, 1.0);
     HeightOut   = vec4(Height, Height, Height, 1.0);
 }

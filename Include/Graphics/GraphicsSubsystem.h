@@ -81,32 +81,32 @@ namespace Enjon
 
 	struct ToneMapSettings
 	{
-		ToneMapSettings(float exposure, float gamma, float bloomscalar, float threshold, float saturation)
+		ToneMapSettings( const f32& exposure, const f32& gamma, const f32& bloomscalar, const f32& threshold, const f32& saturation)
 			: mExposure(exposure), mGamma(gamma), mBloomScalar(bloomscalar), mThreshold(threshold), mSaturation(saturation)
 		{}
 
-		float mExposure;
-		float mGamma;
-		float mBloomScalar;
-		float mThreshold;
-		float mSaturation;
+		f32 mExposure;
+		f32 mGamma;
+		f32 mBloomScalar;
+		f32 mThreshold;
+		f32 mSaturation;
 	};
 
 	struct FXAASettings
 	{
-		FXAASettings(float span, float mul, float min)
+		FXAASettings( const f32& span, const f32& mul, const f32& min)
 			: mSpanMax(span), mReduceMin(min), mReduceMul(mul), mEnabled(1)
 		{}
 
-		float mSpanMax;
-		float mReduceMin;
-		float mReduceMul;
+		f32 mSpanMax;
+		f32 mReduceMin;
+		f32 mReduceMul;
 		u32 mEnabled;
 	};
 
 	struct BloomSettings
 	{
-		BloomSettings(Vec3& blurWeights, Vec3& blurIterations, Vec3& blurRadius)
+		BloomSettings( const Vec3& blurWeights, const Vec3& blurIterations, const Vec3& blurRadius )
 			: mWeights(blurWeights), mIterations(blurIterations), mRadius(blurRadius)
 		{}
 
@@ -114,9 +114,9 @@ namespace Enjon
 		Vec3 mIterations;
 		Vec3 mRadius;
 
-		double mSmallGaussianCurve[16];
-		double mMediumGaussianCurve[16];
-		double mLargeGaussianCurve[16];
+		f64 mSmallGaussianCurve[16];
+		f64 mMediumGaussianCurve[16];
+		f64 mLargeGaussianCurve[16];
 	};
 
 	struct PickResult
@@ -430,7 +430,8 @@ namespace Enjon
 			//float mThreshold;
 			//float mSaturation;
 			ToneMapSettings mToneMapSettings = ToneMapSettings(0.77f, 2.2f, 0.61f, 7.74f, 1.3f);
-			BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(3, 3, 2), Vec3(0.001f, 0.006f, 0.015f)); 
+			// BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(3, 3, 2), Vec3(0.001f, 0.006f, 0.015f)); 
+			BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(1, 1, 1), Vec3(0.001f, 0.006f, 0.015f)); 
 
 			bool mShowGame = true;
 			bool mShowGraphicsOptionsWindow = true;

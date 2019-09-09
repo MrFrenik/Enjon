@@ -33,9 +33,9 @@ uniform float Scale;
 void main()
 {
     //RGBA of our diffuse color
-    vec4 DiffuseColor = texture2D(tex, fs_in.uv);
+    vec4 DiffuseColor = texture(tex, fs_in.uv);
 
-    vec4 FragPos = texture2D(u_position, fs_in.uv);
+    vec4 FragPos = texture(u_position, fs_in.uv);
 
     vec3 Position = FragPos.xyz;
 
@@ -50,7 +50,7 @@ void main()
         Lighting += Lights[i].Color.rgb * Intensity;
     }
 
-    // color = texture2D(u_position, fs_in.TexCoords);
+    // color = texture(u_position, fs_in.TexCoords);
     color = vec4(Lighting, DiffuseColor.a);
 
     // Emissiveness

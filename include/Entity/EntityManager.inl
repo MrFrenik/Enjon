@@ -117,10 +117,10 @@ T* EntityManager::GetComponent(Entity* entity)
 template <typename T>
 void EntityManager::DetachComponentFromEntity(Entity* entity)
 {
-	u32 compIdx = Enjon::GetComponentType<T>();
+	u32 compIdx = Component::GetComponentType<T>();
 	assert(mComponents.at(compIdx) != nullptr);
 
-	auto cWrapper = static_cast<ComponentWrapper<T>*>(mComponents.at(compIdx));
+	auto cWrapper = static_cast<ComponentArray*>(mComponents.at(compIdx));
 	auto cPtrList = &cWrapper->mComponentPtrs;
 	auto cMap = &cWrapper->mComponentMap; 
 	auto compPtr = &cWrapper->mComponentMap[entity->mID];

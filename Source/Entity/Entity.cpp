@@ -6,9 +6,8 @@
 #include "Engine.h"
 #include "SubsystemCatalog.h"
 #include "Serialize/ObjectArchiver.h"
+#include "Utils/FileUtils.h"
 #include "Base/World.h"
-
-#include <fmt/format.h>
 
 namespace Enjon 
 {
@@ -49,7 +48,7 @@ namespace Enjon
 					igm->InspectObject( c ); 
 					ImGui::PopFont( );
 
-					if ( ImGui::Button( fmt::format( "Remove##{}", (u32)c ).c_str() ) )
+					if ( ImGui::Button( Utils::format( "Remove##%zu", (u32)(usize)c ).c_str() ) )
 					{
 						RemoveComponent( c->Class( ) );
 					}
@@ -59,7 +58,7 @@ namespace Enjon
 			/*
 			if ( mArchetype )
 			{
-				ImGui::Text( fmt::format( "Archetype: {}", mArchetype->GetName( ) ).c_str( ) );
+				ImGui::Text( Utils::format( "Archetype: {}", mArchetype->GetName( ) ).c_str( ) );
 			}
 			else
 			{
@@ -68,28 +67,28 @@ namespace Enjon
 
 			if ( mPrototypeEntity )
 			{
-				ImGui::Text( fmt::format( "Prototype Entity: {}", mPrototypeEntity.Get()->GetUUID().ToString() ).c_str( ) );
-				ImGui::Text( fmt::format( "Prototype Entity: {}", mPrototypeEntity.Get( )->GetID( ) ).c_str( ) );
+				ImGui::Text( Utils::format( "Prototype Entity: {}", mPrototypeEntity.Get()->GetUUID().ToString() ).c_str( ) );
+				ImGui::Text( Utils::format( "Prototype Entity: {}", mPrototypeEntity.Get( )->GetID( ) ).c_str( ) );
 			}
 			else
 			{
 				ImGui::Text( "Prototype Entity: null" ); 
 			}
 
-			ImGui::Text( fmt::format( "ID: {}", GetID( ) ).c_str( ) );
-			ImGui::Text( fmt::format( "UUID: {}", GetUUID().ToString() ).c_str( ) );
+			ImGui::Text( Utils::format( "ID: {}", GetID( ) ).c_str( ) );
+			ImGui::Text( Utils::format( "UUID: {}", GetUUID().ToString() ).c_str( ) );
 
-			ImGui::Text( fmt::format( "Instanced Ent:" ).c_str( ) );
+			ImGui::Text( Utils::format( "Instanced Ent:" ).c_str( ) );
 			for ( auto& i : GetInstancedEntities() )
 			{
-				ImGui::Text( fmt::format( "\tID: {}", i.Get()->GetID( ) ).c_str( ) );
-				ImGui::Text( fmt::format( "\tUUID: {}", i.Get()->GetUUID().ToString() ).c_str( ) );
+				ImGui::Text( Utils::format( "\tID: {}", i.Get()->GetID( ) ).c_str( ) );
+				ImGui::Text( Utils::format( "\tUUID: {}", i.Get()->GetUUID().ToString() ).c_str( ) );
 
 			}
 			if ( mParent )
 			{ 
-				ImGui::Text( fmt::format( "Parent ID: {}", mParent.Get()->GetID( ) ).c_str( ) );
-				ImGui::Text( fmt::format( "Parent UUID: {}", mParent.Get( )->GetUUID( ).ToString( ) ).c_str( ) );
+				ImGui::Text( Utils::format( "Parent ID: {}", mParent.Get()->GetID( ) ).c_str( ) );
+				ImGui::Text( Utils::format( "Parent UUID: {}", mParent.Get( )->GetUUID( ).ToString( ) ).c_str( ) );
 			}
 			*/
 			
@@ -318,6 +317,8 @@ namespace Enjon
 					// Record property overrides
 					ObjectArchiver::RecordAllPropertyOverrides( sourceTransform, destTransform ); 
 				} break; 
+
+				default: break;
 			}
 		} 
 

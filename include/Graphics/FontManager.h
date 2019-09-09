@@ -14,7 +14,7 @@ namespace Enjon { namespace FontManager {
 	/* Init the FontManager */
 	void Init();
 
-	/* Add font to FontManager */
+	// Add font to FontManager 
 	void AddFont(std::unordered_map<std::string, Font*>& M, std::string N, Font* F);
 
 	// Get specificed animation with given name

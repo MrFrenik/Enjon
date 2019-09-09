@@ -27,7 +27,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			DirectionalLight(Vec3& direction, ColorRGBA32& color, float intensity = 1.0f);
+			DirectionalLight( const Vec3& direction, const ColorRGBA32& color, const f32& intensity = 1.0f );
 
 			/**
 			* @brief
@@ -51,25 +51,25 @@ namespace Enjon
 			* @brief
 			*/
 			ENJON_FUNCTION()
-			void SetDirection(const Vec3& direction);
+			void SetDirection( const Vec3& direction );
 
 			/**
 			* @brief
 			*/
 			ENJON_FUNCTION()
-			void SetColor(const ColorRGBA32& color);
+			void SetColor( const ColorRGBA32& color );
 
 			/**
 			* @brief
 			*/
 			ENJON_FUNCTION()
-			void SetIntensity(float intensity);
+			void SetIntensity( const f32& intensity );
 
 			/**
 			* @brief
 			*/
 			ENJON_FUNCTION()
-			void SetGraphicsScene(GraphicsScene* scene);
+			void SetGraphicsScene( GraphicsScene* scene );
 
 			/**
 			* @brief

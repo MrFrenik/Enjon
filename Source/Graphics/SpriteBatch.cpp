@@ -201,16 +201,12 @@ namespace Enjon {
 
 		void SpriteBatch::SortGlyphs()
 		{
-			switch (m_sortType) {
-			case GlyphSortType::BACK_TO_FRONT:
-				std::stable_sort(m_glyphpointers.begin(), m_glyphpointers.end(), CompareBackToFront);
-				break;
-			case GlyphSortType::FRONT_TO_BACK:
-				std::stable_sort(m_glyphpointers.begin(), m_glyphpointers.end(), CompareFrontToBack);
-				break;
-			case GlyphSortType::TEXTURE:
-				std::stable_sort(m_glyphpointers.begin(), m_glyphpointers.end(), CompareTexture);
-				break;
+			switch (m_sortType) 
+			{
+				default: break;
+				case GlyphSortType::BACK_TO_FRONT: 	std::stable_sort(m_glyphpointers.begin(), m_glyphpointers.end(), CompareBackToFront); break;
+				case GlyphSortType::FRONT_TO_BACK: 	std::stable_sort(m_glyphpointers.begin(), m_glyphpointers.end(), CompareFrontToBack); break;
+				case GlyphSortType::TEXTURE: 		std::stable_sort(m_glyphpointers.begin(), m_glyphpointers.end(), CompareTexture); break;
 			}
 		}
 

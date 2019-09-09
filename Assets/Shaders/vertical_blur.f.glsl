@@ -19,7 +19,7 @@ void main()
 	color = vec4(0.0, 0.0, 0.0, 1.0);
 	for (int i = 0; i < 16; i++)
 	{
-		color += texture2D(tex, v_blurTexCoords[i]) * u_blurWeights[i] * u_weight;
+		color += texture(tex, v_blurTexCoords[i]) * u_blurWeights[i] * u_weight;
 	}
 }
 

@@ -93,9 +93,9 @@ namespace Enjon
 
 	//========================================================================
 
-	void ByteBuffer::Resize( usize size )
+	void ByteBuffer::Resize( u32 size )
 	{
-		mBuffer = (u8*)realloc( mBuffer, sizeof( u8 ) * size );
+		mBuffer = (u8*)realloc( mBuffer, sizeof( u8 ) * (u32)size );
 		mReadPosition = 0;
 		assert( mBuffer != nullptr );
 	}
@@ -106,7 +106,7 @@ namespace Enjon
 	T ByteBuffer::Read( )
 	{
 		// Get size of T
-		usize size = sizeof( T );
+		u32 size = (u32)sizeof( T );
 
 		// Get value at position
 		T val = *(T*)( mBuffer + mReadPosition );
@@ -123,13 +123,13 @@ namespace Enjon
 	String ByteBuffer::Read< String >( )
 	{
 		// Get size of T from buffer
-		usize size = Read< usize >( );
+		u32 size = Read< u32 >( );
 
 		// String to fill out
 		String val = "";
 
 		// Get characters for string
-		for ( usize i = 0; i < size; ++i )
+		for ( u32 i = 0; i < size; ++i )
 		{
 			// Get character
 			char c = *(char*)( mBuffer + mReadPosition );
@@ -181,10 +181,10 @@ namespace Enjon
 	void ByteBuffer::Write( const T& val )
 	{
 		// Get size of val
-		usize size = sizeof( T );
+		u32 size = (u32)sizeof( T );
 
 		// Total amount of capacity needed to write this chunk of data
-		usize totalWriteSize = mWritePosition + size;
+		u32 totalWriteSize = mWritePosition + size;
 
 		// Make sure that enough bytes are present in buffer
 		if ( totalWriteSize >= mCapacity )
@@ -223,10 +223,10 @@ namespace Enjon
 	void ByteBuffer::Write< String >( const String& val )
 	{
 		// Get size of val
-		usize size = val.length( ); 
+		u32 size = (u32)val.length( ); 
 
 		// The total amount of storage needed to write this chunk of data
-		usize totalWriteSize = mWritePosition + size + sizeof( usize );
+		u32 totalWriteSize = (u32)( mWritePosition + (u32)size + (u32)sizeof( u32 ) );
 
 		if ( totalWriteSize >= mCapacity )
 		{
@@ -239,7 +239,7 @@ namespace Enjon
 		}
 
 		// Write length of string
-		Write< usize >( size );
+		Write< u32 >( (u32)size );
 
 		// Write characters of string
 		for ( auto& c : val )
@@ -278,7 +278,7 @@ namespace Enjon
 
 			// Get file size
 			infile.seekg( 0, std::ios::end );
-			usize size = infile.tellg( );
+			u32 size = (u32)infile.tellg( );
 			infile.seekg( 0, std::ios::beg );
 
 			// Create and read data
@@ -407,7 +407,7 @@ namespace Enjon
 
 	//========================================================================
 
-	void ByteBuffer::AdvanceReadPosition( const usize& amount )
+	void ByteBuffer::AdvanceReadPosition( const u32& amount )
 	{
 		// Cannot read past where we are
 		if ( mReadPosition + amount >= mSize )
@@ -430,7 +430,7 @@ namespace Enjon
 		auto leftData = left.GetData( );
 		auto rightData = right.GetData( );
 
-		for ( usize i = 0; i < left.GetSize( ); ++i )
+		for ( u32 i = 0; i < left.GetSize( ); ++i )
 		{
 			if ( leftData[ i ] != rightData[ i ] )
 			{
@@ -445,7 +445,6 @@ namespace Enjon
 
 	// Template Specializations
 	BYTE_BUFFER_RW( bool )
-	BYTE_BUFFER_RW( b1 )
 	BYTE_BUFFER_RW( s8 )
 	BYTE_BUFFER_RW( u8 )
 	BYTE_BUFFER_RW( u16 )
@@ -456,7 +455,5 @@ namespace Enjon
 	BYTE_BUFFER_RW( s64 )
 	BYTE_BUFFER_RW( u64 )
 	BYTE_BUFFER_RW( f64 )
-	BYTE_BUFFER_RW( usize )
-	BYTE_BUFFER_RW( Mat4x4 )
 }
 

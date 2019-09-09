@@ -6,12 +6,10 @@
 #include "ImGui/ImGuiManager.h"
 #include "Asset/AssetManager.h"
 #include "SubsystemCatalog.h"
+#include "Utils/FileUtils.h"
 #include "Engine.h"
 
-#include <fmt/format.h>
 #include <assert.h>
-
-//#include <windows.h>
 
 namespace Enjon 
 { 
@@ -302,7 +300,7 @@ namespace Enjon
 		// List shadergraph
 		const MetaClass* cls = Object::GetClass< ShaderGraph >( );
 		String label = mShaderGraph ? mShaderGraph->GetName( ) : cls->GetName( );
-		if ( ImGui::BeginCombo( fmt::format("##{}", "ShaderGraph" ).c_str(), label.c_str() ) )
+		if ( ImGui::BeginCombo( Utils::format("##%s", "ShaderGraph" ).c_str(), label.c_str() ) )
 		{
 			// For each record in assets
 			for ( auto& a : *shaderGraphs )
@@ -344,17 +342,19 @@ namespace Enjon
 
 				switch ( uniform->GetType( ) )
 				{
+					default: break;
+
 					case UniformType::Float:
 					{ 
 						// Display uniform name
-						ImGui::Text( uniform->GetName( ).c_str() );
+						ImGui::Text( "%s", uniform->GetName( ).c_str() );
 						ImGui::SameLine( );
 
 						// Get value from uniform
 						UniformFloat* uFloat = uniform->ConstCast< UniformFloat >( );
 						f32 val = uFloat->GetValue( );
 
-						if ( ImGui::DragFloat( fmt::format( "##{}", uniform->GetName() ).c_str( ), &val ) )
+						if ( ImGui::DragFloat( Utils::format( "##%s", uniform->GetName().c_str() ).c_str( ), &val ) )
 						{
 							// If override exists, set value
 							if ( bHasOverride )
@@ -380,7 +380,7 @@ namespace Enjon
 					case UniformType::Vec2:
 					{ 
 						// Display uniform name
-						ImGui::Text( uniform->GetName( ).c_str() );
+						ImGui::Text( "%s", uniform->GetName( ).c_str() );
 						ImGui::SameLine( );
 
 						// Get value from uniform
@@ -388,7 +388,7 @@ namespace Enjon
 						Vec2 val = uVec2->GetValue( );
 						f32 vals[2] = { val.x, val.y };
 
-						if ( ImGui::DragFloat2( fmt::format( "##{}", uVec2->GetName() ).c_str( ), (f32*)vals ) )
+						if ( ImGui::DragFloat2( Utils::format( "##%s", uVec2->GetName().c_str() ).c_str( ), (f32*)vals ) )
 						{
 							// If override exists, set value
 							if ( bHasOverride )
@@ -414,7 +414,7 @@ namespace Enjon
 					case UniformType::Vec3:
 					{ 
 						// Display uniform name
-						ImGui::Text( uniform->GetName( ).c_str() );
+						ImGui::Text( "%s", uniform->GetName( ).c_str() );
 						ImGui::SameLine( );
 
 						// Get value from uniform
@@ -422,7 +422,7 @@ namespace Enjon
 						Vec3 val = uVec3->GetValue( );
 						f32 vals[3] = { val.x, val.y, val.z };
 
-						if ( ImGui::DragFloat3( fmt::format( "##{}", uVec3->GetName() ).c_str( ), (f32*)vals ) )
+						if ( ImGui::DragFloat3( Utils::format( "##%s", uVec3->GetName().c_str() ).c_str( ), (f32*)vals ) )
 						{
 							// If override exists, set value
 							if ( bHasOverride )
@@ -448,7 +448,7 @@ namespace Enjon
 					case UniformType::Vec4:
 					{ 
 						// Display uniform name
-						ImGui::Text( uniform->GetName( ).c_str() );
+						ImGui::Text( "%s", uniform->GetName( ).c_str() );
 						ImGui::SameLine( );
 
 						// Get value from uniform
@@ -456,7 +456,7 @@ namespace Enjon
 						Vec4 val = uVec4->GetValue( );
 						f32 vals[4] = { val.x, val.y, val.z, val.w };
 
-						if ( ImGui::DragFloat4( fmt::format( "##{}", uVec4->GetName() ).c_str( ), (f32*)vals ) )
+						if ( ImGui::DragFloat4( Utils::format( "##%s", uVec4->GetName().c_str() ).c_str( ), (f32*)vals ) )
 						{
 							// If override exists, set value
 							if ( bHasOverride )
@@ -482,7 +482,7 @@ namespace Enjon
 					case UniformType::TextureSampler2D:
 					{
 						// Display uniform name
-						ImGui::Text( uniform->GetName( ).c_str( ) );
+						ImGui::Text( "%s", uniform->GetName( ).c_str( ) );
 						ImGui::SameLine( );
 
 						// Get value from uniform
@@ -496,7 +496,7 @@ namespace Enjon
 						Vec2 padding( 20.0f, 7.0f );
 						f32 height = ImGui::GetWindowSize( ).y - ImGui::GetCursorPosY( ) - padding.y;
 
-						if ( ImGui::BeginCombo( fmt::format( "##{}", uTexture->GetName( ) ).c_str( ), comboLabel.c_str( ), ImGuiComboFlags_HeightRegular ) )
+						if ( ImGui::BeginCombo( Utils::format( "##%s", uTexture->GetName().c_str() ).c_str( ), comboLabel.c_str( ), ImGuiComboFlags_HeightRegular ) )
 						{
 							// Draw for filtering
 							filter.Draw( "" );

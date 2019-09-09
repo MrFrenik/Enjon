@@ -1,8 +1,6 @@
 // Copyright 2016-2017 John Jackson. All Rights Reserved.
 // File: AssetUtils.h
 
-#pragma once
-
 #include "Asset/AssetUtils.h"
 #include "Asset/AssetManager.h"
 #include "Engine.h"

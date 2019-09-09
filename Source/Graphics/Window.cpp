@@ -324,7 +324,7 @@ namespace Enjon
 						{
 							// Need to push back into static window for destruction at top of frame
 							WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-							ws->DestroyWindow( this );
+							ws->DestroyWindow( this->mID );
 							//return Result::FAILURE;
 						}
 					} break; 
@@ -348,10 +348,12 @@ namespace Enjon
 		mDroppedFiles.clear( ); 
 
 		// Cache main window
-		Window* mainWindow = gfx->GetMainWindow( );
+		// Window* mainWindow = gfx->GetMainWindow( );
+
+		Window* mainWindow = EngineSubsystem( WindowSubsystem )->GetWindow( 0 );
 
 		// Remove from graphics subsystem
-		gfx->RemoveWindow( this ); 
+		// gfx->RemoveWindow( this ); 
 
 		// Destroy SDL window
 		SDL_DestroyWindow( m_sdlWindow );
@@ -361,7 +363,7 @@ namespace Enjon
 		// Need to check for main window to destroy everything
 		if ( mainWindow == this )
 		{ 
-			for ( auto& w : gfx->GetWindows( ) )
+			for ( auto& w : EngineSubsystem( WindowSubsystem )->GetWindows( ) )
 			{
 				windowsToPostDestroy.push_back( w );
 			}
@@ -471,14 +473,14 @@ namespace Enjon
 
 	void WindowSubsystem::InitSDLCursors( )
 	{ 
-		mSDLCursors[ CursorType::Arrow ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_ARROW );
-		mSDLCursors[ CursorType::IBeam ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_IBEAM );
-		mSDLCursors[ CursorType::SizeAll ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEALL );
-		mSDLCursors[ CursorType::SizeNESW ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENESW );
-		mSDLCursors[ CursorType::SizeNWSE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENWSE );
-		mSDLCursors[ CursorType::SizeWE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEWE );
-		mSDLCursors[ CursorType::SizeNS ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENS );
-		mSDLCursors[ CursorType::Hand ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_HAND );
+		mSDLCursors[ (u32)CursorType::Arrow ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_ARROW );
+		mSDLCursors[ (u32)CursorType::IBeam ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_IBEAM );
+		mSDLCursors[ (u32)CursorType::SizeAll ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEALL );
+		mSDLCursors[ (u32)CursorType::SizeNESW ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENESW );
+		mSDLCursors[ (u32)CursorType::SizeNWSE ]	= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENWSE );
+		mSDLCursors[ (u32)CursorType::SizeWE ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZEWE );
+		mSDLCursors[ (u32)CursorType::SizeNS ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_SIZENS );
+		mSDLCursors[ (u32)CursorType::Hand ]		= SDL_CreateSystemCursor( SDL_SYSTEM_CURSOR_HAND );
 	}
 
 	//============================================================================================== 
@@ -597,7 +599,7 @@ namespace Enjon
 
 	SDL_Cursor* WindowSubsystem::GetCursor( CursorType type )
 	{
-		return mSDLCursors[ type ];
+		return mSDLCursors[ (u32)type ];
 	} 
 
 	s32 WindowSubsystem::AddNewWindow( WindowParams params )
@@ -607,10 +609,10 @@ namespace Enjon
 		return params.id;
 	}
 
-	void WindowSubsystem::DestroyWindow( Window* window )
-	{ 
-		mWindowsToDestroy.push_back( window->mID );
-	}
+	// void WindowSubsystem::DestroyWindow( Window* window )
+	// { 
+	// 	mWindowsToDestroy.push_back( window->mID );
+	// }
 
 	// Want to destroy a window by a given id
 	void WindowSubsystem::DestroyWindow( const u32& id )

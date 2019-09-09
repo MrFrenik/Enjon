@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 2.6)
 # Declare project file
 project(Enjon)
 
-message( status ${VS_DIR} )
-
 # set top level directory
 set (ENJON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/)
 set (REFLECTION_DIR "${ENJON_DIR}/GENERATOR/")
@@ -21,26 +19,46 @@ set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
 # Turn on ability to create folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Set compiler flags and build options
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /W1")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD /W1")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /W1")
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()	
+	
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")	
 
-message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
+# Set compiler flags and build options
+if (MSVC)
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /W1 -std=c++11")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD /W1 -std=c++11")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /W1 -std=c++11")
+else()
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -O3")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -std=c++11")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11")
+endif()
+set(CMAKE_CXX_STANDARD 11)
+
+message("cxx Flags:" ${CMAKE_CXX_FLAGS})
 
 # Add additional sub-directories
-add_subdirectory( Generator )
-add_subdirectory( Editor )
+if (MSVC)
+	add_subdirectory( Generator )
+	add_subdirectory( Editor )
+endif()
 #add_subdirectory( TestSuite )
 
 # Add include directories
 include_directories(${ENJON_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
+					${ENJON_DIR}ThirdParty/Build/Include/Bullet
 )
 
 # Output generation file
 if (NOT IS_DIRECTORY ${ENJON_GENERATED_DIR})
-	file(MAKE_DIRECTORY ${dir})
+	file(MAKE_DIRECTORY ${ENJON_GENERATED_DIR})
+endif()
+
+if (NOT IS_DIRECTORY ${ENJON_BUILD_DIR}/Generator/Intermediate/)
+	file(MAKE_DIRECTORY ${ENJON_BUILD_DIR}/Generator/Intermediate)
 endif()
 
 if ( NOT EXISTS ${ENJON_GENERATED_DIR}/Enjon_Generated.cpp )
@@ -50,6 +68,7 @@ endif()
 # Add lib directories
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/OSX/Release)
 
 set(ENJON_SRC "${ENJON_DIR}/Source")
 set(ENJON_INC "${ENJON_DIR}/Include")
@@ -124,7 +143,83 @@ file(GLOB_RECURSE SRC_SCENE
 	"${ENJON_SRC}/Scene/*.cpp"
 	"${ENJON_INC}/Scene/*.inl") 
 
-file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Assets/Shaders/*.glsl" ) 
+set(ENJON_BULLET_DIR ${ENJON_DIR}/ThirdParty/Build/Include/Bullet)
+
+file(GLOB_RECURSE SRC_BULLET
+
+	"${ENJON_BULLET_DIR}/*.h"
+	"${ENJON_BULLET_DIR}/*.cpp"
+
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/*.cpp"
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/*.h"
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/shared/*.h"
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/shared/*.cpp"
+
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/NarrowPhaseCollision/*.h"
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/NarrowPhaseCollision/*.cpp"
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/NarrowPhaseCollision/shared/*.cpp"
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/NarrowPhaseCollision/shared/*.h"
+	"${ENJON_BULLET_DIR}/Bullet3Collision/BroadPhaseCollision/NarrowPhaseCollision/shared/*.h"
+
+	"${ENJON_BULLET_DIR}/Bullet3Common/shared/*.h"
+	"${ENJON_BULLET_DIR}/Bullet3Common/shared/*.cpp"
+	"${ENJON_BULLET_DIR}/Bullet3Common/*.cpp"
+	"${ENJON_BULLET_DIR}/Bullet3Common/*.h"
+
+	"${ENJON_BULLET_DIR}/Bullet3Dynamics/*.h"
+	"${ENJON_BULLET_DIR}/Bullet3Dynamics/*.cpp"
+
+	"${ENJON_BULLET_DIR}/Bullet3Dynamics/ConstraintSolver/*.cpp"
+	"${ENJON_BULLET_DIR}/Bullet3Dynamics/ConstraintSolver/*.h"
+
+	"${ENJON_BULLET_DIR}/Bullet3Dynamics/shared/*.h"
+	"${ENJON_BULLET_DIR}/Bullet3Dynamics/shared/*.cpp"
+
+	"${ENJON_BULLET_DIR}/Bullet3Geometry/*.cpp"
+	"${ENJON_BULLET_DIR}/Bullet3Geometry/*.h"
+
+	 "${ENJON_BULLET_DIR}/BulletCollision/*.h"
+	 "${ENJON_BULLET_DIR}/BulletCollision/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletCollision/BroadPhaseCollision/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletCollision/BroadPhaseCollision/*.h"
+	 "${ENJON_BULLET_DIR}/BulletCollision/CollisionDispatch/*.h"
+	 "${ENJON_BULLET_DIR}/BulletCollision/CollisionDispatch/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletCollision/CollisionShapes/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletCollision/CollisionShapes/*.h"
+	 "${ENJON_BULLET_DIR}/BulletCollision/Gimpact/*.h"
+	 "${ENJON_BULLET_DIR}/BulletCollision/Gimpact/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletCollision/NarrowPhaseCollision/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletCollision/NarrowPhaseCollision/*.h"
+
+	 "${ENJON_BULLET_DIR}/BulletDynamics/*.h"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/Character/*.h"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/Character/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/ConstraintSolver/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/ConstraintSolver/*.h"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/Dynamics/*.h"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/Dynamics/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/Featherstone/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/Featherstone/*.h"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/MLCPSolvers/*.h"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/MLCPSolvers/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/Vehicle/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletDynamics/Vehicle/*.h"
+
+	 "${ENJON_BULLET_DIR}/BulletInverseDynamics/*.h"
+	 "${ENJON_BULLET_DIR}/BulletInverseDynamics/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletInverseDynamics/details/*.cpp"
+	 "${ENJON_BULLET_DIR}/BulletInverseDynamics/details/*.h"
+
+	 "${ENJON_BULLET_DIR}/BulletSoftBody/*.h"
+	 "${ENJON_BULLET_DIR}/BulletSoftBody/*.cpp"
+
+	 "${ENJON_BULLET_DIR}/LinearMath/*.cpp"
+	 "${ENJON_BULLET_DIR}/LinearMath/*.h"
+	 "${ENJON_BULLET_DIR}/LinearMath/TaskScheduler/*.cpp"
+	 "${ENJON_BULLET_DIR}/LinearMath/TaskScheduler/*.h"
+)
+
+file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Assets/Shaders/*.glsl" )
 
 file(GLOB_RECURSE REFLECTION_INCLUDES
 	"${ENJON_INC}/*.h"
@@ -167,6 +262,7 @@ set(
 	${SRC_SHADER_GRAPH}
 	${SRC_SERIALIZE}
 	${GENERAL_SOURCES}
+	${SRC_BULLET}
 	${SHADERS}
 ) 
 
@@ -177,25 +273,40 @@ endif()
 add_library( Enjon ${ALL_SRC})
 
 # Link libraries
-target_link_libraries( Enjon debug Opengl32.lib optimized Opengl32.lib ) 
-target_link_libraries( Enjon debug SDL2_d.lib optimized SDL2.lib )
-target_link_libraries( Enjon debug SDL2main_d.lib optimized SDL2main.lib )
-target_link_libraries( Enjon debug glew32_d.lib optimized glew32.lib )
-target_link_libraries( Enjon debug glew32s_d.lib optimized glew32s.lib )
-target_link_libraries( Enjon debug freetype_d.lib optimized freetype.lib )
-target_link_libraries( Enjon debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
-target_link_libraries( Enjon debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
-target_link_libraries( Enjon debug Bullet3Common_d.lib optimized Bullet3Common.lib )
-target_link_libraries( Enjon debug LinearMath_d.lib optimized LinearMath.lib )
-target_link_libraries( Enjon debug BulletDynamics_d.lib optimized BulletDynamics.lib )
-target_link_libraries( Enjon debug BulletCollision_d.lib optimized BulletCollision.lib )
-target_link_libraries( Enjon debug fmt_d.lib optimized fmt.lib )
-target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
-target_link_libraries( Enjon debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
-target_link_libraries( Enjon debug nfd_d.lib optimized nfd.lib ) 
+if (MSVC)
+	target_link_libraries( Enjon debug Opengl32.lib optimized Opengl32.lib ) 
+	target_link_libraries( Enjon debug SDL2_d.lib optimized SDL2.lib )
+	target_link_libraries( Enjon debug SDL2main_d.lib optimized SDL2main.lib )
+	target_link_libraries( Enjon debug glew32_d.lib optimized glew32.lib )
+	target_link_libraries( Enjon debug glew32s_d.lib optimized glew32s.lib )
+	target_link_libraries( Enjon debug freetype_d.lib optimized freetype.lib )
+	target_link_libraries( Enjon debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
+	target_link_libraries( Enjon debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
+	target_link_libraries( Enjon debug Bullet3Common_d.lib optimized Bullet3Common.lib )
+	target_link_libraries( Enjon debug LinearMath_d.lib optimized LinearMath.lib )
+	target_link_libraries( Enjon debug BulletDynamics_d.lib optimized BulletDynamics.lib )
+	target_link_libraries( Enjon debug BulletCollision_d.lib optimized BulletCollision.lib )
+	target_link_libraries( Enjon debug fmt_d.lib optimized fmt.lib )
+	target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
+	target_link_libraries( Enjon debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
+	target_link_libraries( Enjon debug nfd_d.lib optimized nfd.lib ) 
+else()
+	target_link_libraries( Enjon libSDL2.a )
+	target_link_libraries( Enjon libSDL2main.a )
+	# target_link_libraries( Enjon libBullet3Collision.a )
+	# target_link_libraries( Enjon libBullet3Dynamics.a )
+	# target_link_libraries( Enjon libBullet3Common.a )
+	# target_link_libraries( Enjon libLinearMath.a )
+	# target_link_libraries( Enjon libBulletDynamics.a )
+	# target_link_libraries( Enjon libBulletCollision.a )
+	target_link_libraries( Enjon libassimp.a )
+	target_link_libraries( Enjon libIrrXML.a )
+endif()
 
-add_dependencies( Enjon Reflection )
-add_dependencies( EnjonEditor Enjon )
+if (MSVC)
+	add_dependencies( Enjon Reflection )
+	add_dependencies( EnjonEditor Enjon )
+endif()
 
 source_group("Base"			FILES ${SRC_BASE})
 source_group("Entity"		FILES ${SRC_ENTITY})
@@ -256,25 +367,24 @@ foreach(dir ${BUILD_DIRECTORIES})
 endforeach(dir)
 
 # Add DLLs to builds
-foreach(dll ${DLL_LIST})
+if (MSVC)
+	foreach(dll ${DLL_LIST})
+		add_custom_command(TARGET Enjon POST_BUILD        		
+		    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
+		        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
+		        ${ENJON_BUILD_DIR}/RelWithDebInfo/)
 
-	add_custom_command(TARGET Enjon POST_BUILD        		
-	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
-	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
-	        ${ENJON_BUILD_DIR}/RelWithDebInfo/)
+		add_custom_command(TARGET Enjon POST_BUILD        		
+		    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
+		        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
+		        ${ENJON_BUILD_DIR}/Release/)
 
-	add_custom_command(TARGET Enjon POST_BUILD        		
-	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
-	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
-	        ${ENJON_BUILD_DIR}/Release/)
-
-	add_custom_command(TARGET Enjon POST_BUILD        		
-	    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
-	        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
-	        ${ENJON_BUILD_DIR}/Debug/)
-
-endforeach(dll) 
-
+		add_custom_command(TARGET Enjon POST_BUILD        		
+		    COMMAND ${CMAKE_COMMAND} -E copy_if_different  		
+		        "${ENJON_DIR}/ThirdParty/Build/DLLs/${dll}"   
+		        ${ENJON_BUILD_DIR}/Debug/)
+	endforeach(dll) 
+endif()
 
 # Create reflection list
 file(WRITE ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#target_dir \"${ENJON_DIR}\"\n") 
@@ -285,13 +395,13 @@ file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "#files\n")
 
 # Add all reflection include files
 foreach( file ${REFLECTION_INCLUDES} )
-
-	file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "\"${file}\"\n") 
-
+	file(APPEND ${ENJON_BUILD_DIR}/Generator/reflection.cfg "\"${file}\"\n")
 endforeach(file) 
 
-add_custom_command(TARGET Enjon PRE_BUILD
-	COMMAND call ${ENJON_RELEASE_DIR}/Reflection.exe ARGS --target-path ${ENJON_DIR}/
-	)
-
+# Pre build events are only working for MSVC...annoying
+if (MSVC)
+	add_custom_command(TARGET Enjon PRE_BUILD
+		COMMAND call ${ENJON_RELEASE_DIR}/Reflection.exe ARGS --target-path ${ENJON_DIR}/
+		)
+endif()
 

@@ -12,7 +12,7 @@
 
 #include <string>
 #include <unordered_map>
-#include <filesystem>
+#include "fs/filesystem.hpp"
 
 namespace Enjon
 {
@@ -235,7 +235,7 @@ namespace Enjon
 				// If found, then return asset
 				if ( query != mAssetsByName.end() ) 
 				{
-					handle = AssetHandle<T>( query->second.mAsset ); 
+					handle = AssetHandle<T>( query->second->mAsset ); 
 				}
 				// Else return default asset
 				else
@@ -246,79 +246,11 @@ namespace Enjon
 				return handle; 
 			} 
 
+			/*
+			* @brief Implementation in AssetManager.h
+			*/
 			template < typename T >
-			Result ConstructAsset( const AssetManager* manager, AssetHandle< T >* handle, const String& assetName = "", const String& path = "" )
-			{
-				// Get default asset from this loader
-				T* defaultAsset = (T*)GetDefaultAsset( );
-
-				// Construct unique name for asset to be saved
-				String typeName = defaultAsset->Class( )->GetName( ); 
-				String originalAssetName = assetName.compare("") != 0 ? assetName : "New" + typeName;
-				String usedAssetName = originalAssetName; 
-
-				// TODO(): MAKE THIS GO THROUGH A CENTRALIZED GRAPHICS FACTORY
-				std::experimental::filesystem::path originalPath = manager->GetAssetsDirectoryPath() + "Cache/";
-				std::experimental::filesystem::path p = originalPath.string() + "/" + usedAssetName + GetAssetFileExtension();
-
-				// If path is given
-				if ( path.compare( "" ) != 0 )
-				{
-					originalPath = path;
-					p = originalPath.string( ) + "/" + usedAssetName + GetAssetFileExtension( );
-				}
-
-				// Look for cached asset based on name and continue until name is unique
-				u32 index = 0;
-				while ( std::experimental::filesystem::exists( p ) )
-				{
-					index++;
-					usedAssetName = originalAssetName + std::to_string( index );
-					p = std::experimental::filesystem::path( originalPath.string() + "/" + usedAssetName + GetAssetFileExtension() );
-				} 
-
-				// Get qualified name for asset
-				String finalAssetName = AssetLoader::GetQualifiedName( p.string( ) );
-
-				// Construct new asset
-				T* asset = new T( ); 
-
-				// Attempt to copy default asset
-				Result res = asset->CopyFromOther( defaultAsset );
-				if ( res == Result::INCOMPLETE )
-				{
-					// Copy values from default asset
-					*asset = *defaultAsset; 
-				}
-
-				//====================================================================================
-				// Asset header information
-				//====================================================================================
-				AssetRecordInfo info;
-				asset->mName = finalAssetName;
-				asset->mLoader = this;
-				asset->mUUID = UUID::GenerateUUID( ); 
-				asset->mFilePath = p.string( );
-				asset->mIsDefault = false;
-
-				info.mAsset = asset;
-				info.mAssetName = asset->mName;
-				info.mAssetUUID = asset->mUUID;
-				info.mAssetFilePath = p.string( );					
-				info.mAssetLoadStatus = AssetLoadStatus::Loaded;
-				info.mAssetLoaderClass = Class( );
-				info.mAssetDisplayName = usedAssetName;
-				info.mAssetClass = asset->Class( );
-
-				// Add to loader
-				const Asset* cnstAsset = AddToAssets( info ); 
-
-				// Set handle with new asset
-				handle->Set( cnstAsset );
-
-				// Return incomplete so that manager knows to serialize asset
-				return Result::INCOMPLETE;
-			}
+			Result ConstructAsset( const AssetManager* manager, AssetHandle< T >* handle, const String& assetName = "", const String& path = "" );
 
 			/**
 			* @brief 
@@ -394,6 +326,33 @@ namespace Enjon
 			*/
 			virtual Asset* LoadResourceFromImporter( const ImportOptions* options ); 
 	};
+
+	//====================================================================================
+	//====================================================================================
+
+	//===============
+	// Asset Handle
+	//===============
+
+	template < typename T >
+	void AssetHandle< T >::Unload( )
+	{
+		// Unload asset from record info if valid
+		if ( mAsset )
+		{
+			const_cast< AssetRecordInfo* >( mAsset->GetAssetRecordInfo( ) )->UnloadAsset( );
+		}
+	}
+
+	template < typename T >
+	void AssetHandle< T >::Reload( )
+	{
+		if ( mAsset )
+		{
+			// Reload and reset asset
+			const_cast<AssetRecordInfo*>( mAsset->GetAssetRecordInfo( ) )->ReloadAsset( );
+		}
+	}
 } 
 
 #endif

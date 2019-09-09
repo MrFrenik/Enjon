@@ -4,14 +4,14 @@
 #include <Utils/FileUtils.h>
 #include <Engine.h>
 
-#include <filesystem>
+#include <fs/filesystem.hpp>
 
 #ifdef ENJON_SYSTEM_WINDOWS 
 	#define WINDOWS_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
 
-namespace FileSystem = std::experimental::filesystem; 
+namespace FileSystem = ghc::filesystem; 
 
 namespace Enjon
 {
@@ -230,8 +230,8 @@ namespace Enjon
 		CloseHandle( pi.hThread );
 
 		delete cmdLineStrBuffer;
-
 #endif
+		
 		return Result::SUCCESS; 
 	} 
 

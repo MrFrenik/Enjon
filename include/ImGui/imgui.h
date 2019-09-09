@@ -1584,6 +1584,8 @@ struct ImDrawData
     int             CmdListsCount;
     int             TotalVtxCount;          // For convenience, sum of all cmd_lists vtx_buffer.Size
     int             TotalIdxCount;          // For convenience, sum of all cmd_lists idx_buffer.Size
+    ImVec2          DisplayPos;             // Upper-left position of the viewport to render (== upper-left of the orthogonal projection matrix to use)
+    ImVec2          DisplaySize;            // Size of the viewport to render (== io.DisplaySize for the main viewport) (DisplayPos + DisplaySize == lower-right of the orthogonal projection matrix to use)
 
     // Functions
     ImDrawData() { Clear(); }

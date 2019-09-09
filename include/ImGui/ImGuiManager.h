@@ -11,7 +11,7 @@
 #include "Subsystem.h"
 #include "Defines.h"
 
-#include <SDL2/sdl.h>
+#include <SDL2/SDL.h>
 
 #include <functional>
 #include <unordered_map>

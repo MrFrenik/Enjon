@@ -58,57 +58,57 @@ namespace Enjon
 			/** 
 			* @brief
 			*/
-			SpotLight(Vec3& position, SLParams& params, ColorRGBA32& color, float intensity = 1.0f); 
+			SpotLight( const Vec3& position, const SLParams& params, const ColorRGBA32& color, const f32& intensity = 1.0f ); 
 
 			/** 
 			* @brief
 			*/
-			Vec3& GetPosition() { return mPosition; }
+			Vec3 GetPosition() { return mPosition; }
 
 			/** 
 			* @brief
 			*/
-			ColorRGBA32& GetColor() { return mColor; }
+			ColorRGBA32 GetColor() { return mColor; }
 
 			/** 
 			* @brief
 			*/
-			SLParams& GetParams() { return mParams; }
+			SLParams GetParams() { return mParams; }
 
 			/** 
 			* @brief
 			*/
-			float GetIntensity() { return mIntensity; }
+			f32 GetIntensity() { return mIntensity; }
 
 			/** 
 			* @brief
 			*/
-			void SetPosition(Vec3& position);
+			void SetPosition( const Vec3& position );
 
 			/** 
 			* @brief
 			*/
-			void SetDirection(Vec3& direction);
+			void SetDirection( const Vec3& direction );
 
 			/** 
 			* @brief
 			*/
-			void SetColor(ColorRGBA32& color);
+			void SetColor( const ColorRGBA32& color );
 
 			/** 
 			* @brief
 			*/
-			void SetIntensity(float intensity);
+			void SetIntensity( const f32& intensity );
 
 			/** 
 			* @brief
 			*/
-			void SetGraphicsScene(GraphicsScene* scene);
+			void SetGraphicsScene( GraphicsScene* scene );
 
 			/** 
 			* @brief
 			*/
-			void SetParams(SLParams& params);
+			void SetParams( const SLParams& params );
 
 		private:
 			ENJON_PROPERTY( Editable )

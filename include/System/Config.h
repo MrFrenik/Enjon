@@ -20,22 +20,24 @@
 	// Mac	
 	#define ENJON_SYSTEM_OSX
 
-	// UNIX systems
-	#if defined(__linux__) 
-		// Linux
-		#define ENJON_SYSTEM_LINUX
-	#elif defined(__FreeBSD__) || defined (__FreeBSD_kernel__)
-		// FreeBSD
-		#define ENJON_SYSTEM_FREEBSD
+// UNIX systems
+#elif defined(__linux__) 
+	// Linux
+	#define ENJON_SYSTEM_LINUX
+
+#elif defined(__FreeBSD__) || defined (__FreeBSD_kernel__)
+	// FreeBSD
+	#define ENJON_SYSTEM_FREEBSD
+
 	#else
 		#error This UNIX operating system is not supported by Enjon
-	#endif
-#else
-	
-	// Unsupported OS
-	#error This operating system is not supported by OS 
-
 #endif
+// #else
+	
+// 	// Unsupported OS
+// 	#error This operating system is not supported by OS 
+
+// #endif
 
 //////////////////////////
 // Environment Bit Size //

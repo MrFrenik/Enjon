@@ -49,35 +49,35 @@ namespace Enjon
 
 	//==================================================================================
 
-	void PointLightComponent::SetColor(ColorRGBA32& color)
+	void PointLightComponent::SetColor( const ColorRGBA32& color )
 	{
 		mLight.SetColor(color);
 	}
 
 	//==================================================================================
 
-	void PointLightComponent::SetIntensity(float intensity)
+	void PointLightComponent::SetIntensity( const f32& intensity )
 	{
 		mLight.SetIntensity(intensity);
 	}
 
 	//==================================================================================
 
-	void PointLightComponent::SetPosition(Vec3& position)
+	void PointLightComponent::SetPosition(const Vec3& position )
 	{
 		mLight.SetPosition(position);
 	}
 
 	//==================================================================================
 
-	void PointLightComponent::SetRadius(float radius)
+	void PointLightComponent::SetRadius( const f32& radius )
 	{
 		mLight.SetRadius(radius);
 	}
 
 	//==================================================================================
 
-	void PointLightComponent::SetAttenuationRate(float rate)
+	void PointLightComponent::SetAttenuationRate( const f32& rate )
 	{
 		mLight.SetAttenuationRate(rate);
 	}

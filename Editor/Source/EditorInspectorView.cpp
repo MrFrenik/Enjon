@@ -14,8 +14,7 @@
 #include <Entity/Components/RigidBodyComponent.h>
 #include <Serialize/ObjectArchiver.h>
 
-#include <filesystem>
-#include <fmt/format.h>
+#include <fs/filesystem.hpp>
 
 namespace Enjon
 {
@@ -77,7 +76,7 @@ namespace Enjon
 					if ( !ent->HasComponent( cls ) )
 					{
 						// Add component to mEntity
-						if ( ImGui::Selectable( fmt::format( "\t{}", cls->GetName( ) ).c_str() ) )
+						if ( ImGui::Selectable( Utils::format( "\t%s", cls->GetName().c_str() ).c_str() ) )
 						{
 							ent->AddComponent( cls );
 						} 
@@ -150,7 +149,7 @@ namespace Enjon
 			centerPos.x -= textSize.x / 2.0f;
 			centerPos.y -= textSize.y / 2.0f;
 			ImGui::SetCursorScreenPos( centerPos );
-			ImGui::Text( text );
+			ImGui::Text( "%s", text );
 			ImGui::PopStyleColor( ); 
 		}
 	}

@@ -114,7 +114,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			virtual Result Initialize();
+			virtual Result Initialize() override;
 
 			/**
 			*@brief
@@ -186,7 +186,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void PhysicsSubsystem::CheckCollisions( const f32& dt );
+			void CheckCollisions( const f32& dt );
 
 		private:
 			BulletDynamicPhysicsWorld* mDynamicsWorld						= nullptr;

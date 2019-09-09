@@ -72,7 +72,7 @@ namespace Enjon
 		buffer->Write< UUID >( entity.Get( )->HasPrototypeEntity( ) ? entity.Get( )->GetPrototypeEntity( ).Get( )->GetUUID( ) : UUID::Invalid( ) );
 
 		// Serialize instanced entity size
-		buffer->Write< usize >( entity.Get( )->GetInstancedEntities( ).size( ) );
+		buffer->Write< u32 >( (u32)entity.Get( )->GetInstancedEntities( ).size( ) );
 
 		// Serialize all entity instance uuids
 		for ( auto& e : entity.Get( )->GetInstancedEntities( ) )
@@ -105,7 +105,7 @@ namespace Enjon
 			{
 				SerializeObjectDataDefault( c, compCls, &temp );
 			}
-			buffer->Write< usize >( temp.GetSize( ) );
+			buffer->Write< u32 >( temp.GetSize( ) );
 
 			// Serialize component data
 			Result res = c->SerializeData( buffer );
@@ -278,10 +278,10 @@ namespace Enjon
 		}
 		
 		// Deserialize instanced entity size
-		usize entityInstanceSize = buffer->Read< usize >( );
+		u32 entityInstanceSize = buffer->Read< u32 >( );
 
 		// Attempt to add entity instance
-		for ( usize i = 0; i < entityInstanceSize; ++i )
+		for ( u32 i = 0; i < entityInstanceSize; ++i )
 		{
 			// If entity is valid, then set its prototype entity to this entity
 			EntityHandle h = em->GetEntityByUUID( buffer->Read< UUID >( ) );
@@ -304,7 +304,7 @@ namespace Enjon
 			// Get component's meta class
 			const MetaClass* cmpCls = Object::GetClass( buffer->Read< String >( ) );
 
-			usize compWriteSize = buffer->Read< usize >( );
+			u32 compWriteSize = buffer->Read< u32 >( );
 
 			if ( cmpCls )
 			{

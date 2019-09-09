@@ -6,7 +6,7 @@
 #include "EditorApp.h"
 #include "EditorMaterialEditWindow.h"
 #include "EditorArchetypeEditWindow.h" 
-#include "Project.h"
+#include "Project.h" 
 
 #include <Engine.h>
 #include <SubsystemCatalog.h>
@@ -18,12 +18,12 @@
 #include <Graphics/Window.h>
 #include <Utils/FileUtils.h>
 #include <Engine.h>
+#include <Utils/FileUtils.h> 
 #include <SubsystemCatalog.h>
 
-#include <filesystem>
-#include <fmt/format.h>
+#include <fs/filesystem.hpp>
  
-namespace FS = std::experimental::filesystem; 
+namespace FS = ghc::filesystem; 
 
 namespace Enjon
 {
@@ -179,7 +179,7 @@ namespace Enjon
 			curDir = Utils::FindReplaceAll( curDir, "\\", "/" );
 
 			// Display the current directory path
-			ImGui::Text( fmt::format( "Current Dir: Assets{}", curDir ).c_str( ) );
+			ImGui::Text( "%s", Utils::format( "Current Dir: Assets%s", curDir.c_str() ).c_str( ) );
 
 			// Separator for formatting
 			ImGui::Separator( );
@@ -195,9 +195,10 @@ namespace Enjon
 				for ( auto& p : FS::directory_iterator( mCurrentDirectory ) )
 				{
 					bool isDir = FS::is_directory( p );
-					bool isSelected = p == FS::path( mSelectedPath );
+					bool isSelected = p == FS::path( mSelectedPath ); 
 
 					String pathLabel = Utils::SplitString( p.path( ).string( ), "\\" ).back( );
+					pathLabel = Utils::SplitString( pathLabel, "/" ).back();
 					ImColor headerHovered = ImColor( ImGui::GetColorU32( ImGuiCol_HeaderHovered ) );
 					ImColor textColor = ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
 
@@ -227,7 +228,7 @@ namespace Enjon
 							}
 
 							// Final path to be created
-							String finalPath = isDir ? newPath + "/" + pathLabel : newPath + "/" + pathLabel + "." + fileExtension;
+							String finalPath = isDir ? newPath + "/" + pathLabel : newPath + "/" + pathLabel + "." + fileExtension; 
  
 							// If path doesn't exist, then rename this path
 							if ( !FS::exists( finalPath ) )
@@ -297,7 +298,6 @@ namespace Enjon
 
 										// Open new editor window for this material
 										WindowParams params;
-										//params.mWindowClass = Object::Class< EditorMaterialEditWindow( mat );
 										params.mWindowClass = Object::GetClass< EditorMaterialEditWindow >();
 										params.mName = mat->GetName( );
 										params.mWidth = 800;
@@ -318,7 +318,6 @@ namespace Enjon
 
 										// Open new edit window for this archetype
 										WindowParams params;
-										//params.mWindow = new EditorArchetypeEditWindow( archType );
 										params.mWindowClass = Object::GetClass< EditorArchetypeEditWindow >( );
 										params.mName = archType->GetName( );
 										params.mWidth = 1200;

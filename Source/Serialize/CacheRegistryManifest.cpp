@@ -4,8 +4,10 @@
 #include "Serialize/CacheRegistryManifest.h"
 #include "Serialize/AssetArchiver.h"
 #include "Asset/AssetManager.h"
+#include "SubsystemCatalog.h"
+#include "Engine.h"
 
-#include <filesystem>
+#include "fs/filesystem.hpp"
 
 namespace Enjon
 { 
@@ -30,11 +32,11 @@ namespace Enjon
 
 	Result CacheRegistryManifest::Initialize( const String& manifestPath, const AssetManager* manager )
 	{
-		// Check if directory exists - if not, create it
-		if ( !std::experimental::filesystem::exists( manager->GetCachedAssetsDirectoryPath( ) ) )
+		// Check if directory exists - if not, create it (...so this is failing... great)
+		if ( !ghc::filesystem::exists( manager->GetCachedAssetsDirectoryPath( ) ) )
 		{
-			std::experimental::filesystem::create_directory( manager->GetCachedAssetsDirectoryPath( ) );
-		} 
+			ghc::filesystem::create_directory( manager->GetCachedAssetsDirectoryPath( ) );
+		}
 
 		// Reset manifest records
 		Reset();
@@ -83,7 +85,7 @@ namespace Enjon
 
 	Result CacheRegistryManifest::ReadInManifest( )
 	{
-		for ( auto& p : std::experimental::filesystem::recursive_directory_iterator( mAssetManager->GetAssetsDirectoryPath( ) + "/" ) )
+		for ( auto& p : ghc::filesystem::recursive_directory_iterator( mAssetManager->GetAssetsDirectoryPath( ) + "/" ) )
 		{
 			if ( Enjon::AssetManager::HasAnyAssetFileExtension( p.path().string() ) )
 			{

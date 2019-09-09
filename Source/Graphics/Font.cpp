@@ -1,5 +1,4 @@
-#include <Math/Maths.h>
-
+#include "Math/Maths.h"
 #include "Graphics/Font.h"
 #include "System/Types.h"
 #include "Utils/Errors.h" 
@@ -27,7 +26,7 @@ namespace Enjon
 	}
 
 	/* Inits a particular font with a particular size and stores in a returned map */
-	void Init(const String& filePath, GLuint size, Font* font)
+	void Init( const String& filePath, GLuint size, Font* font )
 	{
 		// FreeType
 	    FT_Library ft;
@@ -213,7 +212,7 @@ namespace Enjon
 	}
 
 	/* Creates and returns new font */
-	Font* CreateFont(const String& filePath, GLuint size)
+	Font* CreateFont( const String& filePath, GLuint size )
 	{
 		// Create new font
 		Font* F = new Font;
@@ -232,18 +231,18 @@ namespace Enjon
 	}
 
 	/* Gets character stats from given font */
-	CharacterStats GetCharacterAttributes(Enjon::Vec2 Pos, float scale, Font* F, char c, float* advance)
+	CharacterStats GetCharacterAttributes( const Vec2& Pos, const f32& scale, Font* F, char c, f32* advance )
 	{
 		Character ch = F->Characters[c];
 
-		float x = Pos.x;
-		float y = Pos.y;
+		f32 x = Pos.x;
+		f32 y = Pos.y;
 
-        GLfloat xpos = x + ch.Bearing.x * scale;
-        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+        f32 xpos = x + ch.Bearing.x * scale;
+        f32 ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 
-        GLfloat w = ch.Size.x * scale;
-        GLfloat h = ch.Size.y * scale;
+        f32 w = ch.Size.x * scale;
+        f32 h = ch.Size.y * scale;
 
         Vec4 DestRect(xpos, ypos, w, h);
         Vec4 UV(0.00f, 1.0f, 1.0f, 1.0f);
@@ -253,18 +252,18 @@ namespace Enjon
         return CharacterStats{DestRect, UV, ch.TextureID};
 	}
 
-	float GetAdvance(char c, Font* F, float scale)
+	f32 GetAdvance( char c, Font* F, const f32& scale )
 	{
 		Character ch = F->Characters[c];
 
 		return (ch.Advance >> 6) * scale;
 	}
 
-	float GetStringAdvance(const char* C, Font* F, float Scale)
+	f32 GetStringAdvance( const char* C, Font* F, const f32& Scale )
 	{
-		float Advance = 0.0f;
-	    std::string::const_iterator c;
-	    std::string Text(C);
+		f32 Advance = 0.0f;
+	    String::const_iterator c;
+	    String Text(C);
 	    for (c = Text.begin(); c != Text.end(); c++)
 	    {
 	    	Advance += GetAdvance(*c, F, Scale);
@@ -272,7 +271,7 @@ namespace Enjon
 	    return Advance;
 	}
 
-	float GetHeight(char c, Font* F, float scale)
+	f32 GetHeight( char c, Font* F, const f32& scale )
 	{
 		Character ch = F->Characters[c];
 
@@ -280,7 +279,7 @@ namespace Enjon
 	}
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
-	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, SpriteBatch& Batch, ColorRGBA32 Color, TextStyle Style, float Angle, float Depth)
+	void PrintText( f32 x, f32 y, const f32& scale, const String& text, Font* F, SpriteBatch& Batch, const ColorRGBA32& Color, TextStyle Style, const f32& Angle, const f32& Depth )
 	{
 	    if (Style == TextStyle::SHADOW) 
 	    {
@@ -288,16 +287,16 @@ namespace Enjon
 	    }
 
 		// Iterate through all characters
-	    std::string::const_iterator c;
+	    String::const_iterator c;
 	    for (c = text.begin(); c != text.end(); c++) 
 	    {
 	        Character ch = F->Characters[*c];
 
-	        GLfloat xpos = x + ch.Bearing.x * scale;
-	        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+	        f32 xpos = x + ch.Bearing.x * scale;
+	        f32 ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 
-	        GLfloat w = ch.Size.x * scale;
-	        GLfloat h = ch.Size.y * scale;
+	        f32 w = ch.Size.x * scale;
+	        f32 h = ch.Size.y * scale;
 
 	        Vec4 DestRect(xpos, ypos, w, h);
 	        Vec4 UV(0.00f, 0.0f, 1.0f, 1.0f);
@@ -312,22 +311,22 @@ namespace Enjon
 
 	}
 
-	void PrintText( const Vec2& position, const Vec2& size, std::string Text, Font* F, SpriteBatch* Batch, ColorRGBA32 Color, float Spacing, TextStyle Style )
+	void PrintText( const Vec2& position, const Vec2& size, const String& Text, Font* F, SpriteBatch* Batch, const ColorRGBA32& Color, const f32& Spacing, TextStyle Style )
 	{ 
-		float x = position.x;
-		float y = position.y; 
+		f32 x = position.x;
+		f32 y = position.y; 
 
 		// Iterate through all characters
-	    std::string::const_iterator c;
+	    String::const_iterator c;
 	    for (c = Text.begin(); c != Text.end(); c++) 
 	    {
 	        Character ch = F->Characters[*c];
 
-	        GLfloat xpos = x + ch.Bearing.x * size.x;
-	        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * size.y;
+	        f32 xpos = x + ch.Bearing.x * size.x;
+	        f32 ypos = y - (ch.Size.y - ch.Bearing.y) * size.y;
 
-	        GLfloat w = ch.Size.x;
-	        GLfloat h = ch.Size.y;
+	        f32 w = ch.Size.x;
+	        f32 h = ch.Size.y;
 
 	        Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f); 
 
@@ -339,14 +338,14 @@ namespace Enjon
 	    } 
 	}
 
-	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA32 Color, float Spacing, TextStyle Style)
+	void PrintText( const Transform& transform, const String& text, Font* font, QuadBatch& batch, const ColorRGBA32& color, const f32& spacing, TextStyle style )
 	{
-		Vec3& Position = Transform.GetPosition();
-		Quaternion& Rotation = Transform.GetRotation();
-		Vec3& Scale = Transform.GetScale();
+		Vec3 position = transform.GetPosition();
+		Quaternion rotation = transform.GetRotation();
+		Vec3 scale = transform.GetScale();
 
-		float x = Transform.GetPosition().x;
-		float y = Transform.GetPosition().y;
+		f32 x = transform.GetPosition().x;
+		f32 y = transform.GetPosition().y;
 
 	    // if (Style == TextStyle::SHADOW) 
 	    // {
@@ -354,52 +353,52 @@ namespace Enjon
 	    // }
 
 		// Iterate through all characters
-	    std::string::const_iterator c;
-	    for (c = Text.begin(); c != Text.end(); c++) 
+	    String::const_iterator c;
+	    for (c = text.begin(); c != text.end(); c++) 
 	    {
-	        Character ch = F->Characters[*c];
+	        Character ch = font->Characters[*c];
 
-	        GLfloat xpos = x + ch.Bearing.x * Scale.x;
-	        GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * Scale.y;
+	        f32 xpos = x + ch.Bearing.x * scale.x;
+	        f32 ypos = y - (ch.Size.y - ch.Bearing.y) * scale.y;
 
-	        GLfloat w = ch.Size.x;
-	        GLfloat h = ch.Size.y;
+	        f32 w = ch.Size.x;
+	        f32 h = ch.Size.y;
 
-	        Vec4 UV(0.00f, 0.05f, 1.0f, 0.90f); 
+	        Vec4 uv(0.00f, 0.05f, 1.0f, 0.90f); 
 
 	        // Add to batch
-	        Batch.Add(
+	        batch.Add(
 						Vec2(w, h),
 	        			Enjon::Transform(
-	        							Vec3(xpos, ypos, Position.z),
-	        							Rotation,
-	        							Vec3(Scale.x, Scale.y, 1.0f)
+	        							Vec3(xpos, ypos, position.z),
+	        							rotation,
+	        							Vec3(scale.x, scale.y, 1.0f)
 	        						),
-	        			UV,
+	        			uv,
 	        			ch.TextureID, 
-	        			Color
+	        			color
 	        		);
 
 	        // Advance to next character
-	        x += (ch.Advance >> 6) * Scale.x; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+	        x += (ch.Advance >> 6) * scale.x; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
 	    }
 	}
 
-	void PrintText( Transform& Transform, const Enjon::String& Text, const UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize )
+	void PrintText( const Transform& transform, const String& text, const UIFont* font, QuadBatch& batch, const ColorRGBA32& color, const u32& fontSize )
 	{ 
-		const Enjon::FontAtlas* atlas = F->GetAtlas( (s32)fontSize );
+		const FontAtlas* atlas = font->GetAtlas( (s32)fontSize );
 		f32 textureWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );
 		f32 textureHeight = atlas->GetAtlasTexture( ).Get( )->GetHeight( ); 
 
-		Vec3 scale = Transform.GetScale( );
-		Vec3 position = Transform.GetPosition( );
+		Vec3 scale = transform.GetScale( );
+		Vec3 position = transform.GetPosition( );
 		f32 x = position.x;
 		f32 y = position.y;
 
-		std::string::const_iterator c;
-		for ( c = Text.begin( ); c != Text.end( ); ++c )
+		String::const_iterator c;
+		for ( c = text.begin( ); c != text.end( ); ++c )
 		{
-			Enjon::FontGlyph glyph = atlas->GetGlyph( *c );
+			FontGlyph glyph = atlas->GetGlyph( *c );
 			f32 width = glyph.GetWidth( );
 			f32 height = glyph.GetHeight( );
 
@@ -412,19 +411,19 @@ namespace Enjon
 			f32 h = height;
 
 			Vec2 bearing = glyph.GetBearing( );
-			GLfloat xpos = x + ( bearing.x * scale.x );
-			GLfloat ypos = y - ( height - bearing.y ) * scale.y;
+			f32 xpos = x + ( bearing.x * scale.x );
+			f32 ypos = y - ( height - bearing.y ) * scale.y;
 
 			Vec4 uv( u1, v2, u2, v1 );
 			//Vec4 uv( 0, 0, 1, 1 );
 
-			Enjon::Transform tform;
+			Transform tform;
 			tform.SetPosition( Vec3( x, y, position.z ) );
-			tform.SetRotation( Transform.GetRotation( ) );
+			tform.SetRotation( transform.GetRotation( ) );
 			tform.SetScale( Vec3( scale.x, scale.y, 1.0f ) );
 
-			Enjon::AssetHandle< Enjon::Texture > atlasTexture = atlas->GetAtlasTexture( );
-			Batch.Add( Vec2( w, h ), tform, uv, atlasTexture.Get( )->GetTextureId( ) );
+			AssetHandle< Texture > atlasTexture = atlas->GetAtlasTexture( );
+			batch.Add( Vec2( w, h ), tform, uv, atlasTexture.Get( )->GetTextureId( ) );
 
 			s32 advance = glyph.GetAdvance( );
 			x += (f32) advance * scale.x;
@@ -492,7 +491,7 @@ namespace Enjon
 
 	//========================================================================================================================
 
-	FontAtlas::FontAtlas( const Enjon::String& filePath, s32 fontSize, const UIFont* font )
+	FontAtlas::FontAtlas( const String& filePath, const s32& fontSize, const UIFont* font )
 	{ 
 		if ( font == nullptr )
 		{
@@ -773,7 +772,7 @@ namespace Enjon
 			
 	//========================================================================================================================
 
-	FontGlyph FontAtlas::GetGlyph( u8 character ) const
+	FontGlyph FontAtlas::GetGlyph( const u8& character ) const
 	{
 		//// Grab character index
 		//u32 index = FT_Get_Char_Index( mFontFace, character );
@@ -799,7 +798,7 @@ namespace Enjon
 			
 	//========================================================================================================================
 			
-	Enjon::AssetHandle< Enjon::Texture > FontAtlas::GetAtlasTexture( ) const
+	AssetHandle< Texture > FontAtlas::GetAtlasTexture( ) const
 	{
 		return mAtlasTexture;
 	}
@@ -813,7 +812,7 @@ namespace Enjon
 
 	//========================================================================================================================
 
-	UIFont::UIFont( const Enjon::String& fontPath )
+	UIFont::UIFont( const String& fontPath )
 		: mFontPath( fontPath )
 	{ 
 		// FreeType library
@@ -834,7 +833,7 @@ namespace Enjon
 
 	//========================================================================================================================
 
-	bool UIFont::AtlasExists( s32 fontSize ) const
+	bool UIFont::AtlasExists( const s32& fontSize ) const
 	{
 		// If not found, then will reach end of atlas map and return false
 		return ( ( mAtlases.find( fontSize ) ) != mAtlases.end( ) ); 
@@ -842,7 +841,7 @@ namespace Enjon
 
 	//========================================================================================================================
 			
-	const FontAtlas* UIFont::GetAtlas( s32 fontSize ) const
+	const FontAtlas* UIFont::GetAtlas( const s32& fontSize ) const
 	{
 		UIFont* f = const_cast< UIFont* > ( this );
 
@@ -857,7 +856,7 @@ namespace Enjon
 
 	//========================================================================================================================
 			
-	void UIFont::AddAtlas( s32 fontSize )
+	void UIFont::AddAtlas( const s32& fontSize )
 	{
 		// If doesn't exist, then place in map
 		if ( !AtlasExists( fontSize ) )

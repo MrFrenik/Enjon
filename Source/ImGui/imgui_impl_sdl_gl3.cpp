@@ -35,10 +35,21 @@
 
 // SDL,GL3W
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
+// #ifdef ENJON_SYSTEM_OSX
+// 	#ifdef SDL_VIDEO_DRIVER_WINDOWS
+// 		#undef SDL_VIDEO_DRIVER_WINDOWS	
+// 	#endif
+// #endif
+// #include <SDL2/SDL_syswm.h>
 #include <GLEW/glew.h>
 
 #include <unordered_map> 
+
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+    #define IMGUI_DEFINE_MATH_OPERATORS
+#endif
+
+#include "ImGui/imgui_internal.h"
 
 struct DeviceData
 {
@@ -77,6 +88,36 @@ DeviceData* GetDeviceData( ImGuiContext* ctx )
 	return nullptr; 
 }
 
+void ScaleWindow(ImGuiWindow* window, float scale)
+{
+    ImVec2 origin = ImVec2(0.f, 0.f);
+    window->Pos = ImFloor((window->Pos - origin) * scale + origin);
+    window->Size = ImFloor(window->Size * scale);
+    window->SizeFull = ImFloor(window->SizeFull * scale);
+    window->SizeContents = ImFloor(window->SizeContents * scale);
+}
+
+void ScaleWindows(ImGuiContext* ctx, float scale)
+{
+    for (int i = 0; i < ctx->Windows.Size; ++i) {
+        ScaleWindow(ctx->Windows[i], scale);
+    }
+}
+
+void ImGui_ImplSdlGL3_UpdateViewports(ImGuiContext* ctx)
+{
+	static bool updated = false;
+	if (!updated) {
+		// updated = true;
+        float dpi = 0.0f;
+        // if (!SDL_GetDisplayDPI(0, &dpi, NULL, NULL))
+        // printf( "here: %d\n", (int)ctx->Windows.Size );
+        	float dpiScale = 255.f / 96.f;
+        	// ScaleWindows(ctx, dpiScale);
+            // monitor.DpiScale = dpi / 96.0f;
+	}
+}
+
 // This is the main rendering function that you have to implement and provide to ImGui (via setting up 'RenderDrawListsFn' in the ImGuiIO structure)
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so. 
 // If text or lines are blurry when integrating ImGui in your engine: in your Render function, try translating your projection matrix by (0.5f,0.5f) or (0.375f,0.375f)
@@ -94,6 +135,9 @@ void ImGui_ImplSdlGL3_RenderDrawData( ImDrawData* draw_data )
 	ImGuiContext* ctx = ImGui::GetCurrentContext( );
 	// Get device data
 	DeviceData* data = GetDeviceData( ctx );
+
+	draw_data->DisplaySize = io.DisplaySize;
+	draw_data->DisplayPos = ImVec2(0.f, 0.f);
 
 	if ( !data )
 	{
@@ -131,6 +175,21 @@ void ImGui_ImplSdlGL3_RenderDrawData( ImDrawData* draw_data )
 	glDisable( GL_DEPTH_TEST );
 	glEnable( GL_SCISSOR_TEST );
 	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+	// Setup viewport, orthographic projection matrix
+	// glViewport( 0, 0, ( GLsizei )fb_width, ( GLsizei )fb_height );
+
+	// float L = draw_data->DisplayPos.x;
+	// float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
+	// float T = draw_data->DisplayPos.y;	
+	// float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
+	// const float ortho_projection[ 4 ][ 4 ] =
+	// {
+	// 	{ 2.0f /(R-L), 0.0f,         0.0f, 0.0f },
+	// 	{ 0.0f,        2.0f /(T-B),  0.0f, 0.0f },
+	// 	{ 0.0f,        0.0f,        -1.0f, 0.0f },
+	// 	{ (R+L)/(L-R), (T+B)/(B-T),  0.0f, 1.0f },
+	// };
 
 	// Setup viewport, orthographic projection matrix
 	glViewport( 0, 0, ( GLsizei )fb_width, ( GLsizei )fb_height );
@@ -318,6 +377,7 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects( ImGuiContext* ctx )
 	// Not currently in graphics device data map, so construct new device data object
 	mGraphicsDeviceData[ ctx ] = new DeviceData( );
 	DeviceData* data = mGraphicsDeviceData[ ctx ];
+	ImGuiIO& io = ImGui::GetIO( );
 
 	// Backup GL state
 	GLint last_texture, last_array_buffer, last_vertex_array;

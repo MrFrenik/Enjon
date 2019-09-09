@@ -22,6 +22,9 @@
 #include <unordered_set>
 #include <queue>
 
+#include <cstdint>
+#define Int2VoidP(i) (void*)(uintptr_t)(i)
+
 namespace Enjon
 {
 	enum class Result

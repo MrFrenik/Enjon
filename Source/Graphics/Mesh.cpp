@@ -429,42 +429,42 @@ struct struct_name {\
 			{
 				case VertexAttributeFormat::Float4:
 				{
-					glVertexAttribPointer( i, 4, GL_FLOAT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribPointer( i, 4, GL_FLOAT, GL_FALSE, vertexDeclSize, Int2VoidP(vertDecl.GetByteOffset( i )) );
 				} break;
 
 				case VertexAttributeFormat::Float3:
 				{
-					glVertexAttribPointer( i, 3, GL_FLOAT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribPointer( i, 3, GL_FLOAT, GL_FALSE, vertexDeclSize, Int2VoidP(vertDecl.GetByteOffset( i )) );
 				} break;
 
 				case VertexAttributeFormat::Float2:
 				{
-					glVertexAttribPointer( i, 2, GL_FLOAT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribPointer( i, 2, GL_FLOAT, GL_FALSE, vertexDeclSize, Int2VoidP(vertDecl.GetByteOffset(i)) );
 				} break;
 
 				case VertexAttributeFormat::Float:
 				{
-					glVertexAttribPointer( i, 1, GL_FLOAT, GL_FALSE, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribPointer( i, 1, GL_FLOAT, GL_FALSE, vertexDeclSize, Int2VoidP(vertDecl.GetByteOffset(i)) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt4:
 				{
-					glVertexAttribIPointer( i, 4, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 4, GL_UNSIGNED_INT, vertexDeclSize, Int2VoidP(vertDecl.GetByteOffset(i)) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt3:
 				{
-					glVertexAttribIPointer( i, 3, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 3, GL_UNSIGNED_INT, vertexDeclSize, Int2VoidP(vertDecl.GetByteOffset(i)) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt2:
 				{
-					glVertexAttribIPointer( i, 2, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 2, GL_UNSIGNED_INT, vertexDeclSize, Int2VoidP(vertDecl.GetByteOffset(i)) );
 				} break;
 
 				case VertexAttributeFormat::UnsignedInt:
 				{
-					glVertexAttribIPointer( i, 1, GL_UNSIGNED_INT, vertexDeclSize, (void*)vertDecl.GetByteOffset( i ) );
+					glVertexAttribIPointer( i, 1, GL_UNSIGNED_INT, vertexDeclSize, Int2VoidP(vertDecl.GetByteOffset(i)) );
 				} break;
 			}
 		} 

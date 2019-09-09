@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <stdarg.h>
 
 #include "Utils/json.h"
 #include "Defines.h"
@@ -33,8 +34,7 @@ namespace Enjon { namespace Utils
 	{
 		//Create file pointer to filepath
 		//FILE* file = fopen(filePath, "rt"); 
-		FILE* file;
-		fopen_s(&file, filePath, "rt"); 
+		FILE* file = fopen(filePath, "rt");
 
 		//Seek to end of file
 		fseek(file, 0, SEEK_END);
@@ -211,6 +211,7 @@ namespace Enjon { namespace Utils
 		return true;
 	}
 
+#ifdef ENJON_WINDOWS
 	inline void ConvertToWchar(char* buffer, wchar_t* wcstring)
 	{
 		 size_t origsize = strlen(buffer) + 1;
@@ -220,6 +221,7 @@ namespace Enjon { namespace Utils
 		mbstowcs_s(&convertedChars, wcstring, origsize, buffer, _TRUNCATE);
 		//wcscpy_s(wcstring, string);
 	}
+#endif
 	
 	inline int convert_buffer_to_int(char* buffer, int digits)
 	{
@@ -336,8 +338,20 @@ namespace Enjon { namespace Utils
 			out.write( contents.c_str( ), contents.length( ) );
 		} 
 	}
-
+	
 	//==================================================================================================================
+
+	static inline String format( const char* fmt, ... )
+	{
+		va_list args1;
+	    va_start( args1, fmt );
+		va_list args2;
+		va_copy( args2, args1 );
+		Vector<char> buf(1+std::vsnprintf(nullptr, 0, fmt, args1)); // <<<
+		va_end(args1);
+		std::vsnprintf(buf.data(), buf.size(), fmt, args2);
+		return String(buf.data());
+	}
 
 }} 
 

@@ -376,7 +376,7 @@ namespace ImGui
 				}
 
 				// Callbacks for exit hovered state
-				else if ( !IsItemHovered( ) && dock.hovered && dock.status != Status_Dragged || ( ImGui::IsMouseReleased( 0 ) && !dock.hovered ) )
+				else if ( (!IsItemHovered( ) && dock.hovered && dock.status != Status_Dragged) || ( ImGui::IsMouseReleased( 0 ) && !dock.hovered ) )
 				{
 					mOnExitSplitHoverCallback( );
 				}
@@ -393,7 +393,7 @@ namespace ImGui
 					float r2 = 2.5f * r;
 					float rd2 = r / 1.5f;
 					ImVec2 centerPos = ImVec2( GetItemRectMin( ).x + GetItemRectSize( ).x / 2.0f, GetItemRectMin( ).y + GetItemRectSize( ).y / 2.0f ); 
-					ImColor circleColor = IsItemHovered() || dock.status == Status_Dragged ? color_hovered : color_hovered_alpha_low;
+					ImColor circleColor = (IsItemHovered() || (dock.status == Status_Dragged)) ? (ImColor)color_hovered : (ImColor)color_hovered_alpha_low;
 					if ( dock.isHorizontal( ) )
 					{
 						draw_list->AddCircleFilled( ImVec2( centerPos.x, centerPos.y + r2 ), rd2, circleColor ); 
@@ -576,6 +576,8 @@ namespace ImGui
 
 				switch ( DockSlotType( i ) )
 				{
+					default: break;
+
 					case Slot_Top:
 					{
 						canvas->AddRectFilled(r.Min, r.Min + ImVec2(r.GetSize().x, borderSize), hovered ? color_hovered : color); 
@@ -857,7 +859,7 @@ namespace ImGui
 					// Tab BG
 					draw_list->AddRectFilled(pos+ImVec2(tabOffset, 0.0),
 											 pos+size,
-											 dock_tab->active ? color_active : (hovered ? color_hovered : color), 1.5f, ImDrawCornerFlags_TopLeft | ImDrawCornerFlags_TopRight );
+											 dock_tab->active ? (ImColor)color_active : (hovered ? (ImColor)color_hovered : color), 1.5f, ImDrawCornerFlags_TopLeft | ImDrawCornerFlags_TopRight );
 					if ( dock_tab->active )
 					{
 						lineLeftStart = dock.pos + ImVec2( pos.x + tabOffset, tab_base + line_height - 1.0f );
@@ -1400,27 +1402,27 @@ namespace ImGui
 
 	void Print() 
 	{ 
-		DockContext* ctx = GetCurrentDockingContext( );
-		for (int i = 0; i < ctx->m_docks.size(); ++i)
-		{
-			ImGui::Text("i=%d this=0x%.8p state=(%d %d) pos=(%.0f %.0f) size=(%.0f %.0f) children=(%s %s) tabs=(%s %s) parent=%s status=%d  location='%s' label='%s'\n", i, 
-						(void*)ctx->m_docks[i],
-						ctx->m_docks[i]->active,
-						ctx->m_docks[i]->opened,
-						ctx->m_docks[i]->pos.x,
-						ctx->m_docks[i]->pos.y,
-						ctx->m_docks[i]->size.x,
-						ctx->m_docks[i]->size.y,
-						ctx->m_docks[i]->children[0] ? ctx->m_docks[i]->children[0]->label : "None",
-						ctx->m_docks[i]->children[1] ? ctx->m_docks[i]->children[1]->label : "None",
-						ctx->m_docks[i]->prev_tab    ? ctx->m_docks[i]->prev_tab->label    : "None",
-						ctx->m_docks[i]->next_tab    ? ctx->m_docks[i]->next_tab->label    : "None",
-						ctx->m_docks[i]->parent      ? ctx->m_docks[i]->parent->label      : "None",
-						ctx->m_docks[i]->status,
-						ctx->m_docks[i]->location,
-						ctx->m_docks[i]->label);
+		// DockContext* ctx = GetCurrentDockingContext( );
+		// for (int i = 0; i < ctx->m_docks.size(); ++i)
+		// {
+		// 	ImGui::Text("i=%d this=0x%.8p state=(%d %d) pos=(%.0f %.0f) size=(%.0f %.0f) children=(%s %s) tabs=(%s %s) parent=%s status=%d  location='%s' label='%s'\n", i, 
+		// 				(void*)ctx->m_docks[i],
+		// 				ctx->m_docks[i]->active,
+		// 				ctx->m_docks[i]->opened,
+		// 				ctx->m_docks[i]->pos.x,
+		// 				ctx->m_docks[i]->pos.y,
+		// 				ctx->m_docks[i]->size.x,
+		// 				ctx->m_docks[i]->size.y,
+		// 				ctx->m_docks[i]->children[0] ? ctx->m_docks[i]->children[0]->label : "None",
+		// 				ctx->m_docks[i]->children[1] ? ctx->m_docks[i]->children[1]->label : "None",
+		// 				ctx->m_docks[i]->prev_tab    ? ctx->m_docks[i]->prev_tab->label    : "None",
+		// 				ctx->m_docks[i]->next_tab    ? ctx->m_docks[i]->next_tab->label    : "None",
+		// 				ctx->m_docks[i]->parent      ? ctx->m_docks[i]->parent->label      : "None",
+		// 				ctx->m_docks[i]->status,
+		// 				ctx->m_docks[i]->location,
+		// 				ctx->m_docks[i]->label);
 
-		}
+		// }
 	}
 
 	void ShutdownDock()

@@ -82,6 +82,7 @@ namespace Enjon
 		String assetName = buffer->Read< String >( );								// Asset name
 		String loaderName = buffer->Read< String >( );								// Loader class name
 
+
 		if ( cls )
 		{
 			// If asset doesn't exist, then construct it
@@ -137,12 +138,12 @@ namespace Enjon
 
 		// Read contents into buffer
 		mBuffer.ReadFromFile( filePath );
- 
+
 		//==================================================
 		// Object Header 
 		//==================================================
 		const MetaClass* cls = Object::GetClass( mBuffer.Read< String >( ) );	// Read class type
-		u32 versionNumber = mBuffer.Read< u32 >( );								// Read version number id 
+		u32 versionNumber = mBuffer.Read< u32 >( );								// Read version number id
 
 		//==================================================
 		// Asset Header 
@@ -159,6 +160,7 @@ namespace Enjon
 			// Construct new object based on class
 			asset = (Asset*)cls->Construct( );
 
+
 			// Couldn't construct object
 			if ( !asset )
 			{
@@ -169,6 +171,7 @@ namespace Enjon
 			// Successfully constructed, now deserialize data into it
 			else
 			{
+				std::cout << "Deserializing asset...\n";
 				Result res = asset->DeserializeData( &mBuffer ); 
 
 				// Set asset properties
@@ -180,7 +183,7 @@ namespace Enjon
 				if ( res == Result::INCOMPLETE )
 				{
 					res = DeserializeObjectDataDefault( asset, cls );
-				} 
+				}
 
 				// Delete object if not deserialized correctly
 				if ( res != Result::SUCCESS )

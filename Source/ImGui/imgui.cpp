@@ -642,7 +642,7 @@
 
 #include "ImGui/imgui.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "IMGui/imgui_internal.h"
+#include "ImGui/imgui_internal.h"
 
 #include <ctype.h>      // toupper, isprint
 #include <stdlib.h>     // NULL, malloc, free, qsort, atoi

@@ -9,15 +9,13 @@ uniform mat4 Model;
 
 out DATA
 {
-	vec3 Position;	
 	vec2 TexCoords;
 }vs_out;
 
 void main()
 {             
     gl_Position = LightSpaceMatrix * Model * vec4(position, 1.0f);
-    vs_out.Position = position;
 
 	// Calculate tex coords from sprite frame
-	vec2 TexCoords = vec2(texCoords.x, -texCoords.y);
+	vs_out.TexCoords = vec2(texCoords.x, -texCoords.y);
 }

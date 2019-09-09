@@ -12,8 +12,7 @@
 #include <SubsystemCatalog.h>
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
-
-#include <fmt/format.h>
+#include <Utils/FileUtils.h>
 
 namespace Enjon
 {
@@ -151,22 +150,22 @@ namespace Enjon
 		// If they're the same
 		if ( pEnt == cEnt )
 		{
-			label = fmt::format( "Cannot attach {} to self.", cEnt->GetName() );
+			label = Utils::format( "Cannot attach %s to self.", cEnt->GetName().c_str() );
 		}
 
 		// Is parent
 		else if ( cEnt->GetParent( ) == pEnt ) 
 		{
-			label = fmt::format( "Detach {} from {}.", cEnt->GetName( ), pEnt->GetName( ) );
+			label = Utils::format( "Detach %s from %s.", cEnt->GetName().c_str(), pEnt->GetName().c_str() );
 		}
 
 		else if ( CanParentTo( parent, child ) )
 		{
-			label = fmt::format( "Attach {} to {}.", cEnt->GetName(), pEnt->GetName() ); 
+			label = Utils::format( "Attach %s to %s.", cEnt->GetName().c_str(), pEnt->GetName().c_str() ); 
 		}
 		else
 		{
-			label = fmt::format( "Cannot attach {} to {}.", cEnt->GetName(), pEnt->GetName() ); 
+			label = Utils::format( "Cannot attach %s to %s.", cEnt->GetName().c_str(), pEnt->GetName().c_str() ); 
 		} 
 
 		return label; 
@@ -371,7 +370,7 @@ namespace Enjon
 				ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
 				ImGui::Begin( "##window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
 				{
-					ImGui::Text( label.c_str( ) );
+					ImGui::Text( "%s", label.c_str( ) );
 				}
 				ImGui::End( );
 			}
@@ -422,7 +421,7 @@ namespace Enjon
 		else
 		{
 			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( textColor ) );
-			ImGui::Text( entityLabelText.c_str() ); 
+			ImGui::Text( "%s", entityLabelText.c_str() ); 
 			ImGui::PopStyleColor( ); 
 		}
  
@@ -438,7 +437,7 @@ namespace Enjon
 			ImVec2 a = ImVec2( ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y );
 			ImVec2 b = ImVec2( a.x + ts.x, a.y + ts.y );
 			ImGui::PushClipRect( a, b, true );
-			ImGui::TextColored( ImGui::IsMouseHoveringRect( a, b ) ? ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorActive ) ) : ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ), label.c_str( ) );
+			ImGui::TextColored( ImGui::IsMouseHoveringRect( a, b ) ? ImColor( ImGui::GetColorU32( ImGuiCol_SeparatorActive ) ) : ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ), "%s", label.c_str( ) );
 			ImGui::PopClipRect( );
 			if ( ImGui::IsMouseClicked( 0 ) && ImGui::IsMouseHoveringRect( a, b ) )
 			{
@@ -516,13 +515,13 @@ namespace Enjon
 				{
 					if ( mGrabbedEntity )
 					{
-						String label = fmt::format( "Detach {}.", mGrabbedEntity.Get( )->GetName( ) );
+						String label = Utils::format( "Detach %s.", mGrabbedEntity.Get( )->GetName().c_str() );
 						ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
 						ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
 						ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
 						ImGui::Begin( "##window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
 						{
-							ImGui::Text( label.c_str( ) );
+							ImGui::Text( "%s", label.c_str( ) );
 						}
 						ImGui::End( ); 
 					}
@@ -565,7 +564,7 @@ namespace Enjon
 		// Display total amount of entities
 		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( ImColor( ImGui::GetColorU32( ImGuiCol_TextDisabled ) ) ) );
 		ImGui::PushFont( EngineSubsystem( ImGuiManager )->GetFont( "Roboto-MediumItalic_14" ) );
-		ImGui::Text( fmt::format( "{} Entities", entities->GetEntitiesByWorld( mWindow->GetWorld( ) ).size() ).c_str( ) );
+		ImGui::Text( "%s", Utils::format( "%zu Entities", (u32)entities->GetEntitiesByWorld( mWindow->GetWorld() ).size() ).c_str( ) );
 		ImGui::PopFont( );
 		ImGui::PopStyleColor( );
 

@@ -19,7 +19,7 @@ float LinearizeDepth( float depth )
 
 void main() 
 {
-	float D = texture2D(uDepthMap, fs_in.TexCoords).r;
+	float D = texture(uDepthMap, fs_in.TexCoords).r;
 	float depth = LinearizeDepth( D ) / far;
 	Color = vec4(vec3( depth ), 1.0);
 }

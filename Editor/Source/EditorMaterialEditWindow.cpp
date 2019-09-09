@@ -14,8 +14,8 @@
 #include <Serialize/ObjectArchiver.h>
 #include <IO/InputManager.h>
 #include <SubsystemCatalog.h>
+#include <Utils/FileUtils.h> 
 #include <Engine.h>
-#include <fmt/format.h>
 
 namespace Enjon
 {
@@ -44,7 +44,7 @@ namespace Enjon
 		mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
 		mSceneViewWindowSize = Vec2( width, height );
 
-		ImTextureID img = ( ImTextureID )currentTextureId;
+		ImTextureID img = ( ImTextureID )Int2VoidP(currentTextureId);
 		ImGui::Image( img, ImVec2( width, height ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
 
 		// Update camera aspect ratio
@@ -70,13 +70,13 @@ namespace Enjon
 
 			if ( mWindow->IsMouseInWindow( ) && mWindow->IsFocused( ) )
 			{ 
-				String label = fmt::format( "Asset: {}", abv->GetGrabbedAsset()->GetName( ) ).c_str( );
+				String label = Utils::format( "Asset: %s", abv->GetGrabbedAsset()->GetName().c_str() ).c_str( );
 				ImVec2 txtSize = ImGui::CalcTextSize( label.c_str( ) );
 				ImGui::SetNextWindowPos( ImVec2( ImGui::GetMousePos( ).x + 15.0f, ImGui::GetMousePos().y + 5.0f ) );
 				ImGui::SetNextWindowSize( ImVec2( txtSize.x + 20.0f, txtSize.y ) );
 				ImGui::Begin( "##grabbed_asset_window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
 				{
-					ImGui::Text( label.c_str( ) );
+					ImGui::Text( "%s", label.c_str( ) );
 				}
 				ImGui::End( ); 
 
@@ -89,7 +89,7 @@ namespace Enjon
 
 		if ( HasViewportCallback( ViewportCallbackType::CustomRenderOverlay ) )
 		{
-			mViewportCallbacks[ ViewportCallbackType::CustomRenderOverlay ]( nullptr );
+			mViewportCallbacks[ (u32)ViewportCallbackType::CustomRenderOverlay ]( nullptr );
 		}
 
 		if ( IsFocused( ) )
@@ -113,7 +113,7 @@ namespace Enjon
 
 	void EditorViewport::SetViewportCallback( ViewportCallbackType type, const ViewportCallback& callback )
 	{
-		mViewportCallbacks[ type ] = callback;
+		mViewportCallbacks[ (u32)type ] = callback;
 	}
 
 	//===============================================================================================
@@ -135,7 +135,7 @@ namespace Enjon
 
 	bool EditorViewport::HasViewportCallback( const ViewportCallbackType& type )
 	{
-		return ( mViewportCallbacks.find( type ) != mViewportCallbacks.end( ) );
+		return ( mViewportCallbacks.find( (u32)type ) != mViewportCallbacks.end( ) );
 	}
 
 	void EditorViewport::HandleAssetDrop( )
@@ -176,7 +176,7 @@ namespace Enjon
 		{
 			if ( HasViewportCallback( ViewportCallbackType::AssetDropArchetype ) )
 			{
-				mViewportCallbacks[ ViewportCallbackType::AssetDropArchetype ]( (void*)grabbedAsset );
+				mViewportCallbacks[ (u32)ViewportCallbackType::AssetDropArchetype ]( (void*)grabbedAsset );
 			} 
 		}
 		else if ( grabbedAsset->Class( )->InstanceOf< SkeletalMesh >( ) )
@@ -398,7 +398,7 @@ namespace Enjon
 			{
 				if ( mMaterial )
 				{
-					ImGui::Text( fmt::format( "Material: {}", mMaterial.Get()->GetName( ) ).c_str( ) ); 
+					ImGui::Text( "%s", Utils::format( "Material: %s", mMaterial.Get()->GetName().c_str() ).c_str( ) ); 
 					ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 					igm->InspectObject( mMaterial.Get() ); 
 				}
@@ -496,7 +496,7 @@ namespace Enjon
 
 					World* world = GetWorld( );
 					GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
-					ImGui::Text( fmt::format( "Texture: {}", mTexture.Get( )->GetName( ) ).c_str( ) );
+					ImGui::Text( "%s", Utils::format( "Texture: %s", mTexture.Get( )->GetName().c_str() ).c_str( ) );
 					ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 					igm->InspectObject( mTexture.Get() ); 
 					igm->InspectObject( mMaterial );

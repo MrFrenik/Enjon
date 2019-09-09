@@ -28,30 +28,30 @@ namespace Enjon {
 		GLSLProgram();
 		~GLSLProgram(); 
 
-		void CreateShader(const char* vertexShaderFilePath, const char* fragmentShaderFilepath); 
-		void AddAttribute(const GLchar* attributeName); 
-		GLint GetUniformLocation(const std::string& uniformName);
+		void CreateShader( const char* vertexShaderFilePath, const char* fragmentShaderFilepath ); 
+		void AddAttribute( const GLchar* attributeName ); 
+		GLint GetUniformLocation( const String& uniformName );
 		void Use();
 		void Unuse();
 
-		void BindTexture(const std::string& name, const GLuint& TextureID, const GLuint Index);
-		void BindTexture(const std::string& name, const GLTexture& texture, const GLuint index);
+		void BindTexture( const String& name, const GLuint& TextureID, const GLuint Index );
+		void BindTexture( const String& name, const GLTexture& texture, const GLuint index );
 
 		// template <typename T>
 		// void SetUniform(const std::string& Name, const T& Val);
 
-		void SetUniform(const std::string& name, const s32& val);
-		void SetUniform(const std::string& name, f32* val, s32 count);
-		void SetUniform(const std::string& name, s32* val, s32 count);
-		void SetUniform(const std::string& name, const f64& val);
-		void SetUniform(const std::string& name, const f32& val);
-		void SetUniform(const std::string& name, const Vec2& vector);
-		void SetUniform(const std::string& name, const Vec3& vector);
-		void SetUniform(const std::string& name, const Vec4& vector);
-		void SetUniform(const std::string& name, const Mat4x4& matrix); 
-		void SetUniform(const std::string& name, const Transform& T);
-		void SetUniform(const std::string& name, ColorRGBA32& C);
-		void SetUniformArrayElement( const std::string& name, const u32& index, const Mat4x4& mat );
+		void SetUniform( const String& name, const s32& val );
+		void SetUniform( const String& name, f32* val, s32 count );
+		void SetUniform( const String& name, s32* val, s32 count );
+		void SetUniform( const String& name, const f64& val );
+		void SetUniform( const String& name, const f32& val );
+		void SetUniform( const String& name, const Vec2& vector );
+		void SetUniform( const String& name, const Vec3& vector );
+		void SetUniform( const String& name, const Vec4& vector );
+		void SetUniform( const String& name, const Mat4x4& matrix ); 
+		void SetUniform( const String& name, const Transform& T );
+		void SetUniform( const String& name, const ColorRGBA32& C );
+		void SetUniformArrayElement( const String& name, const u32& index, const Mat4x4& mat );
 		
 		GLuint inline GetProgramID() const { return m_programID; } 
 	
@@ -76,24 +76,29 @@ namespace Enjon {
 	};
 
 	template <typename T>
-	struct Uniform
+	struct Uniform : public UniformBase
 	{
 		Uniform()
-			: mName("UNSET_UNIFORM"), mShader(nullptr)
-		{}
+		{
+			mName = "UNSET_UNIFORM";
+			mShader = nullptr;
+		}
 
-		Uniform(const char* name, T value, GLSLProgram* shader)
-			: mName(name), mValue(value), mShader(shader)
-		{}
+		Uniform( const char* name, T value, GLSLProgram* shader )
+		{
+			mName = name;	
+			mValue = value;
+			mShader = shader;
+		}
 
 		void Set()
 		{
 			assert(mShader != nullptr);
-			mShader->SetUniform(name, value);
+			mShader->SetUniform(mName, mValue);
 		}
 
-		const char* name;
-		T value;
+		const char* mName;
+		T mValue;
 	};
 }
 

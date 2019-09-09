@@ -87,7 +87,7 @@ inline void operator&=( PropertyFlags& a, PropertyFlags b )
 }
 
 typedef std::unordered_map< std::string, PropertyType > PropertyTypeMap;
-typedef std::unordered_map< PropertyType, std::string > PropertyTypeAsStringMap;
+typedef std::unordered_map< u32, std::string > PropertyTypeAsStringMap;
 
 struct PropertyTraits
 {

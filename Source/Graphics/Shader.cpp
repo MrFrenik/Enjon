@@ -75,6 +75,8 @@ namespace Enjon
 		// Create fragment shader
 		mFragmentShaderID = glCreateShader( GL_FRAGMENT_SHADER );
 
+		std::cout << "Compiling: " << vertName + ", " + fragName << "\n";
+
 		// Compile vertex shader
 		Enjon::Result vertexResult = CompileShader( vertexShaderCode, mVertexShaderID );
 

@@ -130,6 +130,8 @@ namespace Enjon
 		// Change material 
 		switch ( type )
 		{
+			default: break;
+
 			case TransformWidgetRenderableType::ScaleRoot:
 			{
 				mRoot.mRenderable.SetMaterial( am->GetAsset< Material >( "Cache.YellowMaterial" ) );
@@ -182,6 +184,8 @@ namespace Enjon
 		// Change material 
 		switch ( type )
 		{
+			default: break;
+			
 			case TransformWidgetRenderableType::ScaleRoot:
 			{
 				mRoot.mRenderable.SetMaterial( am->GetDefaultAsset< Material >( ) );

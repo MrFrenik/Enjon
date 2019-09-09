@@ -6,8 +6,7 @@
 #include <SubsystemCatalog.h>
 #include <ImGui/ImGuiManager.h>
 #include <Graphics/Window.h>
-
-#include <fmt/format.h>
+#include <Utils/FileUtils.h>
 
 namespace Enjon
 {
@@ -24,7 +23,7 @@ namespace Enjon
 
 		ctx->RegisterMenuOption( "View", mName, [ & ] ( )
 		{
-			ImGui::MenuItem( fmt::format( "{}##options{}", mName, (u32)this ).c_str( ), NULL, &mViewEnabled );
+			ImGui::MenuItem( Utils::format( "%s##options%zu", mName.c_str(), (u32)(usize)this ).c_str( ), NULL, &mViewEnabled );
 		});
 
 		// Register individual window with docking system

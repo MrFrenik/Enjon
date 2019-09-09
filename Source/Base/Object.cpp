@@ -95,6 +95,8 @@ namespace Enjon
 					}
 
 				} break;
+
+				default:
 				case MetaClassType::Object:
 				case MetaClassType::Application:
 				{ 
@@ -129,6 +131,8 @@ namespace Enjon
 					}
 				} 
 			} break;
+
+			default: break;
 		} 
 	}
 

@@ -4,10 +4,10 @@
 #ifndef ENJON_OBJECT_H
 #define ENJON_OBJECT_H 
 
-#include "MetaClass.h"
+// #include "MetaClass.h"
 #include "System/Types.h"
 #include "Base/ObjectDefines.h"
-#include "Engine.h"
+#include "Engine.h"					// I think including this is causing duplicate symbols
 #include "Defines.h"
 
 #include <limits>
@@ -22,6 +22,7 @@ namespace Enjon
 	class AssetArchiver;
 	class ObjectArchiver;
 	class ByteBuffer;
+	class Engine;
 }
 
 // TODO(): Clean up this file!  
@@ -590,15 +591,36 @@ namespace Enjon
 			{
 				assert( index < GetCapacity( object ) );
 
+				std::cout << "Attempting to set...\n";
+
 				// Grab raw array
-				T* rawArr = GetRaw( object );
-				rawArr[index] = value;
+				// T* rawArr = GetRaw( object );
+				// rawArr[index] = value;
+
+				switch ( mArraySizeType )
+				{
+					case ArraySizeType::Dynamic:
+					{ 
+						// return ( T* )( &( ( ( Vector< T >* )( (usize)object + mOffset ) )->front() ) );
+						// return ( T* )( ( ( ( Vector< T >* )( (usize)object + mOffset ) ) ) );
+						( (Vector< T >*)( (usize)object + mOffset ) )->at(index) = value;
+					} break;
+
+					default:
+					case ArraySizeType::Fixed:
+					{
+						// return ( reinterpret_cast< T* >( (usize)object + mOffset ) );
+						(reinterpret_cast< T* >( (usize)object + mOffset) )[index] = value;
+					} break;
+				}
+
+				std::cout << "Done setting...\n";
 			}
  
 			/*
 			* @brief
 			*/
-			ArraySizeType GetArraySizeType( ) const override
+			virtual ArraySizeType GetArraySizeType( ) const override
 			{
 				return mArraySizeType;
 			} 
@@ -606,7 +628,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			MetaPropertyType GetArrayType( ) const
+			virtual MetaPropertyType GetArrayType( ) const override
 			{
 				return mArrayType;
 			}
@@ -630,13 +652,14 @@ namespace Enjon
 				{
 					case ArraySizeType::Dynamic:
 					{ 
-						return ( T* )( &( ( ( Vector< T >* )( usize( object ) + mOffset ) )->front() ) );
+						// return ( T* )( &( ( ( Vector< T >* )( (usize)object + mOffset ) )->front() ) );
+						return ( T* )( ( ( ( Vector< T >* )( (usize)object + mOffset ) ) ) );
 					} break;
 
 					default:
 					case ArraySizeType::Fixed:
 					{
-						return ( reinterpret_cast< T* >( usize( object ) + mOffset ) );
+						return ( reinterpret_cast< T* >( (usize)object + mOffset ) );
 					} break;
 				}
 			}
@@ -710,7 +733,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			usize GetSize( const Object* object ) const 
+			usize GetSize( const Object* object ) const override
 			{
 				return ( ( HashMap<K, V>* )( usize( object ) + mOffset ) )->size( ); 
 			}
@@ -785,7 +808,7 @@ namespace Enjon
 			void SetValueAt( const Object* object, const K& key, const V& value ) const
 			{ 
 				HashMap< K, V >* rawMap = GetRaw( object );
-				rawMap->insert_or_assign( key, value );
+				rawMap->insert(std::make_pair(key,value));
 			} 
 
 			/*
@@ -815,120 +838,6 @@ namespace Enjon
 			} 
 	};
 
-	template <typename T>
-	class MetaPropertyAssetHandle : public MetaPropertyTemplateBase
-	{ 
-		public: 
-			MetaPropertyAssetHandle( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits )
-			{
-				Object::AssertIsObject<T>( );
-
-				mType = type;
-				mName = name;
-				mOffset = offset;
-				mIndex = propIndex;
-				mTraits = traits;
-			}
-
-			~MetaPropertyAssetHandle( ) = default;
-
-			virtual const MetaClass* GetClassOfTemplatedArgument() const override
-			{
-				return Object::GetClass<T>();	
-			}
-
-			T mClass;
-	};
-
-#define META_FUNCTION_IMPL( )\
-	friend MetaClass;\
-	friend Object;\
-	virtual void Base( ) override\
-	{\
-	} 
-
-	class MetaFunction
-	{
-		friend MetaClass;
-		friend Object;
-
-		public:
-			MetaFunction( )
-			{
-			}
-
-			~MetaFunction( )
-			{ 
-			}
-
-			template < typename RetVal, typename T, typename... Args >
-			RetVal Invoke( T* obj, Args&&... args )
-			{
-				Object::AssertIsObject<T>( );
-				return static_cast< MetaFunctionImpl< T, RetVal, Args&&... >* >( this )->mFunc( obj, std::forward<Args>( args )... );
-			}
-
-			const Enjon::String& GetName( ) const
-			{
-				return mName;
-			}
-
-		protected:
-			virtual void Base( ) = 0;
-
-		protected:
-			Enjon::String mName = "";
-	};
-
-	template < typename T, typename RetVal, typename... Args >
-	struct MetaFunctionImpl : public MetaFunction
-	{ 
-		META_FUNCTION_IMPL( )
-
-		MetaFunctionImpl( std::function< RetVal( T*, Args&&... ) > function, const Enjon::String& name )
-			: mFunc( function )
-		{ 
-			mName = name;
-		}
-
-		~MetaFunctionImpl( )
-		{ 
-		}
-
-		std::function< RetVal( T*, Args&&... ) > mFunc;
-	};
-
-	template < typename T >
-	struct MetaFunctionImpl< T, void, void > : public MetaFunction
-	{ 
-		META_FUNCTION_IMPL( )
-		
-		MetaFunctionImpl( std::function< void( T* ) > function, const Enjon::String& name )
-			: mFunc( func )
-		{ 
-			mName = name;
-		}
-
-		~MetaFunctionImpl( )
-		{ 
-		}
-		std::function< void( T* ) > mFunc;
-	};
-
-	template < typename T, typename RetVal >
-	struct MetaFunctionImpl< T, RetVal, void > : public MetaFunction
-	{
-		META_FUNCTION_IMPL( )
-
-		MetaFunctionImpl( std::function< RetVal( T* ) > function, const Enjon::String& name )
-			: mFunc( func )
-		{ 
-			mName = name;
-		}
-
-		std::function< RetVal( T* ) > mFunc;
-	};
-
 	typedef Vector< MetaProperty* > PropertyTable;
 	typedef HashMap< Enjon::String, MetaFunction* > FunctionTable;
 	typedef std::function< Object*( void ) > ConstructFunction;
@@ -954,29 +863,30 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual ~MetaClass( )
-			{
-				// Delete all functions
-				for ( auto& f : mFunctions )
-				{
-					delete f.second;
-					f.second = nullptr;
-				}
+			~MetaClass()
+			{}
+			// {
+			// 	// Delete all functions
+			// 	for ( auto& f : mFunctions )
+			// 	{
+			// 		delete f.second;
+			// 		f.second = nullptr;
+			// 	}
 
 
-				for ( auto& p : mProperties )
-				{
-					delete p;
-					p = nullptr;
-				}
+			// 	for ( auto& p : mProperties )
+			// 	{
+			// 		delete p;
+			// 		p = nullptr;
+			// 	}
 
-				// Clear properties and functions
-				mProperties.clear( );
-				mFunctions.clear( );
+			// 	// Clear properties and functions
+			// 	mProperties.clear( );
+			// 	mFunctions.clear( );
 
-				// Any further destruction that needs to occur
-				this->Destroy( ); 
-			} 
+			// 	// Any further destruction that needs to occur
+			// 	this->Destroy( ); 
+			// } 
 
 			MetaClassType GetMetaClassType( ) const 
 			{
@@ -1101,52 +1011,52 @@ namespace Enjon
 			} 
 
 			template < typename T >
-			void SetValue( const Object* object, const MetaProperty* prop, const T& value ) const
-			{
-				if ( HasProperty( prop ) )
-				{
-					T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
-					*dest = value;
+			void SetValue( const Object* object, const MetaProperty* prop, const T& value ) const;
+			// {
+			// // 	// if ( HasProperty( prop ) )
+			// // 	// {
+			// // 	// 	T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
+			// // 	// 	*dest = value;
 					
-					// Call mutator callbacks
-					for ( auto& mutator : prop->mMutatorCallbacks )
-					{
-						if ( mutator )
-						{
-							mutator->Invoke<void>( object, value ); 
-						}
-					} 
+			// // 	// 	// Call mutator callbacks
+			// // 	// 	for ( auto& mutator : prop->mMutatorCallbacks )
+			// // 	// 	{
+			// // 	// 		if ( mutator )
+			// // 	// 		{
+			// // 	// 			mutator->Invoke<void>( object, value ); 
+			// // 	// 		}
+			// // 	// 	} 
 
-					for ( auto& m : prop->mOnValueChangedCallbacks )
-					{
-						m( );
-					}
-				}
-			} 
+			// // 	// 	for ( auto& m : prop->mOnValueChangedCallbacks )
+			// // 	// 	{
+			// // 	// 		m( );
+			// // 	// 	}
+			// // 	// }
+			// } 
 
 			template < typename T >
-			void SetValue( Object* object, const MetaProperty* prop, const T& value )
-			{
-				if ( HasProperty( prop ) )
-				{
-					T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
-					*dest = value;
+			void SetValue( Object* object, const MetaProperty* prop, const T& value );
+			// {
+			// // 	// if ( HasProperty( prop ) )
+			// // 	// {
+			// // 	// 	T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
+			// // 	// 	*dest = value;
 
-					// Call mutator callbacks
-					for ( auto& mutator : prop->mMutatorCallbacks )
-					{
-						if ( mutator )
-						{
-							mutator->Invoke<void>( object, value ); 
-						}
-					} 
+			// // 	// 	// Call mutator callbacks
+			// // 	// 	for ( auto& mutator : prop->mMutatorCallbacks )
+			// // 	// 	{
+			// // 	// 		if ( mutator )
+			// // 	// 		{
+			// // 	// 			mutator->Invoke<void>( object, value ); 
+			// // 	// 		}
+			// // 	// 	} 
 
-					for ( auto& m : prop->mOnValueChangedCallbacks )
-					{
-						m( );
-					}
-				}
-			} 
+			// // 	// 	for ( auto& m : prop->mOnValueChangedCallbacks )
+			// // 	// 	{
+			// // 	// 		m( );
+			// // 	// 	}
+			// // 	// }
+			// } 
 
 			/** 
 			* @brief
@@ -1157,23 +1067,18 @@ namespace Enjon
 			* @brief
 			*/
 			template < typename T >
-			bool InstanceOf( ) const
-			{
-				MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) );
-				const MetaClass* cls = mr->Get< T >( );
-				if ( !cls )
-				{
-					cls = mr->RegisterMetaClass< T >( );
-				} 
+			bool InstanceOf( ) const;
+			// {
+			// 	return false;
+			// 	// MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) );
+			// 	// const MetaClass* cls = mr->Get< T >( );
+			// 	// if ( !cls )
+			// 	// {
+			// 	// 	cls = mr->RegisterMetaClass< T >( );
+			// 	// } 
 
-				return ( cls && cls == this ); 
-			} 
-
-			template < typename T >
-			static void AssertIsType( const Object* object )
-			{
-				assert( Object::GetClass< T >( ) == object->Class() );
-			} 
+			// 	// return ( cls && cls == this ); 
+			// } 
 
 			// Method for getting type id from MetaClass instead of Object
 			virtual u32 GetTypeId( ) const 
@@ -1273,31 +1178,32 @@ namespace Enjon
 			}
 
 			template <typename T>
-			MetaClass* RegisterMetaClass( )
-			{
-				// Must inherit from object to be able to registered
-				static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." );
+			MetaClass* RegisterMetaClass( );
+			// {
+			// 	// Must inherit from object to be able to registered
+			// 	static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." );
 
-				// Get id of object
-				u32 id = GetTypeId< T >( );
+			// 	// Get id of object
+			// 	u32 id = GetTypeId< T >( );
 
-				// If available, then return
-				if ( HasMetaClass< T >( ) )
-				{
-					return mRegistry[ id ];
-				}
+			// 	// If available, then return
+			// 	if ( HasMetaClass< T >( ) )
+			// 	{
+			// 		return mRegistry[ id ];
+			// 	}
 
-				// Otherwise construct it and return
-				MetaClass* cls = Object::ConstructMetaClass< T >( ); 
+			// 	// Otherwise construct it and return
+			// 	MetaClass* cls = Object::ConstructMetaClass< T >( ); 
 
-				mRegistry[ id ] = cls;
-				mRegistryByClassName[cls->GetName()] = cls;
+			// 	mRegistry[ id ] = cls;
+			// 	mRegistryByClassName[cls->GetName()] = cls;
 
-				// Further registration of metaclass
-				RegisterMetaClassLate( cls );
+			// 	// Further registration of metaclass
+			// 	RegisterMetaClassLate( cls );
 
-				return cls;
-			}
+			// 	return cls;
+			// 	// return nullptr;
+			// }
  
 			/**
 			* @brief
@@ -1308,12 +1214,12 @@ namespace Enjon
 			* @brief
 			*/
 			template <typename T>
-			void UnregisterMetaClass( )
-			{
-				// Must inherit from object to be able to registered
-				static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." ); 
-				UnregisterMetaClass( Object::GetClass< T >( ) ); 
-			}
+			void UnregisterMetaClass( );
+			// {
+			// 	// Must inherit from object to be able to registered
+			// 	// static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." ); 
+			// 	// UnregisterMetaClass( Object::GetClass< T >( ) ); 
+			// }
 
 			/**
 			* @brief
@@ -1383,9 +1289,6 @@ namespace Enjon
 			HashMap< u32, MetaClass* > mRegistry; 
 			HashMap< String, MetaClass* > mRegistryByClassName;
 	};
-
-	// Max allowed type id by engine
-	const u32 EnjonMaxTypeId = std::numeric_limits<u32>::max( ) - 1;
 
 	// Base model for all Enjon classes that participate in reflection
 	class Object
@@ -1505,7 +1408,15 @@ namespace Enjon
 					cls = mr->RegisterMetaClass< T >( );
 				}
 				return cls;
+				// return nullptr;
 			}
+
+
+			template < typename T >
+			static void AssertIsType( const Object* object )
+			{
+				assert( Object::GetClass< T >( ) == object->Class() );
+			} 
 
 			/**
 			*@brief Could return null!
@@ -1519,6 +1430,7 @@ namespace Enjon
 			{
 				MetaClassRegistry* mr = const_cast<MetaClassRegistry*> ( Engine::GetInstance( )->GetMetaClassRegistry( ) );
 				return mr->GetClassByName( className );
+				// return nullptr;
 			} 
 
 		protected:
@@ -1607,6 +1519,258 @@ namespace Enjon
 				// Do nothing by default
 			} 
 	};
+
+	template <typename T>
+	class MetaPropertyAssetHandle : public MetaPropertyTemplateBase
+	{ 
+		public: 
+			MetaPropertyAssetHandle( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits )
+			{
+				Object::AssertIsObject<T>( );
+
+				mType = type;
+				mName = name;
+				mOffset = offset;
+				mIndex = propIndex;
+				mTraits = traits;
+			}
+
+			~MetaPropertyAssetHandle( ) = default;
+
+			virtual const MetaClass* GetClassOfTemplatedArgument() const override
+			{
+				return Object::GetClass<T>();	
+			}
+
+			T mClass;
+	};
+
+#define META_FUNCTION_IMPL( )\
+	friend MetaClass;\
+	friend Object;\
+	virtual void Base( ) override\
+	{\
+	} 
+
+	class MetaFunction
+	{
+		friend MetaClass;
+		friend Object;
+
+		public:
+			MetaFunction( )
+			{
+			}
+
+			virtual ~MetaFunction( )
+			{ 
+			}
+
+			template < typename RetVal, typename T, typename... Args >
+			RetVal Invoke( T* obj, Args&&... args );
+			// {
+			// 	RetVal val;
+			// 	return val;
+			// // 	Object::AssertIsObject<T>( );
+			// // 	return static_cast< MetaFunctionImpl< T, RetVal, Args&&... >* >( this )->mFunc( obj, std::forward<Args>( args )... );
+			// }
+
+			const Enjon::String& GetName( ) const
+			{
+				return mName;
+			}
+
+		protected:
+			virtual void Base( ) = 0;
+
+		protected:
+			Enjon::String mName = "";
+	};
+
+	template < typename T, typename RetVal, typename... Args >
+	struct MetaFunctionImpl : public MetaFunction
+	{ 
+		META_FUNCTION_IMPL( )
+
+		MetaFunctionImpl( std::function< RetVal( T*, Args&&... ) > function, const Enjon::String& name )
+			: mFunc( function )
+		{ 
+			mName = name;
+		}
+
+		~MetaFunctionImpl( )
+		{ 
+		}
+
+		std::function< RetVal( T*, Args&&... ) > mFunc;
+	};
+
+	template < typename T >
+	struct MetaFunctionImpl< T, void, void > : public MetaFunction
+	{ 
+		META_FUNCTION_IMPL( )
+		
+		MetaFunctionImpl( std::function< void( T* ) > function, const Enjon::String& name )
+			: mFunc( function )
+		{ 
+			mName = name;
+		}
+
+		~MetaFunctionImpl( )
+		{ 
+		}
+		std::function< void( T* ) > mFunc;
+	};
+
+	template < typename T, typename RetVal >
+	struct MetaFunctionImpl< T, RetVal, void > : public MetaFunction
+	{
+		META_FUNCTION_IMPL( )
+
+		MetaFunctionImpl( std::function< RetVal( T* ) > function, const Enjon::String& name )
+			: mFunc( function )
+		{ 
+			mName = name;
+		}
+
+		std::function< RetVal( T* ) > mFunc;
+	};
+
+	template < typename T >
+	MetaClass* MetaClassRegistry::RegisterMetaClass( )
+	{
+		// Must inherit from object to be able to registered
+		static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." );
+
+		// Get id of object
+		u32 id = GetTypeId< T >( );
+
+		// If available, then return
+		if ( HasMetaClass< T >( ) )
+		{
+			return mRegistry[ id ];
+		}
+
+		// Otherwise construct it and return
+		MetaClass* cls = Object::ConstructMetaClass< T >( ); 
+
+		mRegistry[ id ] = cls;
+		mRegistryByClassName[cls->GetName()] = cls;
+
+		// Further registration of metaclass
+		RegisterMetaClassLate( cls );
+
+		return cls;
+	}
+
+	template < typename T >
+	bool MetaClass::InstanceOf( ) const
+	{
+		MetaClassRegistry* mr = const_cast< MetaClassRegistry* >( Engine::GetInstance( )->GetMetaClassRegistry( ) );
+		const MetaClass* cls = mr->Get< T >( );
+		if ( !cls )
+		{
+			cls = mr->RegisterMetaClass< T >( );
+		} 
+
+		return ( cls && cls == this ); 
+	} 
+
+	template < typename RetVal, typename T, typename... Args >
+	RetVal MetaFunction::Invoke( T* obj, Args&&... args )
+	{
+		// RetVal val;
+		// return val;
+		Object::AssertIsObject<T>( );
+		return static_cast< MetaFunctionImpl< T, RetVal, Args&&... >* >( this )->mFunc( obj, std::forward<Args>( args )... );
+	}
+
+	// template < typename T >
+	// static void MetaClass::AssertIsType( const Object* object )
+	// {
+	// 	assert( Object::GetClass< T >( ) == object->Class() );
+	// } 
+
+	template <typename T>
+	void MetaClassRegistry::UnregisterMetaClass( )
+	{
+		// Must inherit from object to be able to registered
+		static_assert( std::is_base_of<Object, T>::value, "MetaClass::RegisterMetaClass() - T must inherit from Object." ); 
+		UnregisterMetaClass( Object::GetClass< T >( ) ); 
+	}
+
+	template < typename T >
+	void MetaClass::SetValue( const Object* object, const MetaProperty* prop, const T& value ) const
+	{
+		if ( HasProperty( prop ) )
+		{
+			T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
+			*dest = value;
+			
+			// Call mutator callbacks
+			for ( auto& mutator : prop->mMutatorCallbacks )
+			{
+				if ( mutator )
+				{
+					mutator->Invoke<void>( object, value ); 
+				}
+			} 
+
+			for ( auto& m : prop->mOnValueChangedCallbacks )
+			{
+				m( );
+			}
+		}
+	} 
+
+	template < typename T >
+	void MetaClass::SetValue( Object* object, const MetaProperty* prop, const T& value )
+	{
+		if ( HasProperty( prop ) )
+		{
+			T* dest = reinterpret_cast< T* >( usize( object ) + prop->mOffset );
+			*dest = value;
+
+			// Call mutator callbacks
+			for ( auto& mutator : prop->mMutatorCallbacks )
+			{
+				if ( mutator )
+				{
+					mutator->Invoke<void>( object, value ); 
+				}
+			} 
+
+			for ( auto& m : prop->mOnValueChangedCallbacks )
+			{
+				m( );
+			}
+		}
+	} 
+
+	// MetaClass::~MetaClass( )
+	// {
+	// 	// Delete all functions
+	// 	for ( auto& f : mFunctions )
+	// 	{
+	// 		delete f.second;
+	// 		f.second = nullptr;
+	// 	}
+
+
+	// 	for ( auto& p : mProperties )
+	// 	{
+	// 		delete p;
+	// 		p = nullptr;
+	// 	}
+
+	// 	// Clear properties and functions
+	// 	mProperties.clear( );
+	// 	mFunctions.clear( );
+
+	// 	// Any further destruction that needs to occur
+	// 	this->Destroy( ); 
+	// } 
+
 }
 
 #endif

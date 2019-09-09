@@ -32,7 +32,7 @@ namespace Enjon
 				: x(vec.x), y(vec.y), z(vec.z), w(_w)
 			{}
 
-			Quaternion::Quaternion(const Quaternion& q)
+			Quaternion(const Quaternion& q)
 				: x(q.x), y(q.y), z(q.z), w(q.w) 
 			{} 
 

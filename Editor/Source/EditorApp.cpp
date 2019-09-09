@@ -30,6 +30,7 @@
 
 #include <Base/World.h> 
 
+// This is fun...
 #ifdef ENJON_SYSTEM_WINDOWS
 	#include <windows.h>
 	#ifdef GetObject
@@ -37,7 +38,6 @@
 	#endif
 #endif
 
-#include <fmt/format.h>
 #include <chrono>
 #include <ctime>
 #include <nfd/include/nfd.h>
@@ -51,7 +51,7 @@ using namespace rapidjson;
 
 /*
 	- This define is funky. Delete all the engine assets in the engine asset cache. Set this define to 1. Load the editor to 
-		recreate all engine assets. STOP the editor. Set this define back to 0. Then you're go to run like normal. 
+		recreate all engine assets. STOP the editor. Set this define back to 0. Then you're good to go to run like normal. 
 */
 #define LOAD_ENGINE_RESOURCES	0
 
@@ -59,22 +59,19 @@ typedef void( *funcSetEngineInstance )( Enjon::Engine* instance );
 typedef Enjon::Application*( *funcCreateApp )( Enjon::Engine* );
 typedef void( *funcDeleteApp )( Enjon::Application* ); 
 
-// TODO(): Make sure to abstract this for platform independence
-HINSTANCE dllHandleTemp = nullptr;
-HINSTANCE dllHandle = nullptr;
+void* dllHandleTemp = nullptr;
+void* dllHandle = nullptr;
 funcSetEngineInstance setEngineFunc = nullptr;
 funcCreateApp createAppFunc = nullptr;
 funcDeleteApp deleteAppFunc = nullptr;
 
-namespace fs = std::experimental::filesystem; 
+namespace fs = ghc::filesystem; 
 
 // ALL of this needs to change to be user dependent
 Enjon::String projectName = "TestProject";
 Enjon::String projectDLLName = projectName + ".dll";
 Enjon::String copyDir = ""; 
-//Enjon::String mProjectsDir = "E:/Development/EnjonProjects/";
 Enjon::String mProjectsDir = "";
-//Enjon::String mVisualStudioDir = "\"E:\\Programs\\MicrosoftVisualStudio14.0\\\"";
 Enjon::String mVisualStudioDir = ""; 
 
 // Need to make two different builds for editor configurations - debug / release
@@ -85,11 +82,12 @@ Enjon::String mVisualStudioDir = "";
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
 Enjon::String configuration = "Debug";
-//Enjon::String configuration = "Bin";
+//Enjon::String configuration = "Bin"; 
 
 namespace Enjon
 {
 	// This has to happen anyway. Perfect!
+#ifdef ENJON_SYSTEM_WINDOWS
 	void CopyLibraryContents( const String& projectName, const String& projectDir )
 	{
 		Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
@@ -97,9 +95,11 @@ namespace Enjon
 
 		// Removing the dll for this project (it's temporary, so we're going to name it a temp name)
 		fs::path dllPath = rootDir + "Build/" + configuration + "/" + "proj.dll";
-		if ( fs::exists( dllPath ) )
+		String path = String( rootDir + "Build/" + configuration + "/" + proj.dll );
+		bool exists = fs::exists( path );
+		if ( exists )
 		{
-			fs::remove( dllPath );
+			fs::remove( path );
 		}
 
 		// Now copy over contents from intermediate build to executable dir
@@ -112,6 +112,31 @@ namespace Enjon
 			}
 		}
 	}
+#endif
+#ifdef ENJON_SYSTEM_OSX
+	void CopyLibraryContents( const String& projectName, const String& projectDir )
+	{
+		Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
+		Enjon::String dllName =  "lib" + projectName + ".dylib";
+
+		// Removing the dll for this project (it's temporary, so we're going to name it a temp name)
+		String dllPath = rootDir + "Build/" + configuration + "/" + "proj.dylib";
+		if ( fs::exists( dllPath ) )
+		{
+			fs::remove( dllPath );
+		}
+
+		// Now copy over contents from intermediate build to executable dir
+		dllPath = projectDir;
+		if ( fs::exists( dllPath ) )
+		{
+			if ( fs::exists( dllPath + "Build/" + configuration + "/" + dllName ) )
+			{
+				fs::copy( fs::path( dllPath + "Build/" + configuration + "/" + dllName ), rootDir + "Build/" + configuration + "/" + "proj.dylib" );
+			}
+		} 
+	}
+#endif
 
 	void EditorApp::LoadProjectView( )
 	{ 
@@ -259,7 +284,7 @@ namespace Enjon
 			// If not empty string
 			if ( componentErrorMessage.compare( "" ) != 0 )
 			{
-				ImGui::Text( componentErrorMessage.c_str() );
+				ImGui::Text( "%s", componentErrorMessage.c_str() );
 			}
 
 			ImGui::EndPopup( );
@@ -353,7 +378,7 @@ namespace Enjon
 		mSceneViewWindowPosition = Vec2( cursorPos.x, cursorPos.y );
 		mSceneViewWindowSize = Vec2( ImGui::GetWindowWidth( ), ImGui::GetWindowHeight( ) );
 
-		ImTextureID img = ( ImTextureID )currentTextureId;
+		ImTextureID img = ( ImTextureID )Int2VoidP(currentTextureId);
 		ImGui::Image( img, ImVec2( ImGui::GetWindowWidth( ), ImGui::GetWindowHeight( ) ),
 			ImVec2( 0, 1 ), ImVec2( 1, 0 ), ImColor( 255, 255, 255, 255 ), ImColor( 255, 255, 255, 0 ) );
 
@@ -684,7 +709,35 @@ namespace Enjon
 		{
 			std::cout << "Could not build project.\n";
 		}
+#else
+			// Unload previous project
+			UnloadDLL( ); 
+
+			// Create new project
+			Project proj; 
+			proj.SetProjectPath( projectDir );
+			proj.SetProjectName( projectName );
+			proj.SetEditor( this );
+
+			// Compile the project
+			proj.CompileProject( ); 
+
+			// Add project to list
+			mProjectsOnDisk.push_back( proj ); 
+
+			// Load the new project
+			LoadProject( proj ); 
+
+			// Load the solution for the project
+			LoadProjectSolution( );
+
+			// Add project to project list
+			mConfigSettings.mProjectList.push_back( proj );
+
+			// Serialize editor configuration settings
+			SerializeEditorConfigSettings();
 #endif
+
 
 	}
 
@@ -814,7 +867,7 @@ namespace Enjon
 
 		ImGui::SameLine( );
 		strncpy( tmpBuffer, mNewProjectName.c_str( ), 1024 ); 
-		u8 buffer[ 2048 ];
+		char buffer[ 2048 ];
 		snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str( ), tmpBuffer );
 		b32 projExists = fs::exists( buffer ); 
 		ImGui::PushItemWidth( 150.f );
@@ -901,7 +954,8 @@ namespace Enjon
 			}
 
 			// Free library if in use
-			FreeLibrary( dllHandle );
+			// FreeLibrary( dllHandle );
+			SDL_UnloadObject( dllHandle );
 			dllHandle = nullptr;
 			createAppFunc = nullptr;
 			deleteAppFunc = nullptr;
@@ -959,6 +1013,7 @@ namespace Enjon
 		} 
 
 		mNeedReload = false;
+
 	}
 
 	//================================================================================================================================
@@ -980,15 +1035,21 @@ namespace Enjon
 
 		// Try to load library
 		//dllHandle = LoadLibrary( ( mProject.GetProjectName() + ".dll" ).c_str() );
-		dllHandle = LoadLibrary( "proj.dll" );
+		// dllHandle = LoadLibrary( "proj.dll" );
+		// dllHandle = LoadLibrary( "proj.dll" );
+		#ifdef ENJON_SYSTEM_WINDOWS
+			dllHandle = SDL_LoadObject( "proj.dll" );
+		#else
+			dllHandle = SDL_LoadObject( "proj.dylib" );
+		#endif
 		//dllHandle = LoadLibrary( ( mProject.GetProjectPath() + "Build/" + configuration +"/" + mProject.GetProjectName() + ".dll" ).c_str() );
 
 		// If valid, then set address of procedures to be called
 		if ( dllHandle )
 		{
 			// Set functions from handle
-			createAppFunc = ( funcCreateApp )GetProcAddress( dllHandle, "CreateApplication" );
-			deleteAppFunc = ( funcDeleteApp )GetProcAddress( dllHandle, "DeleteApplication" );
+			createAppFunc = ( funcCreateApp )SDL_LoadFunction( dllHandle, "CreateApplication" );
+			deleteAppFunc = ( funcDeleteApp )SDL_LoadFunction( dllHandle, "DeleteApplication" );
 
 			// Create application
 			if ( createAppFunc )
@@ -1017,7 +1078,7 @@ namespace Enjon
 					for ( u32 i = 0; i < 30; ++i )
 					{
 						// Write this out to file for shiggles
-						buffer.WriteToFile( mProject.GetProjectPath( ) + "/testWriteBuffer" + fmt::format("{}", i ) ); 
+						buffer.WriteToFile( mProject.GetProjectPath( ) + "/testWriteBuffer" + Utils::format("%d", i ) ); 
 					}
 				}
 			}
@@ -1251,6 +1312,7 @@ namespace Enjon
 	{
 		mPreloadProjectContext = false;
 
+
 		Window* mainWindow = EngineSubsystem( GraphicsSubsystem )->GetMainWindow( );
 		assert( mainWindow != nullptr );
 
@@ -1261,7 +1323,8 @@ namespace Enjon
 		mainWindow->SetWindowTitle( "Enjon Editor: " + mProject.GetProjectName( ) );
 
 		// Destroy previous contexts and windows if available
-		CleanupGUIContext( ); 
+		CleanupGUIContext( );
+
 
 		// Add main menu options ( order matters )
 		guiContext->RegisterMainMenu( "File" );
@@ -1275,6 +1338,7 @@ namespace Enjon
 		mAssetBroswerView = new EditorAssetBrowserView( this, mainWindow );
 		mInspectorView = new EditorInspectorView( this, mainWindow );
 		mTransformToolBar = new EditorTransformWidgetToolBar( this, mainWindow );
+
 
 		// Archetype callback for scene view
 		mEditorSceneView->SetViewportCallback( ViewportCallbackType::AssetDropArchetype, [ & ] ( const void* data )
@@ -1291,6 +1355,7 @@ namespace Enjon
 			}
 		});
 
+
 		mEditorSceneView->SetViewportCallback( ViewportCallbackType::CustomRenderOverlay, [ & ] ( const void* data )
 		{
 			// Data should be null here
@@ -1304,18 +1369,19 @@ namespace Enjon
 			AssetHandle< Scene > currentScene = EngineSubsystem( SceneManager )->GetScene( ); 
 			if ( currentScene )
 			{
-				txt = fmt::format( "Scene: {}", currentScene->GetName() );
+				txt = Utils::format( "Scene: %s", currentScene->GetName().c_str() );
 				txtSz = ImGui::CalcTextSize( txt.c_str() );
 			} 
 			else
 			{ 
-				txt = fmt::format( "Scene: default" );
+				txt = Utils::format( "Scene: default" );
 				txtSz = ImGui::CalcTextSize( txt.c_str() );
 			}
 
 			ImGui::SetCursorScreenPos( ImVec2( windowPos.x + windowSize.x - txtSz.x - margin.x, windowPos.y + windowSize.y - txtSz.y - margin.y ) );
 			ImGui::Text( "%s", txt.c_str() );
 		});
+
 
 		// Register selection callback with outliner view
 		mWorldOutlinerView->RegisterEntitySelectionCallback( [ & ] ( const EntityHandle& handle )
@@ -1345,7 +1411,7 @@ namespace Enjon
 		} );
 
 		// Initialize transform widget
-		mTransformWidget.Initialize( mEditorSceneView ); 
+		mTransformWidget.Initialize( mEditorSceneView );
 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
@@ -1379,6 +1445,7 @@ namespace Enjon
 				app->mWorldOutlinerView->SelectEntity( entity );
 			} 
 		};
+
 
 		auto createCamera = [ & ] ( EditorApp* app )
 		{
@@ -1566,7 +1633,7 @@ namespace Enjon
 			}
 			ImGui::PopStyleColor( );
 
-			textColor = mPlaying ? ImVec4( 0.2f, 0.2f, 0.2f, 1.f ) : ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
+			textColor = mPlaying ? ImColor( 0.2f, 0.2f, 0.2f, 1.f ) : ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
 			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4(textColor) );
 			if ( ImGui::MenuItem( "Load Project##options", NULL ) && !mPlaying )
 			{
@@ -1585,6 +1652,15 @@ namespace Enjon
 				mNeedsLoadProject = true;
 			}
 			ImGui::PopStyleColor( );
+
+			textColor = mPlaying ? ImColor( 0.2f, 0.2f, 0.2f, 1.f ) : ImColor( ImGui::GetColorU32( ImGuiCol_Text ) );
+			ImGui::PushStyleColor( ImGuiCol_Text, ImVec4(textColor) );
+			if (ImGui::MenuItem( "Exit##options", NULL) && !mPlaying )
+			{
+				// Quit everything
+				EngineSubsystem( WindowSubsystem )->DestroyWindow( 0 );
+			}
+			ImGui::PopStyleColor();
 		};
 
 		// Register menu options
@@ -1610,12 +1686,12 @@ namespace Enjon
 		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
 
 		// Register docking layouts 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Play Options", "Viewport", GUIDockSlotType::Slot_Top, 0.08f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "World Outliner", nullptr, GUIDockSlotType::Slot_Right, 0.3f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Transform ToolBar", "Play Options", GUIDockSlotType::Slot_Right, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.6f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Bottom, 0.3f ) ); 
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Bottom, 0.3f ) );
 
 		guiContext->Finalize( );
 	}
@@ -1627,7 +1703,7 @@ namespace Enjon
 	{ 
 		ImGuiManager* igm = EngineSubsystem(ImGuiManager);
 		// I don't like this...
-		b32 projDirSet = fs::v1::exists( mProjectsDir );
+		b32 projDirSet = fs::exists( mProjectsDir );
 
 		if ( ImGui::BeginDock( "Project Browser", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 		{
@@ -1683,7 +1759,7 @@ namespace Enjon
 					if (bActive) { 
 						PreloadProject( p );
 						WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-						ws->DestroyWindow( mProjectSelectionWindow );
+						ws->DestroyWindow( mProjectSelectionWindow->GetWindowID() );
 					}
 				}
 				ImGui::PushFont(igm->GetFont("Roboto-MediumItalic_12"));
@@ -1717,6 +1793,43 @@ namespace Enjon
 
 			//ImGui::SameLine( );
 			//SelectProjectDirectoryView( ); 
+
+			if (ImGui::Button( "Load..." ))
+			{				
+				nfdchar_t* outPath = NULL;
+				nfdresult_t res = NFD_PickFolder( NULL, &outPath );
+				if ( res == NFD_OKAY )
+				{
+					// Set the path now
+					// Need to check that the directory contains a .eproj file to be considered valid
+
+					if ( fs::exists( outPath ) && fs::is_directory( outPath ) )
+					{
+						for ( auto& p : ghc::filesystem::recursive_directory_iterator( outPath ) )
+						{
+							// Get file extension of passed in file
+							String fileExt = "." + Enjon::Utils::SplitString( p.path().string(), "." ).back( );
+							if ( fileExt.compare( ".eproj" ) == 0 )
+							{
+								// Load project (want to get all of this information from the project directory, obviously)
+								Project proj; 
+								proj.SetProjectPath( String( outPath ) + "/" );
+								proj.SetProjectName( "NewProject" );
+								proj.SetEditor( this );
+								PreloadProject( proj );
+								mConfigSettings.mProjectList.push_back(proj);
+								WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+								ws->DestroyWindow( mProjectSelectionWindow->GetWindowID() );
+
+								// Serialize editor settings after loading project
+								SerializeEditorConfigSettings();
+							}
+						}
+						// mProjectsDir = outPath;
+					} 
+				}
+
+			}
 		}
 		ImGui::EndDock( ); 
 	}
@@ -1751,7 +1864,7 @@ namespace Enjon
 			if ( CreateProjectView( ) )
 			{
 				WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-				ws->DestroyWindow( mProjectSelectionWindow );
+				ws->DestroyWindow( mProjectSelectionWindow->GetWindowID() );
 			}
 		}
 		ImGui::EndDock( );
@@ -2153,6 +2266,7 @@ namespace Enjon
 	{
 		switch ( mode )
 		{
+			default: break;
 			case TransformationMode::Translation: { return mTransformWidget.GetTranslationSnap( ); } break;
 			case TransformationMode::Rotation: { return mTransformWidget.GetRotationSnap( ); } break;
 			case TransformationMode::Scale: { return mTransformWidget.GetScaleSnap( ); } break;
@@ -2165,6 +2279,7 @@ namespace Enjon
 	{
 		switch ( mode )
 		{
+			default: break;
 			case TransformationMode::Translation: { mTransformWidget.SetTranslationSnap( val ); } break;
 			case TransformationMode::Rotation: { mTransformWidget.SetRotationSnap( val ); } break;
 			case TransformationMode::Scale: { mTransformWidget.SetScaleSnap( val ); } break;
@@ -2460,7 +2575,7 @@ namespace Enjon
 		mAssetManager->AddToDatabase( conePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( cylinderPath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( ringPath, true, true, AssetLocationType::EngineAsset );
-		mAssetManager->AddToDatabase( axisBoxPath, true, true, AssetLocationType::EngineAsset );
+
 		mAssetManager->AddToDatabase( shaderGraphPath, true, true, AssetLocationType::EngineAsset );
 
 		// Create materials
@@ -2552,6 +2667,8 @@ namespace Enjon
 
 		switch (mVSVersion) 
 		{
+			default: break;
+
 			case VisualStudioVersion::VS2013:
 			{
 				if ( fs::is_directory( "C:/Program Files (x86)/Microsoft Visual Studio 12.0/" ) ) {
@@ -2657,6 +2774,7 @@ namespace Enjon
 				String txt;
 				switch ((VisualStudioVersion)i)
 				{ 
+					default: break;
 					case VisualStudioVersion::VS2013: txt = "Visual Studio 2013"; break; 
 					case VisualStudioVersion::VS2015: txt = "Visual Studio 2015"; break; 
 					case VisualStudioVersion::VS2017: txt = "Visual Studio 2017"; break;

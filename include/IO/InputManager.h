@@ -154,13 +154,13 @@ namespace Enjon
 		MiddleMouseButton	= SDL_BUTTON_MIDDLE
 	};
 
-	using KeyCodeMap		= std::unordered_map< KeyCode, bool >;
-	using MouseButtonMap	= std::unordered_map< MouseButtonCode, bool >;
+	using KeyCodeMap		= HashMap< u32, bool >;
+	using MouseButtonMap	= HashMap< u32, bool >;
 
 	struct Controller
 	{
-		std::unordered_map< u32, bool > m_buttonMap;
-		std::unordered_map< u32, bool > m_previousButtonMap;
+		HashMap< u32, bool > m_buttonMap;
+		HashMap< u32, bool > m_previousButtonMap;
 		float Axis0Value;
 		float Axis1Value;
 		SDL_GameController* ControllerHandle;

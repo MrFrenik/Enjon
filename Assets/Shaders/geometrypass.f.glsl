@@ -13,5 +13,5 @@ uniform sampler2D texture1;
 
 void main()
 {             
-    diffuse = fs_in.Color * texture2D(texture1, fs_in.TexCoords);
+    diffuse = fs_in.Color * texture(texture1, fs_in.TexCoords);
 }

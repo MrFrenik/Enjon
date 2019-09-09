@@ -318,7 +318,7 @@ namespace Enjon
 		ShaderManager::DeleteShaders( );
 
 		// Shutdown font manager
-		FontManager::DeleteFonts( );
+		// FontManager::DeleteFonts( );
 
 		// Clear noise kernel
 		mSSAOKernel.clear( ); 
@@ -350,8 +350,7 @@ namespace Enjon
 		AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< AssetManager >( )->ConstCast< AssetManager >();
 		//am->AddToDatabase( hdrFilePath ); 
 		Enjon::String qualifiedName = AssetLoader::GetQualifiedName( hdrFilePath ); 
-		Enjon::AssetHandle< Enjon::Texture > hdrEnv = am->GetAsset< Enjon::Texture >( qualifiedName ); 
-
+		Enjon::AssetHandle< Enjon::Texture > hdrEnv = am->GetAsset< Enjon::Texture >( qualifiedName );
 		{ 
 			// Generate cubemap FBO, RBO
 			glGenFramebuffers( 1, &mCaptureFBO );
@@ -542,10 +541,12 @@ namespace Enjon
 	
 		// Shader graph creation
 		{ 
-			mTestShaderGraph = am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" );
+			// This was causing an issue on OSX, because of the shader graphs...
+			// mTestShaderGraph = am->GetAsset< Enjon::ShaderGraph >( "shaders.shadergraphs.testgraph" );
 
-			mMaterial = am->GetAsset< Material >( "NewMaterial" ).Get()->ConstCast< Material >();
+			// mMaterial = am->GetAsset< Material >( "NewMaterial" ).Get()->ConstCast< Material >();
 
+			/*
 			for ( u32 i = 0; i < 0; ++i ) 
 			{
 				for ( u32 j = 0; j < 0; ++j )
@@ -560,6 +561,7 @@ namespace Enjon
 					mRenderables.push_back( renderable ); 
 				}
 			}
+			*/
 		}
 
 		InstancingTest( );
@@ -676,6 +678,7 @@ namespace Enjon
 			GraphicsSubsystemContext* gfxCtx = nullptr;
 
 			if ( world )
+			// if ( false )
 			{
 				// Grab graphics context
 				gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
@@ -695,7 +698,7 @@ namespace Enjon
 				// Motion Blur Pass
 				MotionBlurPass( mCompositeTarget, gfxCtx );
 				// FXAA pass
-				 FXAAPass( mMotionBlurTarget, gfxCtx ); 
+				FXAAPass( mMotionBlurTarget, gfxCtx ); 
 
 				// Do UI pass
 				//UIPass( mFXAATarget, gfxCtx ); 
@@ -935,7 +938,7 @@ namespace Enjon
 							}
 
 							//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
-							renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ), i );
+							renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ), i ); 
 						}
 					} 
 				}
@@ -1320,8 +1323,8 @@ namespace Enjon
 
 			for (auto& l : pointLights)
 			{
-				ColorRGBA32& color = l->GetColor();
-				Vec3& position = l->GetPosition();
+				ColorRGBA32 color = l->GetColor();
+				Vec3 position = l->GetPosition();
 
 				pointShader->SetUniform("u_lightPos", position);
 				pointShader->SetUniform("u_lightColor", Vec3(color.r, color.g, color.b));
@@ -1346,9 +1349,9 @@ namespace Enjon
 
 			for (auto& l : spotLights)
 			{
-				ColorRGBA32& color = l->GetColor();
-				SLParams& params = l->GetParams();
-				Vec3& position = l->GetPosition();
+				ColorRGBA32 color = l->GetColor();
+				SLParams params = l->GetParams();
+				Vec3 position = l->GetPosition();
 
 				spotShader->SetUniform("u_lightPos", position);
 				spotShader->SetUniform("u_lightColor", Vec3(color.r, color.g, color.b));
@@ -1574,6 +1577,10 @@ namespace Enjon
 		Camera* camera = scene->GetActiveCamera( );
 		Vector<StaticMeshRenderable*> nonDepthTestedRenderables = scene->GetNonDepthTestedStaticMeshRenderables( );
 		GLSLProgram* motionBlurProgram = ShaderManager::Get( "MotionBlur" ); 
+
+		// I don't need all of these frame buffers. I just need rendertargets. I'm wasting A LOT of memory. 
+		// Need to be smarter about this.
+
 		mMotionBlurTarget->Bind( );
 		{
 			mCurrentWindow->Clear( );
@@ -1902,8 +1909,8 @@ namespace Enjon
 		delete( mLuminanceTarget );
 		delete( mFXAATarget );
 		delete( mShadowDepth );
-		delete( mFinalTarget );
-		delete( mSSAOTarget );
+		delete( mFinalTarget ); 
+		// delete( mSSAOTarget ); 
 		delete( mSSAOBlurTarget );
 		delete( mMotionBlurTarget );
 
@@ -1956,11 +1963,11 @@ namespace Enjon
 		mLargeBlurVertical 			= new FrameBuffer(width / 16, height / 16);
 		mCompositeTarget 			= new FrameBuffer(width, height);
 		mLightingBuffer 			= new FrameBuffer(width, height);
-		mLuminanceTarget 			= new FrameBuffer(width / 2, height / 2);
+		mLuminanceTarget 			= new FrameBuffer(width / 4, height / 4);
 		mFXAATarget 				= new FrameBuffer(width, height);
 		mShadowDepth 				= new FrameBuffer(2048, 2048);
 		mFinalTarget				= new FrameBuffer( width, height );
-		mSSAOTarget					= new FrameBuffer( width, height );
+		// mSSAOTarget					= new FrameBuffer( width, height );
 		mSSAOBlurTarget				= new FrameBuffer( width, height ); 
 		mMotionBlurTarget			= new FrameBuffer( width, height ); 
 	}
@@ -2042,7 +2049,7 @@ namespace Enjon
 	    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);                                 // Right align, keep 140 pixels for labels
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 0.6f, 0.0f, 1.0f));
-        ImGui::Text("Graphics Options");
+        ImGui::Text("%s", "Graphics Options");
         ImGui::PopStyleColor(1);
         ImGui::Separator(); 
 
@@ -2187,8 +2194,8 @@ namespace Enjon
 	    	for (u32 i = 0; i < (u32)GBufferTextureType::GBUFFER_TEXTURE_COUNT; ++i)
 	    	{
 	    		const char* string_name = mGbuffer->FrameBufferToString(i);
-	    		ImGui::Text(string_name);
-			    ImTextureID img = (ImTextureID)mGbuffer->GetTexture(i);
+	    		ImGui::Text( "%s", string_name);
+			    ImTextureID img = (ImTextureID)Int2VoidP(mGbuffer->GetTexture(i));
 
                 if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
                 {
@@ -2198,8 +2205,8 @@ namespace Enjon
 
 	    	{
 	    		const char* string_name = "SmallBloom";
-	    		ImGui::Text(string_name);
-			    ImTextureID img = (ImTextureID)mSmallBlurVertical->GetTexture();
+	    		ImGui::Text( "%s", string_name);
+			    ImTextureID img = (ImTextureID)Int2VoidP(mSmallBlurVertical->GetTexture());
 	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
 	            {
 			        mCurrentRenderTexture = mSmallBlurVertical->GetTexture(); 
@@ -2208,8 +2215,8 @@ namespace Enjon
 
 	    	{
 	    		const char* string_name = "MediumBloom";
-	    		ImGui::Text(string_name);
-			    ImTextureID img = (ImTextureID)mMediumBlurVertical->GetTexture();
+	    		ImGui::Text( "%s", string_name);
+			    ImTextureID img = (ImTextureID)Int2VoidP(mMediumBlurVertical->GetTexture());
 	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
 	            {
 			        mCurrentRenderTexture = mMediumBlurVertical->GetTexture(); 
@@ -2217,8 +2224,8 @@ namespace Enjon
 	    	}
 	    	{
 	    		const char* string_name = "LargeBloom";
-	    		ImGui::Text(string_name);
-			    ImTextureID img = (ImTextureID)mLargeBlurVertical->GetTexture();
+	    		ImGui::Text( "%s", string_name);
+			    ImTextureID img = (ImTextureID)Int2VoidP(mLargeBlurVertical->GetTexture());
 	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
 	            {
 			        mCurrentRenderTexture = mLargeBlurVertical->GetTexture(); 
@@ -2226,8 +2233,8 @@ namespace Enjon
 	    	}
 	    	{
 	    		const char* string_name = "Bright";
-	    		ImGui::Text(string_name);
-			    ImTextureID img = (ImTextureID)mLuminanceTarget->GetTexture();
+	    		ImGui::Text( "%s", string_name);
+			    ImTextureID img = (ImTextureID)Int2VoidP(mLuminanceTarget->GetTexture());
 	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
 	            {
 			        mCurrentRenderTexture = mLuminanceTarget->GetTexture(); 
@@ -2235,8 +2242,8 @@ namespace Enjon
 	    	}
 	    	{
 	    		const char* string_name = "Light";
-	    		ImGui::Text(string_name);
-			    ImTextureID img = (ImTextureID)mLightingBuffer->GetTexture();
+	    		ImGui::Text( "%s", string_name);
+			    ImTextureID img = (ImTextureID)Int2VoidP(mLightingBuffer->GetTexture());
 	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
 	            {
 			        mCurrentRenderTexture = mLightingBuffer->GetTexture(); 
@@ -2245,8 +2252,8 @@ namespace Enjon
 
 			{
 				const char* string_name = "BRDFLUT";
-				ImGui::Text( string_name );
-				ImTextureID img = ( ImTextureID )mBRDFLUT;
+	    		ImGui::Text( "%s", string_name);
+				ImTextureID img = ( ImTextureID )Int2VoidP(mBRDFLUT);
 				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 0 ), ImVec2( 1, 1 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
 				{
 					mCurrentRenderTexture = mBRDFLUT;
@@ -2254,19 +2261,19 @@ namespace Enjon
 			}
 			
 			{
-				const char* string_name = "SSAO";
-				ImGui::Text( string_name );
-				ImTextureID img = ( ImTextureID )mSSAOTarget->GetTexture( );
-				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
-				{
-					mCurrentRenderTexture = mSSAOTarget->GetTexture( );
-				}
+				// const char* string_name = "SSAO";
+	    		// ImGui::Text( "%s", string_name);
+				// ImTextureID img = ( ImTextureID )Int2VoidP(mSSAOTarget->GetTexture( ));
+				// if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
+				// {
+				// 	mCurrentRenderTexture = mSSAOTarget->GetTexture( );
+				// }
 			}
 			
 			{
 				const char* string_name = "SSAOBlur";
-				ImGui::Text( string_name );
-				ImTextureID img = ( ImTextureID )mSSAOBlurTarget->GetTexture();
+	    		ImGui::Text( "%s", string_name);
+				ImTextureID img = ( ImTextureID )Int2VoidP(mSSAOBlurTarget->GetTexture());
 				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
 				{
 					mCurrentRenderTexture = mSSAOBlurTarget->GetTexture();
@@ -2275,8 +2282,8 @@ namespace Enjon
 			
 			{
 				const char* string_name = "SSAONoise";
-				ImGui::Text( string_name );
-				ImTextureID img = ( ImTextureID )mSSAONoiseTexture;
+	    		ImGui::Text( "%s", string_name);
+				ImTextureID img = ( ImTextureID )Int2VoidP(mSSAONoiseTexture);
 				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
 				{
 					mCurrentRenderTexture = mSSAONoiseTexture;
@@ -2285,8 +2292,8 @@ namespace Enjon
 
 			{
 				const char* string_name = "Motion Blur";
-				ImGui::Text( string_name );
-				ImTextureID img = (ImTextureID)mMotionBlurTarget->GetTexture( );
+	    		ImGui::Text( "%s", string_name);
+				ImTextureID img = (ImTextureID)Int2VoidP(mMotionBlurTarget->GetTexture( ));
 				if ( ImGui::ImageButton( img, ImVec2( 64, 64 ), ImVec2( 0, 1 ), ImVec2( 1, 0 ), 1, ImVec4( 0, 0, 0, 0 ), ImColor( 255, 255, 255, 255 ) ) )
 				{
 					mCurrentRenderTexture = mMotionBlurTarget->GetTexture( );
@@ -2295,8 +2302,8 @@ namespace Enjon
 
 	    	{
 	    		const char* string_name = "Final";
-	    		ImGui::Text(string_name);
-			    ImTextureID img = (ImTextureID)mFXAATarget->GetTexture();
+	    		ImGui::Text( "%s", string_name);
+			    ImTextureID img = (ImTextureID)Int2VoidP(mFXAATarget->GetTexture());
 	            if (ImGui::ImageButton(img, ImVec2(64, 64), ImVec2(0,1), ImVec2(1, 0), 1, ImVec4(0,0,0,0), ImColor(255,255,255,255)))
 	            {
 			        mCurrentRenderTexture = mFXAATarget->GetTexture(); 
@@ -2604,13 +2611,16 @@ namespace Enjon
 			// Unbind the VAO 
 			glBindVertexArray(0);
 			glBindBuffer( GL_ARRAY_BUFFER, 0 );
-	}
-
-}
-
+	} 
+} 
 
 
+/*
+	// I want to devise a "Render Pipeline" system, whereby a user can register passes into the gfx subsystem, where a frame graph
+	// can then be created and composited for use
 
+	// Can have 'standard' render pipelines for users, such as 'Deferred' and 'Forward'
+*/
 
 
 

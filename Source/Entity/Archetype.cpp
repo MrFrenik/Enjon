@@ -21,7 +21,7 @@ namespace Enjon
 	Result Archetype::CopyFromOther( const Asset* other )
 	{
 		// Make sure this object is of class archetype
-		MetaClass::AssertIsType< Archetype >( other );
+		Object::AssertIsType< Archetype >( other );
 
 		// Cast to archetype
 		const Archetype* otherArch = other->Cast< Archetype >( ); 

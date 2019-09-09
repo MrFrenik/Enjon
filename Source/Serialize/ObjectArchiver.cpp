@@ -88,10 +88,10 @@ namespace Enjon
 	Result ObjectArchiver::SerializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer )
 	{ 
 		// Write out total count of serializable properties
-		buffer->Write< usize >( cls->GetSerializablePropertyCount( ) ); 
+		buffer->Write< u32 >( (u32)cls->GetSerializablePropertyCount( ) ); 
 
 		// Serialize all object properties
-		for ( usize i = 0; i < cls->GetPropertyCount( ); ++i )
+		for ( u32 i = 0; i < cls->GetPropertyCount( ); ++i )
 		{
 			// Get property
 			const MetaProperty* prop = cls->GetProperty( i );
@@ -354,7 +354,7 @@ namespace Enjon
 	Result ObjectArchiver::DeserializeObjectDataDefault( const Object* object, const MetaClass* cls, ByteBuffer* buffer )
 	{ 
 		// Read in property count of serializable properties
-		usize propCount = buffer->Read< usize >( );
+		u32 propCount = buffer->Read< u32 >( );
 
 		for ( usize i = 0; i < propCount; ++i )
 		{
@@ -419,6 +419,8 @@ namespace Enjon
 			{
 				switch( mergeType )
 				{
+					default: break;
+
 					case MergeType::AcceptSource:
 					{
 						MergeProperty( source, dest, prop, mergeType );
@@ -458,6 +460,7 @@ namespace Enjon
 		
 		switch ( prop->GetType() ) 
 		{
+			default: break;
 			case MetaPropertyType::Bool:		ENJON_MERGE_PROP_POD( cls, source, dest, prop, bool ); break; 
 			case MetaPropertyType::U32:			ENJON_MERGE_PROP_POD( cls, source, dest, prop, u32 ); break; 
 			case MetaPropertyType::S32:			ENJON_MERGE_PROP_POD( cls, source, dest, prop, s32 ); break; 
@@ -502,6 +505,8 @@ namespace Enjon
 				// Write out array elements
 				switch ( base->GetArrayType( ) )
 				{ 
+					default: break;
+
 					case MetaPropertyType::AssetHandle:
 					{ 
 						// Grab array property
@@ -636,6 +641,7 @@ namespace Enjon
 
 			switch ( prop->GetType( ) )
 			{
+				default: break;
 				case MetaPropertyType::Bool:		ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, bool ) break;
 				case MetaPropertyType::S32:			ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, s32 ); break; 
 				case MetaPropertyType::U32:			ENJON_RECORD_OVERRIDE_POD( cls, source, dest, prop, u32 ); break; 
@@ -689,6 +695,8 @@ namespace Enjon
 					// Write out array elements
 					switch ( base->GetArrayType( ) )
 					{ 
+						default: break;
+
 						case MetaPropertyType::AssetHandle:
 						{ 
 							// Grab array property
@@ -797,6 +805,7 @@ namespace Enjon
 
 		switch ( prop->GetType( ) )
 		{
+			default: break;
 			case MetaPropertyType::Bool:		ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, bool ); break;
 			case MetaPropertyType::S32:			ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, s32 ); break;
 			case MetaPropertyType::U32:			ENJON_REVERT_PROP_POD( cls, sourceObject, object, prop, u32 ); break;
@@ -817,6 +826,7 @@ namespace Enjon
 				// Write out array elements
 				switch ( base->GetArrayType( ) )
 				{ 
+					default: break;
 					case MetaPropertyType::AssetHandle:
 					{ 
 						// Grab array property

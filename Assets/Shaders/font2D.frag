@@ -8,6 +8,6 @@ uniform vec4 vColor;
 
 void main()
 {
-	vec4 vTexColor = texture2D(gSampler, texCoord);
+	vec4 vTexColor = texture(gSampler, texCoord);
 	outputColor = vec4(vTexColor.r, vTexColor.r, vTexColor.r, vTexColor.r)*vColor;
 }

@@ -87,7 +87,7 @@ namespace Enjon
 
 	void Camera::LookAt(const Vec3& Position, const Vec3& Up)
 	{
-		Vec3& Pos = mTransform.GetPosition();
+		Vec3 Pos = mTransform.GetPosition();
 
 		// Ignore, since you cannot look at yourself
 		if ((Pos - Position).Length() < 0.001f) return;

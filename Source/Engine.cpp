@@ -18,8 +18,8 @@
 #include "SubsystemCatalog.h"
 #include "Base/World.h"
 
-#include <fmt/printf.h> 
-#include <SDL2/sdl.h>
+#include "fmt/printf.h" 
+#include "SDL2/SDL.h"
 
 #include <assert.h>
 #include <random>
@@ -69,6 +69,7 @@ namespace Enjon
 
 	Enjon::Result Engine::StartUp(const EngineConfig& config)
 	{
+	#ifdef ENJON_SYSTEM_WINDOWS
 		// TODO(): Find out where this should be abstracted into
 		 //Initialize SDL
 		SDL_Init(SDL_INIT_EVERYTHING);
@@ -90,6 +91,34 @@ namespace Enjon
 
 		// Set on vsync by default
 		SDL_GL_SetSwapInterval( 1 );
+	#endif
+
+	#ifdef ENJON_SYSTEM_OSX
+	    SDL_SetHint( SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0" );
+
+		if ( SDL_Init( SDL_INIT_EVERYTHING ) != 0 ) 
+		{
+			printf( "SDL_Init Error: %s", SDL_GetError() );
+			return Result::FAILURE;
+		}
+
+	    SDL_GL_SetAttribute( SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG );
+	    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+	    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
+	    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
+	    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+		SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+		SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+		SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+		SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+		 
+		SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
+		SDL_GL_SetAttribute( SDL_GL_BUFFER_SIZE, 32 );
+		
+
+		SDL_GL_SetSwapInterval( 1 );
+	#endif
 
 		// Set configuration
 		mConfig = config; 
@@ -193,7 +222,7 @@ namespace Enjon
 
 		// Default setting for assets directory
 		mAssetManager->SetAssetsDirectoryPath( mConfig.GetRoot( ) + "Assets/" );
-		mAssetManager->Initialize( ); 
+		mAssetManager->Initialize( );
 
 		// Initialize application if one is registered
 		if ( mApp )
@@ -292,7 +321,7 @@ namespace Enjon
 			{
 				mIsRunning = false;
 				break;
-			}
+			} 
 
 			// Update entity manager
 			mEntities->Update( dt ); 
@@ -303,17 +332,20 @@ namespace Enjon
 			// Update world time
 			mWorldTime.mDT = dt;
 			mWorldTime.mTotalTime += mWorldTime.mDT;
-			mWorldTime.mFPS = 1000.0f / Math::Max( mWorldTime.mDT, 0.00001f ); 
 
 			// Calculate average delta time for world time
 			mWorldTime.CalculateAverageDeltaTime( );
+
+			// TODO(John): This is still incorrect. Need to fix.
+			mWorldTime.mFPS = 1.f / mWorldTime.mAverageDT;
 			
 			// Clamp frame rate to ease up on CPU usage
 			static f32 t = 0.0f;
-			const f32 frameRate = 120.0f;
+			const f32 frameRate = 60.0f;
 			if ( (f32)ticks < 1000.0f / frameRate )
 			{
-				SDL_Delay( u32( (1000.0f / frameRate ) - ( (f32)ticks ) ) );
+				SDL_Delay( u32( (1000.0f / frameRate ) - ( (f32)ticks )	 ) );
+				// SDL_Delay(60);
 			}
 		}
 

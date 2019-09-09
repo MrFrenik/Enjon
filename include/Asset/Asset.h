@@ -197,25 +197,14 @@ namespace Enjon
 			}
 
 			/*
-			* @brief
+			* @brief Implementation in AssetLoader.h
 			*/
-			void Unload( )
-			{
-				// Unload asset from record info if valid
-				if ( mAsset )
-				{
-					const_cast< AssetRecordInfo* >( mAsset->GetAssetRecordInfo( ) )->UnloadAsset( );
-				}
-			}
+			void Unload( );
 
-			void Reload( )
-			{
-				if ( mAsset )
-				{
-					// Reload and reset asset
-					const_cast<AssetRecordInfo*>( mAsset->GetAssetRecordInfo( ) )->ReloadAsset( );
-				}
-			}
+			/*
+			* @brief Implementation in AssetLoader.h
+			*/
+			void Reload( );
 
 			/*
 			* @brief

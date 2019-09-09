@@ -67,7 +67,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual Result CopyFromOther( const Asset* other );
+			virtual Result CopyFromOther( const Asset* other ) override;
 
 			/**
 			* @brief

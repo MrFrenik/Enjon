@@ -50,14 +50,14 @@ namespace Enjon
 
 	//==================================================================================
 
-	void DirectionalLightComponent::SetColor(ColorRGBA32& color)
+	void DirectionalLightComponent::SetColor( const ColorRGBA32& color )
 	{
 		mLight.SetColor(color);
 	}
 
 	//==================================================================================
 
-	void DirectionalLightComponent::SetIntensity(float intensity)
+	void DirectionalLightComponent::SetIntensity( const f32& intensity )
 	{
 		mLight.SetIntensity(intensity);
 	} 

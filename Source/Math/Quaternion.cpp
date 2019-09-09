@@ -271,7 +271,7 @@ namespace Enjon
 	// Modified from: http://assimp.sourcearchive.com/documentation/2.0.863plus-pdfsg-1/aiQuaternion_8h_source.html
 	Quaternion Quaternion::RotationBetweenVectors( const Vec3& s, const Vec3& d )
 	{
-		Vec3 start = start.Normalize( );
+		Vec3 start = s.Normalize( );
 		Vec3 dest = d.Normalize( );
 
 		f32 cosTheta = start.Dot( dest );

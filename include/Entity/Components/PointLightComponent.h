@@ -47,7 +47,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			Vec3& GetPosition() const 
+			Vec3 GetPosition() const 
 			{ 
 				return mLight.GetPosition(); 
 			}
@@ -55,47 +55,47 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			ColorRGBA32& GetColor() { return mLight.GetColor(); }
+			ColorRGBA32 GetColor() { return mLight.GetColor(); }
 
 			/*
 			* @brief
 			*/
-			float GetIntensity() { return mLight.GetIntensity(); }
+			f32 GetIntensity() { return mLight.GetIntensity(); }
 
 			/*
 			* @brief
 			*/
-			float GetRadius() { return mLight.GetRadius(); }
+			f32 GetRadius() { return mLight.GetRadius(); }
 
 			/*
 			* @brief
 			*/
-			float GetAttenuationRate() { return mLight.GetAttenuationRate(); }
+			f32 GetAttenuationRate() { return mLight.GetAttenuationRate(); }
 
 			/*
 			* @brief
 			*/
-			void SetAttenuationRate(float rate);
+			void SetAttenuationRate( const f32& rate );
 
 			/*
 			* @brief
 			*/
-			void SetPosition(Vec3& position);
+			void SetPosition( const Vec3& position );
 
 			/*
 			* @brief
 			*/
-			void SetColor(ColorRGBA32& color);
+			void SetColor( const ColorRGBA32& color );
 
 			/* 
 			* @brief
 			*/
-			void SetIntensity(float intensity);
+			void SetIntensity( const f32& intensity );
 
 			/* 
 			* @brief
 			*/
-			void SetRadius(float radius); 
+			void SetRadius( const f32& radius ); 
 
 		private:
 			ENJON_PROPERTY( )

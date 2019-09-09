@@ -40,24 +40,24 @@ uniform sampler2D aoMap;
 void main()
 {
 	// Base Color
-vec4 albedoMap_sampler = texture2D( albedoMap, fs_in.TexCoords );
+vec4 albedoMap_sampler = texture( albedoMap, fs_in.TexCoords );
 	AlbedoOut = vec4(albedoMap_sampler.rgb, 1.0);
 
 	// Normal
-	vec4 normalMap_sampler = texture2D( normalMap, fs_in.TexCoords );
+	vec4 normalMap_sampler = texture( normalMap, fs_in.TexCoords );
 	vec3 normal = normalize( normalMap_sampler.rgb * 2.0 - 1.0 );
 	normal = normalize( fs_in.TBN * normal );
 	NormalsOut = vec4( normal, 1.0 );
 
 	// Material Properties
-	vec4 metallicMap_sampler = texture2D( metallicMap, fs_in.TexCoords );
-	vec4 roughMap_sampler = texture2D( roughMap, fs_in.TexCoords );
-	vec4 aoMap_sampler = texture2D( aoMap, fs_in.TexCoords );
+	vec4 metallicMap_sampler = texture( metallicMap, fs_in.TexCoords );
+	vec4 roughMap_sampler = texture( roughMap, fs_in.TexCoords );
+	vec4 aoMap_sampler = texture( aoMap, fs_in.TexCoords );
 	MatPropsOut = vec4( clamp( metallicMap_sampler.rgb.x, 0.0, 1.0 ), clamp( roughMap_sampler.rgb.x, 0.0, 1.0 ), clamp( aoMap_sampler.rgb.x, 0.0, 1.0 ), 1.0);
 
 	// Emissive
 	
-vec4 emissiveMap_sampler = texture2D( emissiveMap, fs_in.TexCoords );
+vec4 emissiveMap_sampler = texture( emissiveMap, fs_in.TexCoords );
 emissiveMult = emissiveIntensity * emissiveMap_sampler.rgb;
 	EmissiveOut = vec4(emissiveMult, 1.0);
 

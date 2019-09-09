@@ -120,8 +120,8 @@ namespace Enjon {
 			Vec4& operator*=(const Vec4& other);
 			Vec4& operator/=(const Vec4& other);
 
-			f32 Vec4::Length() const;
-			f32 Vec4::Dot(const Vec4& other); 
+			f32 Length() const;
+			f32 Dot(const Vec4& other); 
 			Vec3 XYZ(); 
 			
 			static Vec4 Normalize(const Vec4& vec);

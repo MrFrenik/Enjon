@@ -60,6 +60,8 @@ namespace Enjon
 		// Set newly active widget
 		switch ( mode )
 		{
+			default: break;
+
 			case TransformationMode::Translation:
 			{
 				mActiveWidget = &mTranslationWidget;
@@ -243,6 +245,8 @@ namespace Enjon
 		{
 			switch ( mType )
 			{
+				default: break;
+
 				case ( TransformWidgetRenderableType::TranslationRoot ):
 				{
 					// Get intersection result
@@ -954,6 +958,7 @@ namespace Enjon
 
 						switch ( mTransformSpace )
 						{
+							default: break;
 							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mDeltaRotation ); break;
 							case TransformSpace::World: transform->SetRotation( mDeltaRotation * mRootTransform.GetRotation( ) ); break; 
 						} 
@@ -1009,6 +1014,7 @@ namespace Enjon
 
 						switch ( mTransformSpace )
 						{
+							default: break;
 							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mDeltaRotation ); break;
 							case TransformSpace::World: transform->SetRotation( mDeltaRotation * mRootTransform.GetRotation( ) ); break; 
 						} 
@@ -1064,6 +1070,7 @@ namespace Enjon
 
 						switch ( mTransformSpace )
 						{
+							default: break;
 							case TransformSpace::Local: transform->SetRotation( mRootTransform.GetRotation( ) * mDeltaRotation ); break;
 							case TransformSpace::World: transform->SetRotation( mDeltaRotation * mRootTransform.GetRotation( ) ); break; 
 						} 
@@ -1133,7 +1140,9 @@ namespace Enjon
 
 		// Look for picked transform widget
 		switch ( type )
-		{ 
+		{
+			default: break;
+			
 			case ( TransformWidgetRenderableType::TranslationRoot ):
 			{
 				// Axis of rotation

@@ -241,7 +241,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			BulletRigidBodyMotionState* RigidBody::GetMotionState( ) const; 
+			BulletRigidBodyMotionState* GetMotionState( ) const; 
 
 			/**
 			* @brief

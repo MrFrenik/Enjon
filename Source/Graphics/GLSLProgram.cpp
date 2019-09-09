@@ -23,7 +23,7 @@ namespace Enjon
 	{
 	}
 
-	void GLSLProgram::CreateShader(const char* vertexShaderFilePath, const char* fragmentShaderFilepath) 
+	void GLSLProgram::CreateShader( const char* vertexShaderFilePath, const char* fragmentShaderFilepath ) 
 	{ 
 		//Create program and get ID from OpenGL
 		m_programID = glCreateProgram();
@@ -116,7 +116,7 @@ namespace Enjon
 	}
 	
 	//Adds an attribute to our shader. Should be called between compiling and linking.
-	void GLSLProgram::AddAttribute(const GLchar* attributeName) 
+	void GLSLProgram::AddAttribute( const GLchar* attributeName ) 
 	{
 		glBindAttribLocation(m_programID, m_numAttributes++, attributeName);
 	}
@@ -144,7 +144,7 @@ namespace Enjon
 	}
 
 	//Compiles a single shader file
-	void GLSLProgram::CompileShader(const char* filePath, GLuint id) 
+	void GLSLProgram::CompileShader( const char* filePath, GLuint id ) 
 	{ 
 		//Read from file
 		std::string fileContents = Utils::read_file(filePath);
@@ -181,7 +181,7 @@ namespace Enjon
 		}
 	}
 
-	GLint GLSLProgram::GetUniformLocation(const std::string& uniformName) 
+	GLint GLSLProgram::GetUniformLocation( const String& uniformName ) 
 	{
 		GLint location = glGetUniformLocation(m_programID, uniformName.c_str());
 
@@ -192,7 +192,7 @@ namespace Enjon
 		return location;
 	} 
 		
-	void GLSLProgram::SetUniform(const std::string& name, const Mat4x4& matrix)
+	void GLSLProgram::SetUniform( const String& name, const Mat4x4& matrix )
 	{
 		// glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);	
 		auto Search = UniformMap.find(name);
@@ -202,7 +202,7 @@ namespace Enjon
 		}
 	}
 	
-	void GLSLProgram::SetUniform(const std::string& name, f32* val, s32 count)
+	void GLSLProgram::SetUniform( const String& name, f32* val, s32 count )
 	{
 		// glUniform1fv(GetUniformLocation(name), count, val);
 		auto Search = UniformMap.find(name);
@@ -212,7 +212,7 @@ namespace Enjon
 		}
 	}
 	
-	void GLSLProgram::SetUniform(const std::string& name, s32* val, s32 count)
+	void GLSLProgram::SetUniform( const String& name, s32* val, s32 count )
 	{
 		// glUniform1iv(GetUniformLocation(name), count, val);
 		auto Search = UniformMap.find(name);
@@ -222,7 +222,7 @@ namespace Enjon
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const f32& val)
+	void GLSLProgram::SetUniform( const String& name, const f32& val )
 	{
 		// glUniform1f(GetUniformLocation(name), val); 
 		auto Search = UniformMap.find(name);
@@ -238,7 +238,7 @@ namespace Enjon
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const Vec2& vector)
+	void GLSLProgram::SetUniform( const String& name, const Vec2& vector )
 	{
 		// glUniform2f(GetUniformLocation(name), vector.x, vector.y);
 		auto Search = UniformMap.find(name);
@@ -248,7 +248,7 @@ namespace Enjon
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const Vec3& vector) 
+	void GLSLProgram::SetUniform( const String& name, const Vec3& vector ) 
 	{
 		// glUniform3f(GetUniformLocation(name), vector.x, vector.y, vector.z);
 		auto Search = UniformMap.find(name);
@@ -262,7 +262,7 @@ namespace Enjon
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const Vec4& vector)
+	void GLSLProgram::SetUniform(  const String& name, const Vec4& vector )
 	{
 		// glUniform4f(GetUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
 		auto Search = UniformMap.find(name);
@@ -272,7 +272,7 @@ namespace Enjon
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const s32& val)
+	void GLSLProgram::SetUniform( const String& name, const s32& val )
 	{
 		// glUniform1i(GetUniformLocation(name), val);
 		auto Search = UniformMap.find(name);
@@ -282,7 +282,7 @@ namespace Enjon
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const f64& val)
+	void GLSLProgram::SetUniform( const String& name, const f64& val )
 	{
 		// glUniform1f(GetUniformLocation(name), val);
 		auto Search = UniformMap.find(name);
@@ -298,7 +298,7 @@ namespace Enjon
 		}
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, const Transform& T)
+	void GLSLProgram::SetUniform( const String& name, const Transform& T )
 	{
 		// TODO(John): Figure out a decent way to cache these
 		glUniform3f(GetUniformLocation(name + ".position"), T.GetPosition().x, T.GetPosition().y, T.GetPosition().z);	
@@ -306,7 +306,7 @@ namespace Enjon
 		glUniform3f(GetUniformLocation(name + ".scale"), T.GetScale().x, T.GetScale().y, T.GetScale().z);
 	}
 
-	void GLSLProgram::SetUniform(const std::string& name, ColorRGBA32& C)
+	void GLSLProgram::SetUniform( const String& name, const ColorRGBA32& C )
 	{
 		auto Search = UniformMap.find(name);
 		if (Search != UniformMap.end())
@@ -315,7 +315,7 @@ namespace Enjon
 		}
 	}
 
-	void GLSLProgram::BindTexture(const std::string& Name, const GLuint& TextureID, const GLuint Index)
+	void GLSLProgram::BindTexture( const String& Name, const GLuint& TextureID, const GLuint Index )
 	{
 		glActiveTexture(GL_TEXTURE0 + Index);
 		
@@ -328,7 +328,7 @@ namespace Enjon
 		glBindTexture( GL_TEXTURE_2D, TextureID );
 	}
 
-	void GLSLProgram::SetUniformArrayElement( const std::string& name, const u32& index, const Mat4x4& mat )
+	void GLSLProgram::SetUniformArrayElement( const String& name, const u32& index, const Mat4x4& mat )
 	{
 		auto search = UniformMap.find( name + "[0]" );
 		if ( search != UniformMap.end( ) )

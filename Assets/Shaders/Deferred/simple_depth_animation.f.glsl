@@ -2,7 +2,6 @@
 
 in DATA
 {
-	vec3 Position;	
 	vec2 TexCoords;
 }fs_in;
 
@@ -20,7 +19,7 @@ float LinearizeDepth(float Depth)
 
 void main()
 {
-	vec4 Color = texture2D(DiffuseMap, fs_in.TexCoords);
+	vec4 Color = texture(DiffuseMap, fs_in.TexCoords);
 	if (Color.a < 0.5) discard;
 
     // float Depth = LinearizeDepth(gl_FragCoord.z);

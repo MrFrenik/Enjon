@@ -17,11 +17,11 @@ out vec4 Color;
  
 void main( void ) {
 
-    vec3 rgbNW=texture2D(tex,fs_in.TexCoords+(vec2(-1.0,-1.0)/u_resolution)).xyz;
-    vec3 rgbNE=texture2D(tex,fs_in.TexCoords+(vec2(1.0,-1.0)/u_resolution)).xyz;
-    vec3 rgbSW=texture2D(tex,fs_in.TexCoords+(vec2(-1.0,1.0)/u_resolution)).xyz;
-    vec3 rgbSE=texture2D(tex,fs_in.TexCoords+(vec2(1.0,1.0)/u_resolution)).xyz;
-    vec3 rgbM=texture2D(tex,fs_in.TexCoords).xyz;
+    vec3 rgbNW=texture(tex,fs_in.TexCoords+(vec2(-1.0,-1.0)/u_resolution)).xyz;
+    vec3 rgbNE=texture(tex,fs_in.TexCoords+(vec2(1.0,-1.0)/u_resolution)).xyz;
+    vec3 rgbSW=texture(tex,fs_in.TexCoords+(vec2(-1.0,1.0)/u_resolution)).xyz;
+    vec3 rgbSE=texture(tex,fs_in.TexCoords+(vec2(1.0,1.0)/u_resolution)).xyz;
+    vec3 rgbM=texture(tex,fs_in.TexCoords).xyz;
 
     vec3 luma=vec3(0.299, 0.587, 0.114);
     float lumaNW = dot(rgbNW, luma);
@@ -45,11 +45,11 @@ void main( void ) {
           dir * rcpDirMin)) / u_resolution;
 
     vec3 rgbA = 0.5 * (
-        texture2D(tex, fs_in.TexCoords.xy + dir * (1.0/3.0 - 0.5)).xyz +
-        texture2D(tex, fs_in.TexCoords.xy + dir * (2.0/3.0 - 0.5)).xyz);
+        texture(tex, fs_in.TexCoords.xy + dir * (1.0/3.0 - 0.5)).xyz +
+        texture(tex, fs_in.TexCoords.xy + dir * (2.0/3.0 - 0.5)).xyz);
     vec3 rgbB = rgbA * 0.5 + 0.25 * (
-        texture2D(tex, fs_in.TexCoords.xy + dir * (0.0/3.0 - 0.5)).xyz +
-        texture2D(tex, fs_in.TexCoords.xy + dir * (3.0/3.0 - 0.5)).xyz);
+        texture(tex, fs_in.TexCoords.xy + dir * (0.0/3.0 - 0.5)).xyz +
+        texture(tex, fs_in.TexCoords.xy + dir * (3.0/3.0 - 0.5)).xyz);
     float lumaB = dot(rgbB, luma);
 
     if((lumaB < lumaMin) || (lumaB > lumaMax)){

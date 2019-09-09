@@ -12,14 +12,12 @@
 #include "Base/Object.h"
 #include "Physics/CollisionShape.h"
 #include "Serialize/ObjectArchiver.h"
+#include "Utils/FileUtils.h"
 #include "SubsystemCatalog.h"
 #include "Engine.h"
 
 #include "Graphics/GraphicsSubsystem.h"
 #include "SubsystemCatalog.h"
-
-#include <fmt/printf.h> 
-#include <fmt/format.h>
 
 #include <algorithm>
 #include <assert.h>
@@ -460,7 +458,7 @@ namespace Enjon
 		{\
 			valType val = mapProp->GetValueAs( object, iter );\
 			Enjon::String label( "##" + propName + std::to_string( iter->first ) );\
-			ImGui::Text( ( "Key: " + std::to_string( iter->first ) ).c_str( ) );\
+			ImGui::Text( "%s", ( "Key: " + std::to_string( iter->first ) ).c_str( ) );\
 			ImGui::SameLine( );\
 			if ( ImGuiFunc( label.c_str( ), ( ImGuiCastType* )&val, mapProp->GetTraits( ).GetUIMin( ), mapProp->GetTraits( ).GetUIMax( ) ) )\
 			{\
@@ -476,7 +474,7 @@ namespace Enjon
 		{\
 			valType val = mapProp->GetValueAs( object, iter );\
 			Enjon::String label( "##" + propName + iter->first );\
-			ImGui::Text( ( "Key: " + iter->first ).c_str( ) );\
+			ImGui::Text( "%s", ( "Key: " + iter->first ).c_str( ) );\
 			ImGui::SameLine( );\
 			if ( ImGuiFunc( label.c_str( ), ( ImGuiCastType* )&val, mapProp->GetTraits( ).GetUIMin( ), mapProp->GetTraits( ).GetUIMax( ) ) )\
 			{\
@@ -492,10 +490,13 @@ namespace Enjon
 
 		switch ( prop->GetKeyType( ) )
 		{
+			default: break;
+
 			case MetaPropertyType::F32:
 			{ 
 				switch ( prop->GetValueType() )
 				{
+					default: break;
 					case MetaPropertyType::U32:		MAP_KEY_PRIMITIVE( f32, u32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::S32:		MAP_KEY_PRIMITIVE( f32, s32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::F32:		MAP_KEY_PRIMITIVE( f32, f32, f32, ImGui::InputFloat, object, prop )	break;
@@ -506,6 +507,7 @@ namespace Enjon
 			{ 
 				switch ( prop->GetValueType() )
 				{
+					default: break;
 					case MetaPropertyType::U32:		MAP_KEY_PRIMITIVE( s32, u32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::S32:		MAP_KEY_PRIMITIVE( s32, s32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::F32:		MAP_KEY_PRIMITIVE( s32, f32, f32, ImGui::InputFloat, object, prop )	break;
@@ -516,6 +518,7 @@ namespace Enjon
 			{ 
 				switch ( prop->GetValueType() )
 				{
+					default: break;
 					case MetaPropertyType::U32:		MAP_KEY_PRIMITIVE( u32, u32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::S32:		MAP_KEY_PRIMITIVE( u32, s32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::F32:		MAP_KEY_PRIMITIVE( u32, f32, f32, ImGui::InputFloat, object, prop )	break;
@@ -526,6 +529,7 @@ namespace Enjon
 			{
 				switch ( prop->GetValueType( ) )
 				{
+					default: break;
 					case MetaPropertyType::U32:		MAP_KEY_STRING( u32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::S32:		MAP_KEY_STRING( s32, s32, ImGui::InputInt, object, prop )	break;
 					case MetaPropertyType::F32:		MAP_KEY_STRING( f32, f32, ImGui::InputFloat, object, prop ) break;
@@ -536,7 +540,7 @@ namespace Enjon
 						{
 							Object* val = mapProp->GetValueAs( object, iter );
 							Enjon::String label( "##" + propName + iter->first );
-							ImGui::Text( ( "Key: " + iter->first ).c_str( ) );
+							ImGui::Text( "%s", ( "Key: " + iter->first ).c_str( ) );
 							if ( ImGui::TreeNode( ( iter->first ).c_str( ) ) )
 							{
 								DebugDumpObject( iter->second );
@@ -570,6 +574,7 @@ namespace Enjon
 
 		switch ( prop->GetArrayType( ) )
 		{
+			default: break;
 			case MetaPropertyType::U32:	ARRAY_PROP( prop, propName, u32, object, s32, ImGui::InputInt, prop->GetTraits().GetUIMin(), prop->GetTraits().GetUIMax() )		break; 
 			case MetaPropertyType::S32: ARRAY_PROP( prop, propName, s32, object, s32, ImGui::InputInt, prop->GetTraits().GetUIMin(), prop->GetTraits().GetUIMax() )		break; 
 			case MetaPropertyType::F32: ARRAY_PROP( prop, propName, f32, object, f32, ImGui::InputFloat, prop->GetTraits().GetUIMin(), prop->GetTraits().GetUIMax() )	break; 
@@ -621,7 +626,7 @@ namespace Enjon
 
 							const MetaClass* arrPropCls = arrObj->Class( ); 
 
-							if ( ImGui::TreeNode( Enjon::String( arrPropCls->GetName() + "##" + std::to_string( u32( arrObj ) ) ).c_str( ) ) )
+							if ( ImGui::TreeNode( Enjon::String( arrPropCls->GetName() + "##" + std::to_string( (u32)(usize)( arrObj ) ) ).c_str( ) ) )
 							{
 								DebugDumpObject( arrayProp->GetValueAs( object, i ) );
 								ImGui::TreePop( );
@@ -642,7 +647,7 @@ namespace Enjon
 						if ( arrObj.Get( ) )
 						{
 							const MetaClass* arrPropCls = arrObj.Get( )->Class( );
-							if ( ImGui::TreeNode( Enjon::String( arrPropCls->GetName( ) + "##" + std::to_string( u32( arrObj.GetID() ) ) ).c_str( ) ) )
+							if ( ImGui::TreeNode( Enjon::String( arrPropCls->GetName( ) + "##" + std::to_string( (u32)(usize)( arrObj.GetID() ) ) ).c_str( ) ) )
 							{
 								DebugDumpObject( arrObj.Get( ) );
 								ImGui::TreePop( );
@@ -656,19 +661,19 @@ namespace Enjon
 			{
 				MetaArrayPropertyProxy proxy = prop->GetProxy( ); 
 				const MetaPropertyTemplateBase* base = static_cast<const MetaPropertyTemplateBase*> ( proxy.mArrayPropertyTypeBase );
-				const MetaClass* assetCls = const_cast<Enjon::MetaClass*>( base->GetClassOfTemplatedArgument( ) ); 
+				const MetaClass* assetCls = const_cast<Enjon::MetaClass*>( base->GetClassOfTemplatedArgument( ) );
 				
 				// Property is of type MetaPropertyAssetHandle
 				const MetaPropertyArray< AssetHandle< Asset > >* arrayProp = static_cast<const MetaPropertyArray< AssetHandle< Asset > > * >( prop ); 
 				if ( assetCls )
 				{ 
-					for ( usize i = 0; i < arrayProp->GetSize( object ); ++i )
+					for ( u32 i = 0; i < (u32)arrayProp->GetSize( object ); ++i )
 					{
 						Enjon::AssetHandle<Enjon::Asset> val; 
 						arrayProp->GetValueAt( object, i, &val );
 						const Enjon::AssetManager* am = Engine::GetInstance( )->GetSubsystemCatalog( )->Get< Enjon::AssetManager >( );
 						auto assets = am->GetAssets( assetCls ); 
-						if ( ImGui::TreeNode( Enjon::String( std::to_string( i ) + "##" + prop->GetName( ) + std::to_string(u32(arrayProp) ) ).c_str( ) ) )
+						if ( ImGui::TreeNode( Enjon::String( std::to_string( i ) + "##" + prop->GetName( ) + std::to_string((u32)(usize)(arrayProp) ) ).c_str( ) ) )
 						{
 							if ( assets )
 							{
@@ -689,9 +694,10 @@ namespace Enjon
 								ImGui::ListBoxFooter( ); 
 							}
 
+							// Crashes here...
 							if ( val )
 							{
-								ImGuiManager::DebugDumpObject( val.Get( ) );
+								// ImGuiManager::DebugDumpObject( val.Get( ) );
 							}
 
 							ImGui::TreePop( );
@@ -800,99 +806,100 @@ namespace Enjon
 
 			ImGui::SetCursorPosX( startCursorX + buttonSize + padding.x );
 
-			ImGui::Text( name.c_str( ) ); 
+			ImGui::Text( "%s", name.c_str( ) ); 
 			ImGui::SameLine( ); 
 
 			ImGui::SetCursorPosX( windowWidth * 0.4f );
 			ImGui::PushItemWidth( windowWidth / 2.0f ); 
-		} 
-
+		}
 
 		switch ( prop->GetType( ) )
 		{
-			case Enjon::MetaPropertyType::Bool:
+			default: break;
+
+			case MetaPropertyType::Bool:
 			{
 				bool val = 0;
 				cls->GetValue( object, prop, &val );
-				if ( ImGui::Checkbox( fmt::format("##{}", name).c_str(), &val ) )
+				if ( ImGui::Checkbox( Utils::format("##%s", name.c_str()).c_str(), &val ) )
 				{
 					cls->SetValue( object, prop, val );
 				}
 
 			} break;
 
-			case Enjon::MetaPropertyType::U32:
+			case MetaPropertyType::U32:
 			{
 				u32 val = 0;
 				cls->GetValue( object, prop, &val );
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderInt( fmt::format("##{}", name).c_str(), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
+					if ( ImGui::SliderInt( Utils::format("##%s", name.c_str()).c_str(), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
 					{
 						cls->SetValue( object, prop, ( u32 )val );
 					}
 				}
 				else
 				{
-					if ( ImGui::DragInt( fmt::format("##{}", name).c_str(), ( s32* )&val ) )
+					if ( ImGui::DragInt( Utils::format("##%s", name.c_str()).c_str(), ( s32* )&val ) )
 					{
 						cls->SetValue( object, prop, ( u32 )val );
 					}
 				}
 			} break;
 
-			case Enjon::MetaPropertyType::S32:
+			case MetaPropertyType::S32:
 			{
 				s32 val = 0;
 				cls->GetValue( object, prop, &val );
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderInt( fmt::format("##{}", name).c_str( ), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
+					if ( ImGui::SliderInt( Utils::format("##%s", name.c_str()).c_str( ), ( s32* )&val, ( s32 )traits.GetUIMin( ), ( s32 )traits.GetUIMax( ) ) )
 					{
 						cls->SetValue( object, prop, ( s32 )val );
 					}
 				}
 				else
 				{
-					if ( ImGui::DragInt( fmt::format("##{}", name).c_str( ), ( s32* )&val ) )
+					if ( ImGui::DragInt( Utils::format("##%s", name.c_str()).c_str( ), ( s32* )&val ) )
 					{
 						cls->SetValue( object, prop, ( s32 )val ); 
 					}
 				}
 			} break;
 
-			case Enjon::MetaPropertyType::F32:
+			case MetaPropertyType::F32:
 			{
 				float val = 0.0f;
 				cls->GetValue( object, prop, &val );
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat( fmt::format("##{}", name).c_str(), &val, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat( Utils::format("##%s", name.c_str()).c_str(), &val, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						cls->SetValue( object, prop, val );
 					}
 				}
 				else
 				{
-					if ( ImGui::DragFloat( fmt::format("##{}", name).c_str(), &val ) )
+					if ( ImGui::DragFloat( Utils::format("##%s", name.c_str()).c_str(), &val ) )
 					{
 						cls->SetValue( object, prop, val );
 					}
 				}
 			} break;
 
-			case Enjon::MetaPropertyType::Vec2:
+			case MetaPropertyType::Vec2:
 			{
-				Enjon::Vec2 val;
+				Vec2 val;
 				cls->GetValue( object, prop, &val );
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				f32 col[ 2 ] = { val.x, val.y };
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat2( fmt::format("##{}", name).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat2( Utils::format("##%s", name.c_str()).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -901,7 +908,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::DragFloat2( fmt::format("##{}", name).c_str(), col ) )
+					if ( ImGui::DragFloat2( Utils::format("##%s", name.c_str()).c_str(), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -910,12 +917,12 @@ namespace Enjon
 				}
 			} break;
 
-			case Enjon::MetaPropertyType::Vec3:
+			case MetaPropertyType::Vec3:
 			{
-				Enjon::Vec3 val;
+				Vec3 val;
 				cls->GetValue( object, prop, &val );
 				f32 col[ 3 ] = { val.x, val.y, val.z };
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
 					if ( ImGui::SliderFloat3( ( "##" + name ).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
@@ -938,12 +945,12 @@ namespace Enjon
 				}
 			} break;
 
-			case Enjon::MetaPropertyType::iVec3:
+			case MetaPropertyType::iVec3:
 			{
-				Enjon::iVec3 val;
+				iVec3 val;
 				cls->GetValue( object, prop, &val );
 				s32 col[ 3 ] = { val.x, val.y, val.z };
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
 					if ( ImGui::SliderInt3( ( "##" + name ).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
@@ -966,15 +973,15 @@ namespace Enjon
 				}
 			} break;
 
-			case Enjon::MetaPropertyType::Vec4:
+			case MetaPropertyType::Vec4:
 			{
-				Enjon::Vec4 val;
+				Vec4 val;
 				cls->GetValue( object, prop, &val );
 				f32 col[ 4 ] = { val.x, val.y, val.z, val.w };
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat4( fmt::format("##{}", name).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat4( Utils::format("##%s", name.c_str()).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -985,7 +992,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::DragFloat4( fmt::format("##{}", name).c_str(), col ) )
+					if ( ImGui::DragFloat4( Utils::format("##%s", name.c_str()).c_str(), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -998,16 +1005,16 @@ namespace Enjon
 
 			case MetaPropertyType::Quat:
 			{
-				Enjon::Quaternion val;
+				Quaternion val;
 				cls->GetValue( object, prop, &val );
 				f32 col[ 4 ] = { val.x, val.y, val.z, val.w };
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				// Make a change to a file in the engine.
 				// Watch how fast the reflection generation occurs.
 				// Already done :)
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::SliderFloat4( fmt::format("##{}", name).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
+					if ( ImGui::SliderFloat4( Utils::format("##%s", name.c_str()).c_str(), col, traits.GetUIMin( ), traits.GetUIMax( ) ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -1018,7 +1025,7 @@ namespace Enjon
 				}
 				else
 				{
-					if ( ImGui::DragFloat4( fmt::format("##{}", name).c_str(), col ) )
+					if ( ImGui::DragFloat4( Utils::format("##%s", name.c_str()).c_str(), col ) )
 					{
 						val.x = col[ 0 ];
 						val.y = col[ 1 ];
@@ -1029,15 +1036,15 @@ namespace Enjon
 				} 
 			} break;
 
-			case Enjon::MetaPropertyType::ColorRGBA32:
+			case MetaPropertyType::ColorRGBA32:
 			{
-				Enjon::ColorRGBA32 val;
+				ColorRGBA32 val;
 				cls->GetValue( object, prop, &val );
 				f32 col[ 4 ] = { val.r, val.g, val.b, val.a };
-				Enjon::MetaPropertyTraits traits = prop->GetTraits( );
+				MetaPropertyTraits traits = prop->GetTraits( );
 				if ( traits.UseSlider( ) )
 				{
-					if ( ImGui::ColorEdit4( fmt::format( "##{}", name ).c_str( ), col ) )
+					if ( ImGui::ColorEdit4( Utils::format( "##%s", name.c_str() ).c_str( ), col ) )
 					{ 
 						val.r = col[ 0 ];
 						val.g = col[ 1 ];
@@ -1048,7 +1055,7 @@ namespace Enjon
 				}
 				else
 				{ 
-					if ( ImGui::ColorEdit4( fmt::format( "##{}", name ).c_str( ), col ) )
+					if ( ImGui::ColorEdit4( Utils::format( "##%s", name.c_str() ).c_str( ), col ) )
 					{ 
 						val.r = col[ 0 ];
 						val.g = col[ 1 ];
@@ -1059,35 +1066,35 @@ namespace Enjon
 				}
 			} break;
 				
-			case Enjon::MetaPropertyType::String:
+			case MetaPropertyType::String:
 			{
-				Enjon::String val;
+				String val;
 				cls->GetValue( object, prop, &val );
 				char buffer[ 256 ];
-				strncpy_s( buffer, &val[0], 256 );
-				if ( ImGui::InputText( fmt::format("##{}", name).c_str( ), buffer, 256 ) )
+				strncpy( buffer, &val[0], 256 );
+				if ( ImGui::InputText( Utils::format("##%s", name.c_str()).c_str( ), buffer, 256 ) )
 				{
 					// Reset string
 					cls->SetValue( object, prop, String( buffer ) ); 
 				}
 			} break;
 				
-			case Enjon::MetaPropertyType::UUID:
+			case MetaPropertyType::UUID:
 			{
-				Enjon::UUID val;
+				UUID val;
 				cls->GetValue( object, prop, &val );
-				Enjon::String str = val.ToString( );
-				ImGui::Text( fmt::format( "{}", str ).c_str( ) );
+				String str = val.ToString( );
+				ImGui::Text( "%s", str.c_str( ) );
 			} break;
 
 			// Type is transform
-			case Enjon::MetaPropertyType::Transform:
+			case MetaPropertyType::Transform:
 			{
 				InspectObject( cls->GetValueAs< Transform >( object, prop ) );
 			} break;
 
 			// Enum type
-			case Enjon::MetaPropertyType::Enum:
+			case MetaPropertyType::Enum:
 			{
 				// Property is enum prop, so need to convert it
 				const MetaPropertyEnum* enumProp = prop->Cast< MetaPropertyEnum >( ); 
@@ -1125,7 +1132,7 @@ namespace Enjon
 			} break;
 			
 			// AssetHandle type
-			case Enjon::MetaPropertyType::AssetHandle:
+			case MetaPropertyType::AssetHandle:
 			{
 				// Property is of type MetaPropertyAssetHandle
 				const MetaPropertyTemplateBase* base = prop->Cast< MetaPropertyTemplateBase >( );
@@ -1133,7 +1140,7 @@ namespace Enjon
 
 				if ( assetCls )
 				{
-					Enjon::AssetHandle<Enjon::Asset> val;
+					AssetHandle<Enjon::Asset> val;
 					cls->GetValue( object, prop, &val );
 					AssetManager* am = EngineSubsystem( AssetManager );
 					auto assets = am->GetAssets( assetCls );
@@ -1143,7 +1150,7 @@ namespace Enjon
 							static ImGuiTextFilter filter;
 							static String filterString = "";
 							String label = val ? val->GetName( ) : assetCls->GetName( );
-							if ( ImGui::BeginCombo( fmt::format( "##{}", prop->GetName( ) ).c_str( ), label.c_str( ) ) )
+							if ( ImGui::BeginCombo( Utils::format( "##%s", prop->GetName().c_str() ).c_str( ), label.c_str( ) ) )
 							{
 								// For each record in assets
 								for ( auto& a : *assets )
@@ -1223,6 +1230,8 @@ namespace Enjon
 
 			switch ( prop->GetType( ) )
 			{
+				default: break;
+
 				// Primitive types
 				case Enjon::MetaPropertyType::U32: 
 				case Enjon::MetaPropertyType::S32: 
@@ -1246,7 +1255,7 @@ namespace Enjon
 				// Array type
 				case Enjon::MetaPropertyType::Array:
 				{
-					if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)object ) ).c_str( ) ) )
+					if ( ImGui::TreeNode( Enjon::String( prop->GetName( ) + "##" + std::to_string( (u32)(usize)object ) ).c_str( ) ) )
 					{
 						const MetaPropertyArrayBase* arrayProp = prop->Cast< MetaPropertyArrayBase >( );
 						DebugDumpArrayProperty( object, arrayProp );
@@ -1257,7 +1266,7 @@ namespace Enjon
 				case Enjon::MetaPropertyType::HashMap: 
 				{
 
-					if ( ImGui::TreeNode( Enjon::String( prop->GetName() + "##" + std::to_string( (u32)object ) ).c_str() ) )
+					if ( ImGui::TreeNode( Enjon::String( prop->GetName() + "##" + std::to_string( (u32)(usize)object ) ).c_str() ) )
 					{
 						const MetaPropertyHashMapBase* mapProp = prop->Cast< MetaPropertyHashMapBase >();
 						DebugDumpHashMapProperty( object, mapProp );
@@ -1320,7 +1329,8 @@ namespace Enjon
 	void ImGuiManager::Render(Window* window)
 	{ 
 		// Render gui context
-		window->GetGUIContext( )->Render( ); 
+		window->GetGUIContext( )->Render( );
+		ImGui_ImplSdlGL3_UpdateViewports(window->GetGUIContext()->GetContext());
 	}
 
 	//============================================================================================
@@ -1458,15 +1468,26 @@ namespace Enjon
 		String fp = rootPath + "/Assets/Fonts/";
 
 		ImGuiIO& io = ImGui::GetIO();
+		ImFontConfig fontCfg;
+	    fontCfg.FontDataOwnedByAtlas = false;
+	    fontCfg.OversampleH = 7;
+	    fontCfg.OversampleV = 7;
+	    // fontCfg.RasterizerMultiply = 1.5f;
+
+	    // Font scale
+	    int fs = 1;
 
 		io.Fonts->Clear();
-		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10);
-		mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14);
-		mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16);
-		mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF(( fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20);
-		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF(( fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14);
-		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF(( fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12);
-		io.Fonts->Build(); 
+		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs, &fontCfg );
+		mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs, &fontCfg );
+		mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16 * fs, &fontCfg );
+		mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs, &fontCfg );
+		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs, &fontCfg );
+		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg );
+		io.Fonts->Build();
+
+		// io.DisplayFramebufferScale = { 8, 8 };
+		// io.FontGlobalScale = 0.25f;
 
 		// Grab reference to style
 		ImGuiStyle& style = ImGui::GetStyle(); 
@@ -1571,7 +1592,7 @@ namespace Enjon
 	void ImGuiManager::Text( const String& text )
 	{
 		BindContext( );
-		ImGui::Text( text.c_str( ) );
+		ImGui::Text( "%s", text.c_str( ) );
 	}
 
 	//=====================================================================
@@ -1790,7 +1811,7 @@ namespace Enjon
 		}
 
 		// Open popup window
-		const char* label = fmt::format( "{}##{}", mLabel, (u32)this ).c_str();
+		const char* label = Utils::format( "%s##%zu", mLabel.c_str(), (u32)(usize)this ).c_str();
 		//ImGui::OpenPopup( label );
 		ImGui::Begin( label, &mEnabled, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
 		{
@@ -1863,7 +1884,7 @@ namespace Enjon
 
 		igm->RegisterMenuOption( "View", mLabel, [ & ] ( )
 		{
-			ImGui::MenuItem( fmt::format( "{}##options", mLabel ).c_str( ), NULL, &mEnabled );
+			ImGui::MenuItem( Utils::format( "%s##options", mLabel.c_str() ).c_str( ), NULL, &mEnabled );
 		});
 
 		// Register individual window with docking system

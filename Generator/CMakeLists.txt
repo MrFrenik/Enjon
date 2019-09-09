@@ -19,6 +19,8 @@ if (NOT IS_DIRECTORY ${LINK_DIR})
 		execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${LINK_DIR})
 endif() 
 
+set(CMAKE_CXX_STANDARD 11)
+
 # Add include directory
 include_directories(${REFL_DIR}/Include)
 

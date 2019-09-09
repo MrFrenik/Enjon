@@ -87,7 +87,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			void AdvanceReadPosition( const usize& amount );
+			void AdvanceReadPosition( const u32& amount );
 
 			/*
 			* @brief
@@ -123,7 +123,7 @@ namespace Enjon
 			/*
 			* @brief Destructor
 			*/
-			void Resize( usize size );
+			void Resize( u32 size );
 
 		private:
 			u32 mReadPosition		= 0;

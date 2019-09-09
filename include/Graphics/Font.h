@@ -40,7 +40,7 @@ namespace Enjon
 
 	typedef struct 
 	{
-		std::unordered_map<GLchar, Character> Characters;
+		HashMap<GLchar, Character> Characters;
 		float MaxHeight;
 		float MaxWidth;	
 	} Font;
@@ -59,33 +59,33 @@ namespace Enjon
 	} PackedCharacterRect;
 
 	/* Inits a particular font with a particular size and stores in a returned map */
-	void Init(const String& filePath, GLuint size, Font* font);
+	void Init( const String& filePath, GLuint size, Font* font );
 
 	/* Gets character stats from given font */
 	// CharacterStats GetCharacterAttributes(Math::Vec2 Pos, float scale, Font* F, std::string::const_iterator c, float* advance);
 
-	CharacterStats GetCharacterAttributes(Enjon::Vec2 Pos, float scale, Font* F, char c, float* advance);
+	CharacterStats GetCharacterAttributes( const Vec2& Pos, const f32& scale, Font* F, char c, float* advance );
 
-	float GetAdvance(char c, Font* F, float scale = 1.0f);
+	float GetAdvance( char c, Font* F, const f32& scale = 1.0f );
 
-	float GetStringAdvance(const char* C, Font* F, float Scale = 1.0f);
+	float GetStringAdvance( const char* C, Font* F, const f32& Scale = 1.0f );
 
-	float GetHeight(char c, Font* F, float scale = 1.0f);
+	float GetHeight( char c, Font* F, const f32& scale = 1.0f );
 
 	/* Creates and returns new font */
-	Font* CreateFont(const String& filePath, GLuint size);
+	Font* CreateFont( const String& filePath, GLuint size );
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
-	void PrintText(GLfloat x, GLfloat y, GLfloat scale, std::string text, Font* F, Enjon::SpriteBatch& Batch, 
-						ColorRGBA32 Color = Enjon::RGBA32_White(), TextStyle Style = TextStyle::SHADOW, float Angle = 0.0f, float Depth = 0.0f);
+	void PrintText( f32 x, f32 y, const f32& scale, const String& text, Font* F, SpriteBatch& Batch, 
+						const ColorRGBA32& Color = RGBA32_White(), TextStyle Style = TextStyle::SHADOW, const f32& Angle = 0.0f, const f32& Depth = 0.0f );
 
-	void PrintText(Transform& Transform, std::string Text, Font* F, QuadBatch& Batch, ColorRGBA32 Color = RGBA32_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW); 
+	void PrintText( const Transform& Transform, const String& Text, Font* F, QuadBatch& Batch, const ColorRGBA32& Color = RGBA32_White(), const f32& Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW ); 
 
-	void PrintText(const Vec2& position, const Vec2& size, std::string Text, Font* F, SpriteBatch* Batch, ColorRGBA32 Color = RGBA32_White(), float Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW); 
+	void PrintText( const Vec2& position, const Vec2& size, const String& Text, Font* F, SpriteBatch* Batch, const ColorRGBA32& Color = RGBA32_White(), const f32& Spacing = 1.0f, TextStyle Style = TextStyle::SHADOW ); 
 
 	class UIFont;
 	
-	void PrintText( Transform& Transform, const Enjon::String& Text, const UIFont* F, QuadBatch& Batch, ColorRGBA32 Color, u32 fontSize );
+	void PrintText( const Transform& Transform, const String& Text, const UIFont* F, const QuadBatch& Batch, const ColorRGBA32& Color, const u32& fontSize );
 
 	class UIFont;
 	class FontAtlas;
@@ -129,16 +129,16 @@ namespace Enjon
 
 		public:
 			FontAtlas( );
-			FontAtlas( const Enjon::String& path, s32 fontSize, const UIFont* font );
-			Enjon::AssetHandle< Enjon::Texture > GetAtlasTexture( ) const;
+			FontAtlas( const String& path, const s32& fontSize, const UIFont* font );
+			AssetHandle< Texture > GetAtlasTexture( ) const;
 			u32 GetTextureID( ) const;
-			FontGlyph GetGlyph( u8 character ) const;
+			FontGlyph GetGlyph( const u8& character ) const;
 			~FontAtlas( ); 
 
 		protected: 
-			Enjon::AssetHandle< Enjon::Texture > mAtlasTexture;
+			Enjon::AssetHandle< Texture > mAtlasTexture;
 			u32 mAtlasTextureID;
-			std::unordered_map< u8, FontGlyph > mGlyphs;
+			HashMap< u8, FontGlyph > mGlyphs;
 	};
 
 	class FontAssetLoader;
@@ -155,23 +155,23 @@ namespace Enjon
 			/**
 			* @brief Constructor
 			*/
-			UIFont( const Enjon::String& fontPath ); 
+			UIFont( const String& fontPath ); 
 
 			/**
 			* @brief
 			*/
-			bool AtlasExists( s32 fontSize ) const;
+			bool AtlasExists( const s32& fontSize ) const;
 
 			/**
 			* @brief
 			*/
-			const FontAtlas* GetAtlas( s32 fontSize ) const;
+			const FontAtlas* GetAtlas( const s32& fontSize ) const;
 
 		private:
 			/**
 			* @brief
 			*/
-			void AddAtlas( s32 fontSize );
+			void AddAtlas( const s32& fontSize );
 
 			FT_Face GetFace( ) const 
 			{ 
@@ -180,9 +180,9 @@ namespace Enjon
 
 		private:
 			ENJON_PROPERTY( )
-			Enjon::String mFontPath;
+			String mFontPath;
 
-			std::unordered_map< u32, FontAtlas > mAtlases; 
+			HashMap< u32, FontAtlas > mAtlases; 
 
 			FT_Face mFontFace;
 	};

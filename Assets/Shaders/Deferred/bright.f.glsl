@@ -15,8 +15,8 @@ uniform float u_threshold;
 void main() 
 {
 	color = vec4(0.0, 0.0, 0.0, 1.0);
-	vec3 FragColor = texture2D(tex, fs_in.TexCoords).rgb;
-	vec3 EmissiveColor = texture2D(u_emissiveMap, fs_in.TexCoords).rgb;
+	vec3 FragColor = texture(tex, fs_in.TexCoords).rgb;
+	vec3 EmissiveColor = texture(u_emissiveMap, fs_in.TexCoords).rgb;
 
 	// Clamp to avoid exceeding max float
 	FragColor = min(vec3(256 * 10, 256 * 10, 256 * 10), max( vec3( 0.0 ), FragColor.rgb) );

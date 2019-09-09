@@ -20,7 +20,7 @@ out vec4 DepthColor;
 
 void main()
 {
-	vec4 Color = texture2D(DiffuseMap, fs_in.TexCoords);
+	vec4 Color = texture(DiffuseMap, fs_in.TexCoords);
 	if (Color.a < 0.5) discard;
     // float Depth = LinearizeDepth(gl_FragCoord.z);
 

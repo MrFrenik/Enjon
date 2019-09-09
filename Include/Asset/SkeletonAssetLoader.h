@@ -33,8 +33,11 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			virtual String SkeletonAssetLoader::GetAssetFileExtension( ) const override;
+			virtual String GetAssetFileExtension( ) const override;
 
+			/**
+			* @brief 
+			*/
 			static void DecomposeMatrix( const Mat4x4& original, Vec3& position, Vec3& scale, Quaternion& rotation );
 
 		protected:

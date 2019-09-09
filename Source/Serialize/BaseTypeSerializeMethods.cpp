@@ -21,7 +21,7 @@ namespace Enjon
 	//==================================================================================================================
 
 #define WRITE_PROP_SIZE_POD( buffer, valType )\
-	buffer->Write< usize >( sizeof( valType ) );
+	buffer->Write< u32 >( (u32)sizeof( valType ) );
 
 #define WRITE_PROP( buffer, cls, object, prop, valType )\
 	buffer->Write< valType >( *cls->GetValueAs< valType >( object, prop ) );
@@ -39,6 +39,8 @@ namespace Enjon
 
 			switch ( prop->GetType( ) )
 			{
+				default: break;
+
 				case MetaPropertyType::U8:
 				{
 					WRITE_PROP_SIZE_POD( buffer, u8 )
@@ -123,7 +125,7 @@ namespace Enjon
 
 				case MetaPropertyType::String:
 				{
-					buffer->Write< usize >( cls->GetValueAs< String >( object, prop )->length( ) );
+					buffer->Write< u32 >( (u32)cls->GetValueAs< String >( object, prop )->length( ) );
 					WRITE_PROP( buffer, cls, object, prop, String )
 				} break;
 
@@ -206,7 +208,7 @@ namespace Enjon
 				case MetaPropertyType::UUID:
 				{
 					// Write size of uuid
-					buffer->Write< usize >( UUID::Invalid( ).ToString( ).length( ) ); 
+					buffer->Write< u32 >( (u32)UUID::Invalid( ).ToString( ).length( ) ); 
 					// Write uuid to buffer
 					WRITE_PROP( buffer, cls, object, prop, UUID )
 				} break;
@@ -214,7 +216,7 @@ namespace Enjon
 				case MetaPropertyType::AssetHandle:
 				{
 					// Write size of uuid to buffer
-					buffer->Write< usize >( UUID::Invalid( ).ToString( ).length( ) );
+					buffer->Write< u32 >( (u32)UUID::Invalid( ).ToString( ).length( ) );
 
 					// Get value of asset 
 					AssetHandle<Asset> val;
@@ -243,7 +245,7 @@ namespace Enjon
 						const MetaPropertyPointerBase* base = prop->Cast< MetaPropertyPointerBase >( );
 						const Object* obj = base->GetValueAsObject( object );
 						ObjectArchiver::Serialize( obj, &temp );
-						buffer->Write< usize >( temp.GetSize( ) );
+						buffer->Write< u32 >( (u32)temp.GetSize( ) );
 
 						// Serialize object data to actual buffer
 						ObjectArchiver::Serialize( obj, buffer );
@@ -254,7 +256,7 @@ namespace Enjon
 						// Write out to temp to write size of object
 						const Object* obj = cls->GetValueAs< Object >( object, prop );
 						ObjectArchiver::Serialize( obj, &temp );
-						buffer->Write< usize >( temp.GetSize( ) );
+						buffer->Write< u32 >( (u32)temp.GetSize( ) );
 
 						// Serialize object data
 						ObjectArchiver::Serialize( obj, buffer );
@@ -277,7 +279,7 @@ namespace Enjon
 					ByteBuffer temp;
 					EntityHandle handle = *cls->GetValueAs< EntityHandle >( object, prop );
 					EntityArchiver::Serialize( handle, &temp );
-					buffer->Write< usize >( temp.GetSize( ) );
+					buffer->Write< u32 >( (u32)temp.GetSize( ) );
 
 					// Serialize entity data 
 					// TODO(): Just copy in the serialized entity data from the other buffer...
@@ -299,17 +301,18 @@ namespace Enjon
 					const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( ); 
 
 					// Get total size to write for array + writing size of array element-wise
-					usize totalWriteSize = base->GetSizeInBytes( object ) + sizeof( usize );
+					u32 totalWriteSize = (u32)base->GetSizeInBytes( object ) + (u32)sizeof( usize );
 
 					// Write out total write size
-					buffer->Write< usize >( totalWriteSize );
+					buffer->Write< u32 >( totalWriteSize );
 
 					// Write out size of array to buffer
-					buffer->Write< usize >( base->GetSize( object ) );
+					buffer->Write< u32 >( (u32)base->GetSize( object ) );
 
 					// Write out array elements
 					switch ( base->GetArrayType( ) )
 					{
+						default: break;
 						case MetaPropertyType::Bool:	WRITE_ARRAY_PROP_PRIM( object, base, bool, buffer )		break;
 						case MetaPropertyType::U8:		WRITE_ARRAY_PROP_PRIM( object, base, u8, buffer )		break;
 						case MetaPropertyType::U32:		WRITE_ARRAY_PROP_PRIM( object, base, u32, buffer )		break;
@@ -383,20 +386,23 @@ namespace Enjon
 					const MetaPropertyHashMapBase* base = prop->Cast< MetaPropertyHashMapBase >( );
 
 					// Get total write size = numElements * ( size of key type + size of val type ) + size of usize
-					usize totalWriteSize = base->GetSizeInBytes( object ) + sizeof( usize ); 
+					u32 totalWriteSize = (u32)base->GetSizeInBytes( object ) + (u32)sizeof( usize ); 
 
 					// Write total write size out
-					buffer->Write< usize >( totalWriteSize );
+					buffer->Write< u32 >( totalWriteSize );
 
 					// Write out size of map to buffer
-					buffer->Write< usize >( base->GetSize( object ) );
+					buffer->Write< u32 >( (u32)base->GetSize( object ) );
 
 					switch ( base->GetKeyType( ) )
 					{
+						default: break;
+
 						case MetaPropertyType::U32:
 						{
 							switch ( base->GetValueType( ) )
 							{
+								default: break;
 								case MetaPropertyType::U32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, u32, buffer )	break;
 								case MetaPropertyType::S32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, s32, buffer )	break;
 								case MetaPropertyType::F32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, f32, buffer )	break;
@@ -407,6 +413,7 @@ namespace Enjon
 						{
 							switch ( base->GetValueType( ) )
 							{
+								default: break;
 								case MetaPropertyType::U32:		WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, buffer )	break;
 								case MetaPropertyType::Object:
 								{
@@ -427,6 +434,7 @@ namespace Enjon
 						{
 							switch ( base->GetValueType( ) )
 							{
+								default: break;
 								case MetaPropertyType::String:	WRITE_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, String, buffer )	break;
 								case MetaPropertyType::Object:	WRITE_MAP_KEY_PRIM_VAL_OBJECT( object, base, s32, buffer )			break;
 							}
@@ -448,16 +456,18 @@ namespace Enjon
 			// Get class from object
 			const MetaClass* cls = object->Class( );
 			// Read in meta property
-			const MetaProperty* prop = cls->GetPropertyByName( buffer->Read< String >( ) );
+			const MetaProperty* prop = cls->GetPropertyByName( buffer->Read< String >() );
 			// Read the type
 			MetaPropertyType propType = ( MetaPropertyType )buffer->Read< s32 >( );
 			// Read in the total size in bytes written for this property
-			usize propSize = buffer->Read< usize >( );
+			u32 propSize = buffer->Read< u32 >( );
 
 			if ( prop && propType == prop->GetType( ) )
 			{
 				switch ( prop->GetType( ) )
 				{
+					default: break;
+
 					case MetaPropertyType::U8:
 					{
 						READ_PROP( buffer, cls, object, prop, u8 )
@@ -705,11 +715,12 @@ namespace Enjon
 					const MetaPropertyArrayBase* base = prop->Cast< MetaPropertyArrayBase >( );
 
 					// Read size of array from buffer
-					usize arraySize = buffer->Read< usize >( );
+					u32 arraySize = buffer->Read< u32 >( );
 
 					// If a dynamic vector then need to resize vector to allow for placement
 					switch ( base->GetArraySizeType( ) )
 					{
+						default: break;
 						case ArraySizeType::Dynamic:
 						{
 							base->Resize( object, arraySize );
@@ -719,6 +730,7 @@ namespace Enjon
 						// Read out array elements
 						switch ( base->GetArrayType( ) )
 						{
+							default: break;
 							case MetaPropertyType::Bool:	READ_ARRAY_PROP_PRIM( object, base, bool, arraySize, buffer )	break;
 							case MetaPropertyType::U8:		READ_ARRAY_PROP_PRIM( object, base, u8, arraySize, buffer )		break;
 							case MetaPropertyType::U32:		READ_ARRAY_PROP_PRIM( object, base, u32, arraySize, buffer )	break;
@@ -790,14 +802,17 @@ namespace Enjon
 						const MetaPropertyHashMapBase* base = prop->Cast< MetaPropertyHashMapBase >( );
 
 						// Read size of map to buffer
-						usize mapSize = buffer->Read< usize >( );
+						u32 mapSize = buffer->Read< u32 >( );
 
 						switch ( base->GetKeyType( ) )
 						{
+							default: break;
+
 							case MetaPropertyType::U32:
 							{
 								switch ( base->GetValueType( ) )
 								{
+									default: break;
 									case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, u32, u32, mapSize, buffer )	break;
 									case MetaPropertyType::S32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, u32, mapSize, buffer )	break;
 									case MetaPropertyType::F32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, f32, u32, mapSize, buffer )	break;
@@ -808,6 +823,7 @@ namespace Enjon
 							{
 								switch ( base->GetValueType( ) )
 								{
+									default: break;
 									case MetaPropertyType::U32:		READ_MAP_KEY_PRIM_VAL_PRIM( object, base, String, u32, mapSize, buffer )	break;
 									case MetaPropertyType::Object:	READ_MAP_KEY_PRIM_VAL_OBJ( object, base, String, mapSize, buffer )			break;
 								}
@@ -818,6 +834,7 @@ namespace Enjon
 							{
 								switch ( base->GetValueType( ) )
 								{
+									default: break;
 									case MetaPropertyType::String:	READ_MAP_KEY_PRIM_VAL_PRIM( object, base, s32, String, mapSize, buffer )	break;
 									case MetaPropertyType::Object:	READ_MAP_KEY_PRIM_VAL_OBJ( object, base, s32, mapSize, buffer )			break;
 								}

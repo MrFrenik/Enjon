@@ -56,11 +56,11 @@ namespace Enjon
 			// Create new bullet transform
 			BTransform bTransform;
 			bTransform.setIdentity( );
-			const Vec3* elp = &transform.GetPosition();
-			const Quaternion* elr = &transform.GetRotation();
-			const Vec3* els = &transform.GetScale();
-			bTransform.setOrigin( BV3( elp->x, elp->y, elp->z ) );
-			bTransform.setRotation( BQuat( elr->x, elr->y, elr->z, -elr->w ) );
+			Vec3 elp = transform.GetPosition();
+			Quaternion elr = transform.GetRotation();
+			Vec3 els = transform.GetScale();
+			bTransform.setOrigin( BV3( elp.x, elp.y, elp.z ) );
+			bTransform.setRotation( BQuat( elr.x, elr.y, elr.z, -elr.w ) );
 
 			return bTransform;
 		}

@@ -14,9 +14,9 @@ PropertyTypeAsStringMap Property::mPropertyTypeStringMap;
 		
 std::string Introspection::GetTypeAsString( PropertyType type )
 {
-	if ( mPropertyTypeStringMap.find( type ) != mPropertyTypeStringMap.end( ) )
+	if ( mPropertyTypeStringMap.find( (u32)type ) != mPropertyTypeStringMap.end( ) )
 	{
-		return mPropertyTypeStringMap[ type ];
+		return mPropertyTypeStringMap[ (u32)type ];
 	} 
 
 	return "Object";
@@ -46,7 +46,7 @@ PropertyType Introspection::GetTypeFromString( const std::string& str )
 
 #define STRING_TO_PROP( str, prop )\
 mPropertyTypeMap[ str ] = PropertyType::prop;\
-mPropertyTypeStringMap[ PropertyType::prop ] = #prop;
+mPropertyTypeStringMap[ (u32)PropertyType::prop ] = #prop;
 
 void Introspection::InitPropertyMap( )
 {
@@ -223,6 +223,7 @@ void Introspection::Parse( Lexer* lexer )
 			}
 			break;
 
+			default:
 			case TokenType::Token_Unknown:
 			{
 			}
@@ -708,6 +709,11 @@ void Introspection::ParseClassMembers( Lexer* lexer, Class* cls )
 			case TokenType::Token_EndOfStream: 
 			{
 				isParsing = false; 
+			} break;
+
+			default:
+			{
+
 			} break;
 		}
 	}
@@ -1873,7 +1879,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 						case PropertyType::AssetHandle:
 						{
 							code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyAssetHandle" + prop.second->mTypeAppend + "( MetaPropertyType::" + metaPropStr + ", \"" 
-															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
+															+ pn + "\", ( u32 )( usize )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + " );" ); 
 						} break;
 
 						case PropertyType::Enum:
@@ -1883,7 +1889,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 							if ( enm )
 							{
 								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyEnum( MetaPropertyType::" + metaPropStr + ", \"" 
-																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", Enum_" + enm->mName + "_Structure().Elements(), \"" + prop.second->mTypeRaw + "\" );" ); 
+																+ pn + "\", ( u32 )( usize )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", Enum_" + enm->mName + "_Structure().Elements(), \"" + prop.second->mTypeRaw + "\" );" ); 
 							}
 							
 						} break;
@@ -1932,7 +1938,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 							}
 
 							code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyHashMap< " + mp->mKeyPropertyTypeRaw + ", " + mp->mValuePropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
-															+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", MetaPropertyType::" + keyPropStr + ", MetaPropertyType::" + valPropStr + ", " + keyProxyString + ", "   
+															+ pn + "\", ( u32 )( usize )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", MetaPropertyType::" + keyPropStr + ", MetaPropertyType::" + valPropStr + ", " + keyProxyString + ", "   
 															+ valProxyString + " );" ); 
 
 						} break;
@@ -1967,7 +1973,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 								case ArraySizeType::Dynamic:
 								{
 									code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyArray< " + ap->mPropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
-																	+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + arraySizeType + ", MetaPropertyType::" 
+																	+ pn + "\", ( u32 )( usize )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + arraySizeType + ", MetaPropertyType::" 
 																	+ arrayPropStr + ", " + propertyProxyString + " );" ); 
 
 								} break;
@@ -1975,7 +1981,7 @@ void Introspection::Compile( const ReflectionConfig& config )
 								case ArraySizeType::Fixed:
 								{
 									code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyArray< " + ap->mPropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
-																	+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + arraySizeType + ", MetaPropertyType::" 
+																	+ pn + "\", ( u32 )( usize )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + arraySizeType + ", MetaPropertyType::" 
 																	+ arrayPropStr + ", " + propertyProxyString + ", usize( " + ap->mSizeString + " ) );" ); 
 								} break;
 							}
@@ -1986,12 +1992,12 @@ void Introspection::Compile( const ReflectionConfig& config )
 							if ( prop.second->mTraits.IsPointer )
 							{
 								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyPointer< " + cn + ", " + prop.second->mTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
-																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", &" + cn + "::" + pn + " );" ); 
+																+ pn + "\", ( u32 )( usize )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", &" + cn + "::" + pn + " );" ); 
 							}
 							else
 							{
 								code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaProperty( MetaPropertyType::" + metaPropStr + ", \"" 
-																+ pn + "\", ( u32 )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + accessorStr + ", " + mutatorStr + " );" ); 
+																+ pn + "\", ( u32 )( usize )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", " + accessorStr + ", " + mutatorStr + " );" ); 
 							}
 						} break;
 					}
@@ -2043,6 +2049,8 @@ void Introspection::Compile( const ReflectionConfig& config )
 
 					code += OutputTabbedLine( l );
 				} break;
+
+				default: break;
 			}
 
 			// Format

@@ -67,7 +67,7 @@ void main()
     if (diff > 0)
     {
         float shininess = Shininess;
-        shininess = texture2D(specularMap, fs_in.TexCoords).r;
+        shininess = texture(specularMap, fs_in.TexCoords).r;
 
         if (shininess < 255.0)
         {

@@ -56,7 +56,7 @@ namespace Enjon
 			/**
 			* @brief
 			*/
-			virtual void ExplicitDestructor( ); 
+			virtual void ExplicitDestructor( ) override; 
 
 		protected:
 
@@ -138,7 +138,7 @@ namespace Enjon
 		/**
 		* @brief
 		*/
-		virtual void ExplicitDestructor( );
+		virtual void ExplicitDestructor( ) override;
 
 		/**
 		* @brief Get id of this entity
@@ -258,27 +258,27 @@ namespace Enjon
 		/**
 		* @brief Sets local position of entity relative to parent, if exists
 		*/
-		void SetLocalPosition( Vec3& position, bool propagateToComponents = true );
+		void SetLocalPosition( const Vec3& position, bool propagateToComponents = true );
 
 		/**
 		* @brief Sets local scale of entity relative to parent, if exists
 		*/
-		void SetLocalScale( Vec3& scale, bool propagateToComponents = true );
+		void SetLocalScale( const Vec3& scale, bool propagateToComponents = true );
 
 		/**
 		* @brief Sets local scale of entity relative to parent, if exists
 		*/
-		void SetLocalScale( f32 scale, bool propagateToComponents = true );
+		void SetLocalScale( const f32& scale, bool propagateToComponents = true );
 
 		/**
 		* @brief Sets local orientation of entity relative to parent, if exists
 		*/
-		void SetLocalRotation( Quaternion& rotation, bool propagateToComponents = true );
+		void SetLocalRotation( const Quaternion& rotation, bool propagateToComponents = true );
 
 		/**
 		* @brief Sets local orientation of entity relative to parent, if exists
 		*/
-		void SetLocalRotation( Vec3& eulerAngles, bool propagateToComponents = true );
+		void SetLocalRotation( const Vec3& eulerAngles, bool propagateToComponents = true );
 
 		/**
 		* @brief Gets local position of entity relative to parent, if exists
@@ -298,12 +298,12 @@ namespace Enjon
 		/**
 		* @brief Sets world position of entity relative to parent, if exists
 		*/
-		void SetWorldPosition( Vec3& position, bool propagateToComponents = true );
+		void SetWorldPosition( const Vec3& position, bool propagateToComponents = true );
 
 		/**
 		* @brief Sets local scale of entity relative to parent, if exists
 		*/
-		void SetWorldScale( Vec3& scale, bool propagateToComponents = true );
+		void SetWorldScale( const Vec3& scale, bool propagateToComponents = true );
 
 		/**
 		* @brief Sets local scale of entity relative to parent, if exists
@@ -313,12 +313,12 @@ namespace Enjon
 		/**
 		* @brief Sets local orientation of entity relative to parent, if exists
 		*/
-		void SetWorldRotation( Quaternion& rotation, bool propagateToComponents = true );
+		void SetWorldRotation( const Quaternion& rotation, bool propagateToComponents = true );
 
 		/**
 		* @brief Sets local orientation of entity relative to parent, if exists
 		*/
-		void SetWorldRotation( Vec3& eulerAngles, bool propagateToComponents = true );
+		void SetWorldRotation( const Vec3& eulerAngles, bool propagateToComponents = true );
 
 		/**
 		* @brief Gets World position of entity which calculates world transform if dirty flag is set

@@ -25,16 +25,30 @@ set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
 # Turn on ability to create folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Set compiler flags and build options
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /W1")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD /W1")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /W1")
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()	
+	
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")	
 
-message("cxx FLgs:" ${CMAKE_CXX_FLAGS})
+# Set compiler flags and build options
+if (MSVC)
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /W1 -std=c++11")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD /W1 -std=c++11")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /W1 -std=c++11")
+else()
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -O3")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -std=c++11")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11")
+endif()
+set(CMAKE_CXX_STANDARD 11)
+
+message("cxx Flags:" ${CMAKE_CXX_FLAGS})
 
 # Add include directories
 include_directories(${TARGET_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
+					${ENJON_DIR}/ThirdParty/Build/Include/Bullet
 					${ENJON_INC}
 					)
 
@@ -44,6 +58,8 @@ link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
 link_directories(${ENJON_BUILD_DIR}/Debug)
 link_directories(${ENJON_BUILD_DIR}/Release)
 link_directories(${ENJON_BUILD_DIR}/RelWithDebInfo)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/OSX/Release)
+link_directories(${ENJON_BUILD_DIR}/)
 
 set(TARGET_INC_DIR "${TARGET_DIR}/Include/")
 set(TARGET_DIR_DIR "${TARGET_DIR}/Source/")
@@ -59,7 +75,9 @@ if ( NOT EXISTS ${TARGET_GENERATED_DIR}/${TARGET_NAME}_Generated.cpp )
 endif()
 
 # Pull in the resource file for the application
-set( RESOURCE_FILE ${TARGET_DIR}/editor_resource.rc )
+if (MSVC)
+	set( RESOURCE_FILE ${TARGET_DIR}/editor_resource.rc )
+endif()
 
 file(
 		GLOB_RECURSE TARGET_SOURCES
@@ -82,27 +100,63 @@ file(
 		"${TARGET_INC_DIR}/*.h"
 	)
 
+if (NOT MSVC)
+	find_package(SDL2 REQUIRED)
+	include_directories(${SDL_INCLUDE_DIRS})
+endif()
+
 # Compile final executable
 add_executable( ${TARGET_NAME} ${ALL_SRC} ) 
 
 # Link libraries to target
-target_link_libraries( ${TARGET_NAME} debug Enjond.lib optimized Enjon.lib )
-target_link_libraries( ${TARGET_NAME} debug Opengl32.lib optimized Opengl32.lib ) 
-target_link_libraries( ${TARGET_NAME} debug SDL2_d.lib optimized SDL2.lib )
-target_link_libraries( ${TARGET_NAME} debug SDL2main_d.lib optimized SDL2main.lib )
-target_link_libraries( ${TARGET_NAME} debug glew32_d.lib optimized glew32.lib )
-target_link_libraries( ${TARGET_NAME} debug glew32s_d.lib optimized glew32s.lib )
-target_link_libraries( ${TARGET_NAME} debug freetype_d.lib optimized freetype.lib )
-target_link_libraries( ${TARGET_NAME} debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
-target_link_libraries( ${TARGET_NAME} debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
-target_link_libraries( ${TARGET_NAME} debug Bullet3Common_d.lib optimized Bullet3Common.lib )
-target_link_libraries( ${TARGET_NAME} debug LinearMath_d.lib optimized LinearMath.lib )
-target_link_libraries( ${TARGET_NAME} debug BulletDynamics_d.lib optimized BulletDynamics.lib )
-target_link_libraries( ${TARGET_NAME} debug BulletCollision_d.lib optimized BulletCollision.lib )
-target_link_libraries( ${TARGET_NAME} debug fmt_d.lib optimized fmt.lib )
-target_link_libraries( ${TARGET_NAME} debug liblz4_d.lib optimized liblz4.lib ) 
-target_link_libraries( ${TARGET_NAME} debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
-target_link_libraries( ${TARGET_NAME} debug nfd_d.lib optimized nfd.lib ) 
+if (MSVC)
+	target_link_libraries( ${TARGET_NAME} debug Enjond.lib optimized Enjon.lib )
+	target_link_libraries( ${TARGET_NAME} debug Opengl32.lib optimized Opengl32.lib ) 
+	target_link_libraries( ${TARGET_NAME} debug SDL2_d.lib optimized SDL2.lib )
+	target_link_libraries( ${TARGET_NAME} debug SDL2main_d.lib optimized SDL2main.lib )
+	target_link_libraries( ${TARGET_NAME} debug glew32_d.lib optimized glew32.lib )
+	target_link_libraries( ${TARGET_NAME} debug glew32s_d.lib optimized glew32s.lib )
+	target_link_libraries( ${TARGET_NAME} debug freetype_d.lib optimized freetype.lib )
+	target_link_libraries( ${TARGET_NAME} debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
+	target_link_libraries( ${TARGET_NAME} debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
+	target_link_libraries( ${TARGET_NAME} debug Bullet3Common_d.lib optimized Bullet3Common.lib )
+	target_link_libraries( ${TARGET_NAME} debug LinearMath_d.lib optimized LinearMath.lib )
+	target_link_libraries( ${TARGET_NAME} debug BulletDynamics_d.lib optimized BulletDynamics.lib )
+	target_link_libraries( ${TARGET_NAME} debug BulletCollision_d.lib optimized BulletCollision.lib )
+	target_link_libraries( ${TARGET_NAME} debug fmt_d.lib optimized fmt.lib )
+	target_link_libraries( ${TARGET_NAME} debug liblz4_d.lib optimized liblz4.lib ) 
+	target_link_libraries( ${TARGET_NAME} debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
+	target_link_libraries( ${TARGET_NAME} debug nfd_d.lib optimized nfd.lib ) 
+else()
+	target_link_libraries( ${TARGET_NAME} debug Enjond optimized Enjon )
+	target_link_libraries( ${TARGET_NAME} assimp.a )
+	target_link_libraries( ${TARGET_NAME} IrrXML.a )
+	target_link_libraries( ${TARGET_NAME} SDL2main.a )
+	target_link_libraries( ${TARGET_NAME} fmt.a )
+	target_link_libraries( ${TARGET_NAME} GLEW )
+	target_link_libraries( ${TARGET_NAME} nfd )
+	target_link_libraries( ${TARGET_NAME} freetype.a )
+	target_link_libraries( ${TARGET_NAME} m )
+	target_link_libraries( ${TARGET_NAME} z )
+	target_link_libraries( ${TARGET_NAME} iconv )
+	target_link_libraries( ${TARGET_NAME} png )
+	target_link_libraries( ${TARGET_NAME} bz2 )
+	target_link_libraries( ${TARGET_NAME} "-framework CoreAudio" )
+	target_link_libraries( ${TARGET_NAME} "-framework CoreMedia" )
+	target_link_libraries( ${TARGET_NAME} "-framework Cocoa" )
+	target_link_libraries( ${TARGET_NAME} "-framework CoreServices" )
+	target_link_libraries( ${TARGET_NAME} "-framework CoreAudioKit" )
+	target_link_libraries( ${TARGET_NAME} "-framework OpenGL" )
+	target_link_libraries( ${TARGET_NAME} "-framework CoreFoundation" )
+	target_link_libraries( ${TARGET_NAME} "-framework ForceFeedback" )
+	target_link_libraries( ${TARGET_NAME} "-framework Carbon" )
+	target_link_libraries( ${TARGET_NAME} "-framework IOKit" )
+	target_link_libraries( ${TARGET_NAME} "-framework AudioToolbox" )
+	target_link_libraries( ${TARGET_NAME} "-framework AudioUnit" )
+	target_link_libraries( ${TARGET_NAME} "-framework CoreVideo" )
+	target_link_libraries( ${TARGET_NAME} "-framework Metal" )
+	target_link_libraries( ${TARGET_NAME} ${SDL2_LIBRARIES} )
+endif()
 
 set_target_properties(${TARGET_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -157,7 +211,9 @@ foreach( file ${REFLECTION_INCLUDES} )
 endforeach(file)
 
 # Need to get this working with projects
-add_custom_command(
-	TARGET ${TARGET_NAME} PRE_BUILD
-	COMMAND call ${ENJON_RELEASE_DIR}/Reflection.exe ARGS --target-path ${TARGET_DIR}/
-)
+if (MSVC)
+	add_custom_command(
+		TARGET ${TARGET_NAME} PRE_BUILD
+		COMMAND call ${ENJON_RELEASE_DIR}/Reflection.exe ARGS --target-path ${TARGET_DIR}/
+	)
+endif()

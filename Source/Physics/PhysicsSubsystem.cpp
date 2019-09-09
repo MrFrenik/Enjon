@@ -40,7 +40,9 @@ namespace Enjon
 		mSolver = new BulletSequentialImpulseConstraintSolver();
 
 		// Set up physics world
+		// This is crashing occasionally. Good job, Bullet...
 		mDynamicsWorld = new BulletDiscreteDynamicWorld( mDispatcher, mOverlappingPairCache, mSolver, mCollisionConfiguration );
+		// mDynamicsWorld = new BulletDiscreteDynamicWorld( nullptr, nullptr, nullptr, mCollisionConfiguration );
 
 		// Set up physics world gravity
 		mDynamicsWorld->setGravity( BV3( 0, -10, 0 ) ); 

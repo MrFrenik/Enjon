@@ -45,17 +45,17 @@ uniform float LightDepth;
 void main()
 {
     //RGBA of our diffuse color
-    vec4 DiffuseColor = texture2D(u_diffuse, fs_in.TexCoords);
+    vec4 DiffuseColor = texture(u_diffuse, fs_in.TexCoords);
 
-    vec4 DepthColor = texture2D(u_depth, fs_in.TexCoords);
+    vec4 DepthColor = texture(u_depth, fs_in.TexCoords);
     float Depth = DepthColor.r * DepthColor.a;
 
-    vec4 FragPos = texture2D(u_position, fs_in.TexCoords);
+    vec4 FragPos = texture(u_position, fs_in.TexCoords);
     FragPos.z = Depth;
 
     // //RGB of our normal map
-    vec3 NormalMap = texture2D(u_normals, fs_in.TexCoords).rgb;
-    vec4 NormalColor = texture2D(u_normals, fs_in.TexCoords);
+    vec3 NormalMap = texture(u_normals, fs_in.TexCoords).rgb;
+    vec4 NormalColor = texture(u_normals, fs_in.TexCoords);
 
     // Hardcoded ambient light
     vec3 Lighting = AmbientColor.rgb * AmbientColor.a * DiffuseColor.rgb;
