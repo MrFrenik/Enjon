@@ -78,5 +78,13 @@
 	#define ENJON_COMPILER_INTEL
 #endif 
 
+// This is fun...
+#ifdef ENJON_SYSTEM_WINDOWS
+	#include <windows.h>
+	#ifdef GetObject
+		#undef GetObject
+	#endif
+#endif
+
 
 #endif

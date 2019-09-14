@@ -648,7 +648,7 @@ namespace Enjon
 	u32 WindowSubsystem::NumberOfHoveredWindows( )
 	{
 		u32 count = 0;
-		for ( auto& w : EngineSubsystem( GraphicsSubsystem )->GetWindows( ) ) 
+		for ( auto& w : EngineSubsystem( WindowSubsystem )->GetWindows( ) ) 
 		{
 			if ( w->IsMouseInWindow( ) )
 			{

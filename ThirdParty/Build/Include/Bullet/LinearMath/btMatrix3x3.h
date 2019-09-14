@@ -19,10 +19,12 @@ subject to the following restrictions:
 #include "btQuaternion.h"
 #include <stdio.h>
 
+#undef BT_USE_SSE
+
 #ifdef BT_USE_SSE
 //const __m128 ATTRIBUTE_ALIGNED16(v2220) = {2.0f, 2.0f, 2.0f, 0.0f};
 //const __m128 ATTRIBUTE_ALIGNED16(vMPPP) = {-0.0f, +0.0f, +0.0f, +0.0f};
-#define vMPPP (_mm_set_ps(+0.0f, +0.0f, +0.0f, -0.0f))
+#define vMPPP (_mm_set_ps(+0.0f, +0.0f, +0.0f, -0.0f)) 
 #endif
 
 #if defined(BT_USE_SSE)

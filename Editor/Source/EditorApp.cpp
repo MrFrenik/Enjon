@@ -31,12 +31,12 @@
 #include <Base/World.h> 
 
 // This is fun...
-#ifdef ENJON_SYSTEM_WINDOWS
-	#include <windows.h>
-	#ifdef GetObject
-		#undef GetObject
-	#endif
-#endif
+//#ifdef ENJON_SYSTEM_WINDOWS
+//	#include <windows.h>
+//	#ifdef GetObject
+//		#undef GetObject
+//	#endif
+//#endif
 
 #include <chrono>
 #include <ctime>
@@ -94,21 +94,21 @@ namespace Enjon
 		Enjon::String dllName =  projectName + ".dll";
 
 		// Removing the dll for this project (it's temporary, so we're going to name it a temp name)
-		fs::path dllPath = rootDir + "Build/" + configuration + "/" + "proj.dll";
-		String path = String( rootDir + "Build/" + configuration + "/" + proj.dll );
-		bool exists = fs::exists( path );
+		String dllPath = rootDir + "Build/" + configuration + "/" + "proj.dll";
+		//String path = String( rootDir + "Build/" + configuration + "/proj.dll" );
+		bool exists = fs::exists( dllPath );
 		if ( exists )
 		{
-			fs::remove( path );
+			fs::remove( dllPath );
 		}
 
 		// Now copy over contents from intermediate build to executable dir
 		dllPath = projectDir;
 		if ( fs::exists( dllPath ) )
 		{
-			if ( fs::exists( dllPath.string( ) + "Build/" + configuration + "/" + dllName ) )
+			if ( fs::exists( dllPath + "Build/" + configuration + "/" + dllName ) )
 			{
-				fs::copy( fs::path( dllPath.string( ) + "Build/" + configuration + "/" + dllName ), rootDir + "Build/" + configuration + "/" + "proj.dll" );
+				fs::copy( fs::path( dllPath + "Build/" + configuration + "/" + dllName ), rootDir + "Build/" + configuration + "/" + "proj.dll" );
 			}
 		}
 	}

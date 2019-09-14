@@ -50,21 +50,21 @@ namespace Enjon
 
 			Mat4x4& Invert();
 
-			static Mat4x4 Orthographic(const f32& left, 
-									const f32& right, 
-									const f32& bottom, 
-									const f32& top, 
-									const f32& near, 
-									const f32& far);
+			static Mat4x4 Orthographic(const f32& l, 
+									const f32& r, 
+									const f32& b, 
+									const f32& t, 
+									const f32& n, 
+									const f32& f);
 
 			/*
 			* @brief
 			* @param FOV - field of view given in degrees
 			* @param aspectRatio - aspectRatio of screen
-			* @param near - near plane
-			* @param far - far plane
+			* @param n - near plane
+			* @param f - far plane
 			*/
-			static Mat4x4 Perspective(const f32& FOV, const f32& aspectRatio, const f32& near, const f32& far);
+			static Mat4x4 Perspective(const f32& FOV, const f32& aspectRatio, const f32& n, const f32& f);
 
 			static Mat4x4 Identity();
 			static Mat4x4 Scale(const Vec3& vector);

@@ -212,7 +212,7 @@ namespace Enjon
 	}
 
 	/* Creates and returns new font */
-	Font* CreateFont( const String& filePath, GLuint size )
+	Font* CreateFont( const String& filePath, u32 size )
 	{
 		// Create new font
 		Font* F = new Font;

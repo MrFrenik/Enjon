@@ -31,9 +31,9 @@ subject to the following restrictions:
 #ifdef USE_MINICL
 #include <MiniCL/cl.h>
 #else
-#include <CL/cl.h>
+//#include <CL/cl.h>
 #ifdef _WIN32
-#include "CL/cl_gl.h"
+//#include "CL/cl_gl.h"
 #endif  //_WIN32
 #endif
 #endif  //__APPLE__

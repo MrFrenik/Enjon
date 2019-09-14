@@ -27,9 +27,9 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # Set compiler flags and build options
 if (MSVC)
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /W1 -std=c++11")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD /W1 -std=c++11")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /W1 -std=c++11")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /W1 -DWINDOWS_IGNORE_PACKING_MISMATCH -DB3_USE_CLEW")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD /W1 -DWINDOWS_IGNORE_PACKING_MISMATCH -DB3_USE_CLEW")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /W1 -DWINDOWS_IGNORE_PACKING_MISMATCH -DB3_USE_CLEW")
 else()
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -O3")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -std=c++11")
@@ -145,8 +145,7 @@ file(GLOB_RECURSE SRC_SCENE
 
 set(ENJON_BULLET_DIR ${ENJON_DIR}/ThirdParty/Build/Include/Bullet)
 
-file(GLOB_RECURSE SRC_BULLET
-
+file(GLOB_RECURSE SRC_BULLET 
 	"${ENJON_BULLET_DIR}/*.h"
 	"${ENJON_BULLET_DIR}/*.cpp"
 
@@ -243,7 +242,7 @@ set(
 	${ENJON_SRC}/TypeCatalog.cpp
 	${ENJON_SRC}/SubsystemCatalog.cpp
 	${ENJON_GENERATED_DIR}/Enjon_Generated.cpp
-	)
+)
 
 set(
 	ALL_SRC 
@@ -280,12 +279,12 @@ if (MSVC)
 	target_link_libraries( Enjon debug glew32_d.lib optimized glew32.lib )
 	target_link_libraries( Enjon debug glew32s_d.lib optimized glew32s.lib )
 	target_link_libraries( Enjon debug freetype_d.lib optimized freetype.lib )
-	target_link_libraries( Enjon debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
-	target_link_libraries( Enjon debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
-	target_link_libraries( Enjon debug Bullet3Common_d.lib optimized Bullet3Common.lib )
-	target_link_libraries( Enjon debug LinearMath_d.lib optimized LinearMath.lib )
-	target_link_libraries( Enjon debug BulletDynamics_d.lib optimized BulletDynamics.lib )
-	target_link_libraries( Enjon debug BulletCollision_d.lib optimized BulletCollision.lib )
+	#target_link_libraries( Enjon debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
+	#target_link_libraries( Enjon debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
+	#target_link_libraries( Enjon debug Bullet3Common_d.lib optimized Bullet3Common.lib )
+	#target_link_libraries( Enjon debug LinearMath_d.lib optimized LinearMath.lib )
+	#target_link_libraries( Enjon debug BulletDynamics_d.lib optimized BulletDynamics.lib )
+	#target_link_libraries( Enjon debug BulletCollision_d.lib optimized BulletCollision.lib )
 	target_link_libraries( Enjon debug fmt_d.lib optimized fmt.lib )
 	target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
 	target_link_libraries( Enjon debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
@@ -293,12 +292,6 @@ if (MSVC)
 else()
 	target_link_libraries( Enjon libSDL2.a )
 	target_link_libraries( Enjon libSDL2main.a )
-	# target_link_libraries( Enjon libBullet3Collision.a )
-	# target_link_libraries( Enjon libBullet3Dynamics.a )
-	# target_link_libraries( Enjon libBullet3Common.a )
-	# target_link_libraries( Enjon libLinearMath.a )
-	# target_link_libraries( Enjon libBulletDynamics.a )
-	# target_link_libraries( Enjon libBulletCollision.a )
 	target_link_libraries( Enjon libassimp.a )
 	target_link_libraries( Enjon libIrrXML.a )
 endif()

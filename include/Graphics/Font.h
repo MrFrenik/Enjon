@@ -73,7 +73,7 @@ namespace Enjon
 	float GetHeight( char c, Font* F, const f32& scale = 1.0f );
 
 	/* Creates and returns new font */
-	Font* CreateFont( const String& filePath, GLuint size );
+	Font* CreateFont( const String& filePath, u32 size );
 
 	/* Adds a string of tex at (x,y) to given spritebatch */
 	void PrintText( f32 x, f32 y, const f32& scale, const String& text, Font* F, SpriteBatch& Batch, 

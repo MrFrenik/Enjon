@@ -95,40 +95,40 @@ namespace Enjon
 		return left.Multiply(right);
 	}
 
-	Mat4x4 Mat4x4::Orthographic(const f32& left, 
-							const f32& right, 
-							const f32& bottom, 
-							const f32& top, 
-							const f32& near, 
-							const f32& far)
+	Mat4x4 Mat4x4::Orthographic(const f32& l, 
+							const f32& r, 
+							const f32& b, 
+							const f32& t, 
+							const f32& n, 
+							const f32& f)
 	{
-		//Create identiy matrix
+		//Create identity matrix
 		Mat4x4 result(1.0f);
 
 		//Main diagonal
-		result.elements[0 + 0 * 4] = 2.0f / (right - left);
-		result.elements[1 + 1 * 4] = 2.0f / (top - bottom);
-		result.elements[2 + 2 * 4] = 2.0f / (near - far);
+		result.elements[0 + 0 * 4] = 2.0f / (r - l);
+		result.elements[1 + 1 * 4] = 2.0f / (t - b);
+		result.elements[2 + 2 * 4] = 2.0f / (n - f);
 
 		//Last column
-		result.elements[0 + 3 * 4] = (left + right) / (left - right);
-		result.elements[1 + 3 * 4] = (bottom + top) / (bottom - top);
-		result.elements[2 + 3 * 4] = (far + near) / (far - near);
+		result.elements[0 + 3 * 4] = (l + r) / (l - r);
+		result.elements[1 + 3 * 4] = (b + t) / (b - t);
+		result.elements[2 + 3 * 4] = (f + n) / (f - n);
 
 		return result; 
 	}
 
 	Mat4x4 Mat4x4::Perspective(const f32& FOV, 
 							const f32& aspectRatio, 
-							const f32& near, 
-							const f32& far)
+							const f32& n, 
+							const f32& f)
 	{
 		Mat4x4 result(0.0f);
 
 		f32 q = 1.0f / tan(Math::ToRadians(0.5f * FOV));
 		f32 a = q / aspectRatio;
-		f32 b = (near + far) / (near - far);
-		f32 c = (2.0f * near * far) / (near - far);
+		f32 b = (n + f) / (n - f);
+		f32 c = (2.0f * n * f) / (n - f);
 
 		result.elements[0 + 0 * 4] = a;		
 		result.elements[1 + 1 * 4] = q;		

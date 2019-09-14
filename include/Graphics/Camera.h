@@ -173,20 +173,20 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			inline void SetNearFar(const f32& near, const f32& far) 
+			inline void SetNearFar(const f32& n, const f32& f) 
 			{ 
-				mNearPlane = near; 
-				mFarPlane = far; 
+				mNearPlane = n; 
+				mFarPlane = f; 
 			}
 
-			inline void SetFar( const f32& far )
+			inline void SetFar( const f32& f )
 			{
-				mFarPlane = far; 
+				mFarPlane = f; 
 			}
 
-			inline void SetNear( const f32& near )
+			inline void SetNear( const f32& n )
 			{
-				mNearPlane = near;
+				mNearPlane = n;
 			}
 
 			/*

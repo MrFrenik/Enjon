@@ -40,7 +40,7 @@
 // 		#undef SDL_VIDEO_DRIVER_WINDOWS	
 // 	#endif
 // #endif
-// #include <SDL2/SDL_syswm.h>
+ #include <SDL2/SDL_syswm.h>
 #include <GLEW/glew.h>
 
 #include <unordered_map> 

@@ -18,6 +18,14 @@
 
 #define STRSIZE( string ) static_cast< SizeType >( string.length() ) 
 
+// This is fun...
+#ifdef ENJON_SYSTEM_WINDOWS
+	#include <windows.h>
+	#ifdef GetObject
+		#undef GetObject
+	#endif
+#endif
+
 using namespace rapidjson;
 
 namespace Enjon
