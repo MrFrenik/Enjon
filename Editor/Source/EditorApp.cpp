@@ -636,10 +636,12 @@ namespace Enjon
 
 	//================================================================================================================================
 	 
-	void EditorApp::CreateNewProject( const String& projectName )
+	void EditorApp::CreateNewProject( const ProjectConfig& projectConfig )
 	{ 
 		// Just output the source files for now... This is already going to get ugly, so need to split this all up pretty quickly
-		String projectDir = mProjectsDir + "/" + projectName + "/";
+		const String& projectDir = projectConfig.mPath;
+		const String& projectName = projectConfig.mName;
+
 		if ( !fs::exists( projectDir ) )
 		{
 			fs::create_directory( projectDir );
@@ -652,14 +654,33 @@ namespace Enjon
 			fs::create_directory( projectDir + "Build/Generator/Linked/" );
 		}
 
-		String cmakeFlags = mConfigSettings.mToolChains[(u32)mConfigSettings.mToolChainID]->mCMakeFlags;
+		//String cmakeFlags = mConfigSettings.mToolChains[(u32)mConfigSettings.mToolChainID]->mCMakeFlags;
+		String cmakeFlags = projectConfig.mToolChain.mCMakeGenerator;
+		String releaseArgs = Utils::FindReplaceAll( 
+									Utils::FindReplaceAll( projectConfig.mToolChain.mArgs[ (u32)ConfigurationType::Release ], "${PROJ_OUTPUT_DIR}", projectDir + "Build/" ), 
+									"${PROJ_NAME}", projectName ); 
+		String debugArgs = Utils::FindReplaceAll( 
+									Utils::FindReplaceAll( projectConfig.mToolChain.mArgs[ (u32)ConfigurationType::Debug ], "${PROJ_OUTPUT_DIR}", projectDir + "Build/" ), 
+									"${PROJ_NAME}", projectName );
 
-		String includeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#HEADERFILEBEGIN", "#HEADERFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName );
-		String sourceFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::ParseFromTo( "#SOURCEFILEBEGIN", "#SOURCEFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName ); 
-		String cmakeFile = Enjon::Utils::FindReplaceAll( Enjon::Utils::FindReplaceAll( mProjectCMakeTemplate, "#PROJECTNAME", projectName ), "#ENJONDIRECTORY", Enjon::Utils::FindReplaceAll( Engine::GetInstance( )->GetConfig( ).GetRoot( ), "\\", "/" ) );
+		String afterBuildEvt = Utils::FindReplaceAll( projectConfig.mToolChain.mAfterBuildEvent, "${PROJ_NAME}", projectName );
+
+		String includeFile = Utils::FindReplaceAll( Utils::ParseFromTo( "#HEADERFILEBEGIN", "#HEADERFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName );
+		String sourceFile = Utils::FindReplaceAll( Utils::ParseFromTo( "#SOURCEFILEBEGIN", "#SOURCEFILEEND", mProjectSourceTemplate, false ), "#PROJECTNAME", projectName ); 
 		String delBatFile = mProjectDelBatTemplate;
-		String buildFile = Enjon::Utils::FindReplaceAll(mProjectBuildBatTemplate, "#CMAKE_FLAGS", cmakeFlags);
-		String buildAndRunFIle = Enjon::Utils::FindReplaceAll(mProjectBuildAndRunTemplate, "#CMAKE_FLAGS", cmakeFlags);
+		String buildFile = Utils::FindReplaceAll(mProjectBuildBatTemplate, "#CMAKE_FLAGS", cmakeFlags);
+		String buildAndRunFIle = Utils::FindReplaceAll( Utils::FindReplaceAll(mProjectBuildAndRunTemplate, "#CMAKE_FLAGS", cmakeFlags), "#AFTER_BUILD_EVT", afterBuildEvt );
+		String compileReleaseFile = Utils::FindReplaceAll( Utils::FindReplaceAll( mCompileProjectBatTemplate, "#PROJ_NAME", projectName ), "#PROJ_COMPILE_CMD", projectConfig.mToolChain.mCommand + " " + releaseArgs );
+		String compileDebugFile = Utils::FindReplaceAll( Utils::FindReplaceAll( mCompileProjectBatTemplate, "#PROJ_NAME", projectName ), "#PROJ_COMPILE_CMD", projectConfig.mToolChain.mCommand + " " + debugArgs );
+
+		String cmakeFile = Utils::FindReplaceAll( Utils::FindReplaceAll( mProjectCMakeTemplate, "#PROJECTNAME", projectName ), "#ENJONDIRECTORY", Utils::FindReplaceAll( Engine::GetInstance( )->GetConfig( ).GetRoot( ), "\\", "/" ) );
+		String includes = "";
+		for (auto& id : projectConfig.mToolChain.mIncludeDirectories) {
+			includes += id;
+			includes += "\n";
+		}
+		cmakeFile = Utils::FindReplaceAll( cmakeFile, "#PROJ_INCLUDES", includes );
+		//cmakeFile = Utils::FindReplaceAll( cmakeFile, "#PROJ_INC_DIR", projectConfig.mToolChain.mIncludeDirectories );
 
 		// Write to file
 		Enjon::Utils::WriteToFile( includeFile, projectDir + "Source/" + projectName + ".h" );
@@ -671,6 +692,8 @@ namespace Enjon
 		Enjon::Utils::WriteToFile( "", projectDir + "Build/Generator/Linked/" + projectName + "_Generated.cpp" ); 
 		Enjon::Utils::WriteToFile( projectDir + "\n" + Engine::GetInstance()->GetConfig().GetRoot(), projectDir + projectName + ".eproj" );
 		Enjon::Utils::WriteToFile( mCompileProjectBatTemplate, projectDir + "Proc/" + "CompileProject.bat" ); 
+		Enjon::Utils::WriteToFile( compileReleaseFile, projectDir + "Proc/" + "CompileProject_Release.bat" ); 
+		Enjon::Utils::WriteToFile( compileDebugFile, projectDir + "Proc/" + "CompileProject_Debug.bat" ); 
 
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
@@ -682,9 +705,9 @@ namespace Enjon
 			UnloadDLL( ); 
 
 			// Create new project
-			Project proj; 
-			proj.SetProjectPath( projectDir );
-			proj.SetProjectName( projectName );
+			Project proj( projectConfig );
+			//proj.SetProjectPath( projectDir );
+			//proj.SetProjectName( projectName );
 			proj.SetEditor( this );
 
 			// Compile the project
@@ -714,9 +737,9 @@ namespace Enjon
 			UnloadDLL( ); 
 
 			// Create new project
-			Project proj; 
-			proj.SetProjectPath( projectDir );
-			proj.SetProjectName( projectName );
+			Project proj( projectConfig );
+			//proj.SetProjectPath( projectDir );
+			//proj.SetProjectName( projectName );
 			proj.SetEditor( this );
 
 			// Compile the project
@@ -777,10 +800,10 @@ namespace Enjon
 
 	//================================================================================================================================
 
-	void EditorApp::PreCreateNewProject( const String& projectName )
+	void EditorApp::PreCreateNewProject( const ProjectConfig& config )
 	{
 		mPrecreateNewProject = true;
-		mNewProjectName = projectName;
+		mNewProjectConfig = config;
 	}
 
 	//================================================================================================================================
@@ -806,13 +829,15 @@ namespace Enjon
 		}
 	}
 
-	//================================================================================================================================
+	//================================================================================================================================ 
 
-	bool EditorApp::CreateProjectView( )
-	{ 
-		auto cleanUpAndLeave = [ & ] ( bool retVal )
+	bool EditorApp::CreateProjectView()
+	{
+		static ToolChainDefinition* sToolChainDef = nullptr;
+
+		auto cleanUpAndLeave = [&]( bool retVal )
 		{
-			ImGui::PopStyleColor( );
+			ImGui::PopStyleColor();
 			return retVal;
 		};
 
@@ -822,67 +847,97 @@ namespace Enjon
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 		f32 offset = 1.5f;
 		//ImGui::SetCursorPosX( ( ImGui::GetWindowWidth( ) - sz.x ) / 2.f );
-		ImGui::Text( "Welcome to the" ); 
-		ImGui::SameLine( );
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() - offset);
+		ImGui::Text( "Welcome to the" );
+		ImGui::SameLine();
+		ImGui::SetCursorPosX( ImGui::GetCursorPosX() - offset );
 		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.f, 1.f, 1.f, 1.f ) );
 		ImGui::Text( "Project Creation" );
-		ImGui::PopStyleColor( );
-		ImGui::SameLine( );
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() - offset);
+		ImGui::PopStyleColor();
+		ImGui::SameLine();
+		ImGui::SetCursorPosX( ImGui::GetCursorPosX() - offset );
 		ImGui::Text( "screen." );
-		ImGui::NewLine( );
+		ImGui::NewLine();
 
-		char tmpBuffer[ 1024 ];
-		strncpy( tmpBuffer, mProjectsDir.c_str(), 1024 ); 
+		char tmpBuffer[1024];
+		strncpy( tmpBuffer, mProjectsDir.c_str(), 1024 );
 
 		ImGui::Text( "Select a location for your project." );
-		ImGui::NewLine( );
+		ImGui::NewLine();
 
 		ImGui::PushItemWidth( 300.f );
-		if ( ImGui::InputText( "##ProjectDir", tmpBuffer, 256 ) )
+		if (ImGui::InputText( "##ProjectDir", tmpBuffer, 256 ))
 		{
-			if ( fs::exists( tmpBuffer ) )
+			if (fs::exists( tmpBuffer ))
 			{
 				mProjectsDir = String( tmpBuffer );
 			}
 		}
-		ImGui::PopItemWidth( );
-		ImGui::SameLine( );
-		ImGui::SetCursorPosX( ImGui::GetCursorPosX( ) - 10.f ); 
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+		ImGui::SetCursorPosX( ImGui::GetCursorPosX() - 10.f );
 		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.3f, 0.3f, 0.3f, 1.f ) );
-		if ( ImGui::Button( "..." ) )
+		if (ImGui::Button( "..." ))
 		{
 			// Open file picking dialogue
 			nfdchar_t* folder;
 			nfdresult_t res = NFD_PickFolder( NULL, &folder );
-			if ( res == NFD_OKAY )
+			if (res == NFD_OKAY)
 			{
-				mProjectsDir = String( folder );	
-				mConfigSettings.mLastUsedProjectDirectory = String(folder);
+				mProjectsDir = String( folder );
+				mConfigSettings.mLastUsedProjectDirectory = String( folder );
 				SerializeEditorConfigSettings();
-			} 
+			}
 		}
-		ImGui::PopStyleColor( );
+		ImGui::PopStyleColor();
 
-		ImGui::SameLine( );
-		strncpy( tmpBuffer, mNewProjectName.c_str( ), 1024 ); 
-		char buffer[ 2048 ];
-		snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str( ), tmpBuffer );
-		b32 projExists = fs::exists( buffer ); 
+		ImGui::SameLine();
+		strncpy( tmpBuffer, mNewProjectName.c_str(), 1024 );
+		char buffer[2048];
+		snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str(), tmpBuffer );
+		b32 projExists = fs::exists( buffer );
 		ImGui::PushItemWidth( 150.f );
-		if ( ImGui::InputText( "Project Name", tmpBuffer, 50 ) )
-		{ 
-			snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str( ), tmpBuffer );
-			if ( fs::exists( buffer ) )
+		if (ImGui::InputText( "Project Name", tmpBuffer, 50 ))
+		{
+			snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str(), tmpBuffer );
+			if (fs::exists( buffer ))
 			{
 				projExists = true;
 			}
-			mNewProjectName = String( tmpBuffer ); 
+			mNewProjectName = String( tmpBuffer );
 		}
-		ImGui::PopItemWidth( );
+		ImGui::PopItemWidth();
 
-		if ( !projExists )
+		// Need to select a tool chain for the given project (Therefore, projects should hold onto their own tool chains, I imagine)
+		//ballsack  -  I hate everything.  
+		if (ImGui::CollapsingHeader( "Tool Chain" ))
+		{
+			ImGui::ListBoxHeader( "##tool_chain_lb" );
+			{
+				String defaultText = sToolChainDef == nullptr ? "Tool Chains..." : sToolChainDef->mLabel;
+				if (ImGui::BeginCombo( "##TOOL_CHAINS", defaultText.c_str() ))
+				{
+					for (u32 i = 0; i < mConfigSettings.mToolChainDefinitions.size(); ++i)
+					{
+						ToolChainDefinition* tc = &mConfigSettings.mToolChainDefinitions[i];
+						if (ImGui::Selectable( tc->mLabel.c_str() ))
+						{
+							sToolChainDef = tc;
+						}
+					}
+					ImGui::EndCombo();
+				}
+
+				if (sToolChainDef)
+				{
+					igm->DebugDumpObject( sToolChainDef );
+				} 
+			}
+			ImGui::ListBoxFooter();
+		}
+
+		b32 projectValid = !projExists && sToolChainDef != nullptr;
+
+		if ( projectValid )
 		{
 			ImGui::NewLine( );
 			if ( ImGui::Button( "Create New Project" ) && mNewProjectName.compare( "" ) != 0 )
@@ -891,8 +946,12 @@ namespace Enjon
 				String projectPath = mProjectsDir + "/" + mNewProjectName + "/";
 				if ( !fs::exists( projectPath ) )
 				{
-					//CreateNewProject( mNewProjectName );
-					PreCreateNewProject( mNewProjectName );
+					ProjectConfig config;
+					config.mPath = projectPath;
+					config.mName = mNewProjectName;
+					config.mToolChain = *sToolChainDef;
+ 
+					PreCreateNewProject( config );
 					return cleanUpAndLeave( true );
 				}
 				else
@@ -901,8 +960,9 @@ namespace Enjon
 				} 
 			} 
 		}
-		// Project already exist, so display warning
-		else
+
+		// Project already exists, so display warning
+		if ( projExists )
 		{
 			ImGui::NewLine( );
 			ImGui::SetCursorPosY( ImGui::GetCursorPosY( ) + 10.f );
@@ -911,6 +971,17 @@ namespace Enjon
 			ImVec2 b = ImVec2( a.x + 400.f, a.y + 40.f );
 			dl->AddRectFilled( a, b, ImColor( 0.9f, 0.1f, 0.f, 1.0f ) );
 			ImGui::Text( "Project already exists. Please choose a different project name." );
+		} 
+
+		if (sToolChainDef == nullptr)
+		{
+			ImGui::NewLine( );
+			ImGui::SetCursorPosY( ImGui::GetCursorPosY( ) + 10.f );
+			ImDrawList* dl = ImGui::GetWindowDrawList( );
+			ImVec2 a = ImGui::GetCursorScreenPos( );
+			ImVec2 b = ImVec2( a.x + 400.f, a.y + 40.f );
+			dl->AddRectFilled( a, b, ImColor( 0.9f, 0.1f, 0.f, 1.0f ) );
+			ImGui::Text( "Invalid Tool Chain. Please choose valid Tool Chain." ); 
 		} 
 
 		return cleanUpAndLeave( false );
@@ -1713,6 +1784,7 @@ namespace Enjon
 			//	if ( ImGui::BeginCombo( "##LOADPROJECTLIST", defaultText.c_str() ) )
 			//	{
 			//		for ( auto& p : mConfigSettings.mProjectList )
+
 			//		{
 			//			if ( ImGui::Selectable( p.GetProjectName( ).c_str( ) ) )
 			//			{ 
@@ -1979,10 +2051,10 @@ namespace Enjon
 
 		guiCtx->RegisterWindow( "Projects", createProjectView ); 
 		guiCtx->RegisterWindow( "New Project", newProjectView ); 
-		guiCtx->RegisterWindow( "Tool Chain", toolChainView ); 
+		//guiCtx->RegisterWindow( "Tool Chain", toolChainView ); 
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Project Browser", nullptr, GUIDockSlotType::Slot_Top, 1.0f ) ); 
 		guiCtx->RegisterDockingLayout( GUIDockingLayout( "New Project", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
-		guiCtx->RegisterDockingLayout( GUIDockingLayout( "Tool Chain", nullptr, GUIDockSlotType::Slot_Top, 0.5f ) ); 
+		//guiCtx->RegisterDockingLayout( GUIDockingLayout( "Tool Chain", nullptr, GUIDockSlotType::Slot_Top, 0.5f ) ); 
 		guiCtx->SetActiveDock( "Project Browser" );
 		guiCtx->Finalize( );
 	}
@@ -2060,6 +2132,7 @@ namespace Enjon
 			ObjectArchiver::Deserialize(archiver, &p);
 			// Add project only if the .eproj file exists (is valid project)
 			if (fs::exists(p.GetProjectPath() + "/" + p.GetProjectName() + ".eproj")) {
+				p.SetEditor( mEditor );
 				mProjectList.push_back(p); 
 			}
 		}
@@ -2076,10 +2149,82 @@ namespace Enjon
 	
 	//================================================================================================================
 
+
+	//{
+	//	"label": "VS2015_MSBuild",
+	//		"cmake_generator" : "Visual Studio 14 2015 -A x64"
+	//		"command" : "MSBuild",
+	//		"args" : [
+	//			"release":"${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release",
+	//				"debug" : "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug"
+	//		] ,
+	//		"output_dir" : "${PROJ_DIR/Build/",
+	//				"includes" : ["${PROJ_DIR}/Include/", "${ENJON_INCLUDES}"] ,
+	//				"source" : [${ PROJ_DIR } / Source / ] ,
+	//				"libs" : [${ ENJON_LIBS }]
+	//}
+
+
 	void EditorApp::InitializeToolChains( )
 	{
 		mConfigSettings.mToolChains[(u32)ToolChainEnvironment::MSVC] = new ToolChainMSVC();
 		mConfigSettings.mToolChains[(u32)ToolChainEnvironment::MSVC]->mName = "MSVC"; 
+
+		ToolChainDefinition vsMSBuild2015;
+		vsMSBuild2015.mLabel									= "VS2015_MSBuild";
+		vsMSBuild2015.mCMakeGenerator							= "\"Visual Studio 14 2015\" -A Win32";
+		vsMSBuild2015.mCommand									= "MSBuild";
+		vsMSBuild2015.mArgs[(u32)ConfigurationType::Release]	= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release";
+		vsMSBuild2015.mArgs[(u32)ConfigurationType::Debug]		= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug";
+		vsMSBuild2015.mAfterBuildEvent							= "start ${PROJ_NAME}.sln";
+		vsMSBuild2015.mOutputDir								= "${PROJ_DIR}/Build";
+		vsMSBuild2015.mIncludeDirectories						= { "${PROJ_DIR}/Source", "${ENJON_INCLUDES}" };
+		vsMSBuild2015.mSources									= { "${PROJ_DIR}/Source/*.cpp" };
+		vsMSBuild2015.mLibraryDirectories						= { "${ENJON_LIB_DIRS}" };
+		vsMSBuild2015.mLibraries								= { "${ENJON_LIBS}" };
+
+		ToolChainDefinition vsMSBuild2017;
+		vsMSBuild2017.mLabel									= "VS2017_MSBuild";
+		vsMSBuild2017.mCMakeGenerator							= "\"Visual Studio 15 2017\" -A Win32";
+		vsMSBuild2017.mCommand									= "MSBuild";
+		vsMSBuild2017.mArgs[(u32)ConfigurationType::Release]	= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release";
+		vsMSBuild2017.mArgs[(u32)ConfigurationType::Debug]		= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug";
+		vsMSBuild2017.mAfterBuildEvent							= "start ${PROJ_NAME}.sln";
+		vsMSBuild2017.mOutputDir								= "${PROJ_DIR}/Build";
+		vsMSBuild2017.mIncludeDirectories						= { "${PROJ_DIR}/Source", "${ENJON_INCLUDES}" };
+		vsMSBuild2017.mSources									= { "${PROJ_DIR}/Source/*.cpp" };
+		vsMSBuild2017.mLibraryDirectories						= { "${ENJON_LIB_DIRS}" };
+		vsMSBuild2017.mLibraries								= { "${ENJON_LIBS}" };
+
+		ToolChainDefinition vsMSBuild2019;
+		vsMSBuild2019.mLabel									= "VS2019_MSBuild";
+		vsMSBuild2019.mCMakeGenerator							= "\"Visual Studio 16 2019\" -A Win32";
+		vsMSBuild2019.mCommand									= "MSBuild";
+		vsMSBuild2019.mArgs[(u32)ConfigurationType::Release]	= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release";
+		vsMSBuild2019.mArgs[(u32)ConfigurationType::Debug]		= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug";
+		vsMSBuild2019.mAfterBuildEvent							= "start ${PROJ_NAME}.sln";
+		vsMSBuild2019.mOutputDir								= "${PROJ_DIR}/Build";
+		vsMSBuild2019.mIncludeDirectories						= { "${PROJ_DIR}/Source", "${ENJON_INCLUDES}" };
+		vsMSBuild2019.mSources									= { "${PROJ_DIR}/Source/*.cpp" };
+		vsMSBuild2019.mLibraryDirectories						= { "${ENJON_LIB_DIRS}" };
+		vsMSBuild2019.mLibraries								= { "${ENJON_LIBS}" }; 
+
+		ByteBuffer buffer;
+		ObjectArchiver::Serialize( &vsMSBuild2015, &buffer );
+		buffer.WriteToFile( Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/ToolChains/" + vsMSBuild2015.mLabel + ".tc" ); 
+		buffer.Reset();
+
+		ObjectArchiver::Serialize( &vsMSBuild2017, &buffer );
+		buffer.WriteToFile( Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/ToolChains/" + vsMSBuild2017.mLabel + ".tc" ); 
+		buffer.Reset();
+		
+		ObjectArchiver::Serialize( &vsMSBuild2019, &buffer );
+		buffer.WriteToFile( Engine::GetInstance()->GetConfig().GetRoot() + "Editor/Assets/ToolChains/" + vsMSBuild2019.mLabel + ".tc" ); 
+		buffer.Reset(); 
+
+		mConfigSettings.mToolChainDefinitions.push_back( vsMSBuild2015 );
+		mConfigSettings.mToolChainDefinitions.push_back( vsMSBuild2017 );
+		mConfigSettings.mToolChainDefinitions.push_back( vsMSBuild2019 );
 	}
 
 	//================================================================================================================
@@ -2087,6 +2232,7 @@ namespace Enjon
 	Enjon::Result EditorApp::Initialize( )
 	{ 
 		mApplicationName = "EditorApp"; 
+		mConfigSettings.mEditor = this;
 
 		// Set application state to stopped by default
 		SetApplicationState( ApplicationState::Stopped );
@@ -2182,7 +2328,7 @@ namespace Enjon
 
 		if ( mPrecreateNewProject )
 		{
-			CreateNewProject( mNewProjectName );
+			CreateNewProject( mNewProjectConfig );
 			LoadProjectContext( );
 			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
 			LoadProject( mProject );

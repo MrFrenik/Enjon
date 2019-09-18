@@ -580,8 +580,25 @@ namespace Enjon
 			{
 				assert( index < GetCapacity( object ) ); 
 
-				T* rawArr = GetRaw( object );
-				return rawArr[ index ]; 
+				//T* rawArr = GetRaw( object );
+				//return rawArr[ index ]; 
+
+				switch (mArraySizeType)
+				{
+					case ArraySizeType::Dynamic:
+					{
+						// return ( T* )( &( ( ( Vector< T >* )( (usize)object + mOffset ) )->front() ) );
+						// return ( T* )( ( ( ( Vector< T >* )( (usize)object + mOffset ) ) ) );
+						return ((Vector< T >*)((usize)object + mOffset))->at( index );
+					} break;
+
+					default:
+					case ArraySizeType::Fixed:
+					{
+						// return ( reinterpret_cast< T* >( (usize)object + mOffset ) );
+						return (reinterpret_cast<T*>((usize)object + mOffset))[index];
+					} break;
+				}
 			}
 
 			/*
@@ -590,8 +607,6 @@ namespace Enjon
 			void SetValueAt( const Object* object, usize index, const T& value ) const
 			{
 				assert( index < GetCapacity( object ) );
-
-				std::cout << "Attempting to set...\n";
 
 				// Grab raw array
 				// T* rawArr = GetRaw( object );
@@ -613,8 +628,6 @@ namespace Enjon
 						(reinterpret_cast< T* >( (usize)object + mOffset) )[index] = value;
 					} break;
 				}
-
-				std::cout << "Done setting...\n";
 			}
  
 			/*

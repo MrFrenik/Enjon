@@ -7,7 +7,7 @@ pushd "%projDir%"
 
 echo "Building %projName%..."
 @echo off
-cmake -G "#CMAKE_FLAGS" -A Win32
+cmake -G #CMAKE_FLAGS
 echo "Running %projName%..."
 @echo off
 

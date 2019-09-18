@@ -5,10 +5,9 @@ pushd %1
 
 echo "Building %projName%..."
 cd Build
-cmake ../. -G "#CMAKE_FLAGS" -A Win32
+cmake ../. -G #CMAKE_FLAGS
 
-echo "Running %projName%..."
-start %projName%.sln
+#AFTER_BUILD_EVT
 
 popd
 exit 0

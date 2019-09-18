@@ -95,6 +95,8 @@ namespace Enjon
 
 			virtual b32 IsValid() = 0;
 
+			virtual Result Compile() = 0;
+
 		public:
 			ENJON_PROPERTY( )
 			ToolChainEnvironment mEnvironment;
@@ -125,6 +127,8 @@ namespace Enjon
 		Count
 	};
 
+	// Want to be able to serialize/deserialize .json files... eventually 
+
 	ENJON_CLASS( Construct )
 	class ToolChainMSVC : public ToolChain
 	{ 
@@ -142,6 +146,10 @@ namespace Enjon
 			virtual Result OnEditorUI() override; 
 
 			virtual b32 IsValid() override;
+			
+			virtual Result Compile() override {
+				return Result::INCOMPLETE;
+			}
 
 			Result FindMSBuildPath(); 
 
@@ -194,6 +202,11 @@ namespace Enjon
 
 			ENJON_PROPERTY()
 			String mLastUsedProjectDirectory = "";
+
+			ENJON_PROPERTY( NonSerializeable )
+			Vector< ToolChainDefinition > mToolChainDefinitions;
+
+			EditorApp* mEditor = nullptr;
 	};
 
 	// TODO(john): Need to reflect over the editor app to get introspection meta data
@@ -301,7 +314,7 @@ namespace Enjon
 			void LoadProjectView( );
 			void CheckForPopups( );
 
-			void CreateNewProject( const String& projectName );
+			void CreateNewProject( const ProjectConfig& projectName );
 
 
 			void LoadProject( const Project& project );
@@ -333,7 +346,7 @@ namespace Enjon
 
 			void CleanupGUIContext( );
 
-			void PreCreateNewProject( const String& projectName );
+			void PreCreateNewProject( const ProjectConfig& projectName );
 
 			void FindProjectOnLoad( );
 
@@ -371,6 +384,7 @@ namespace Enjon
 			Project mProject;
 
 			String mNewProjectName = "NewProject";
+			ProjectConfig mNewProjectConfig;
  
 			String mProjectsPath = "";
 			String mProjectSourceTemplate = "";

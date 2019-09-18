@@ -17,6 +17,15 @@ namespace Enjon
 {
 	//======================================================================
 
+	Project::Project( const ProjectConfig& config ) 
+	{ 
+		mProjectName = config.mName;
+		mProjectPath = config.mPath;
+		mToolChainDefinition = config.mToolChain;
+	}
+
+	//======================================================================
+
 	void Project::SetEditor( EditorApp* app )
 	{
 		mEditor = app;
@@ -195,7 +204,7 @@ namespace Enjon
 		si.cb = sizeof( si );
 		ZeroMemory( &pi, sizeof( pi ) );
 
-		String path = Utils::FindReplaceAll( mProjectPath + "Proc\\\\CompileProject.bat", "/", "\\\\" ).c_str(); 
+		String path = Utils::FindReplaceAll( mProjectPath + "Proc\\\\CompileProject_Debug.bat", "/", "\\\\" ).c_str(); 
 		String args = const_cast<LPSTR>( ( mProjectPath + " " + mProjectName + " " + buildConfig + " " + visualStudioPath ).c_str( ) ); 
 		String cmdLineStr = ( "cmd.exe /c " + path + " " + args ); 
 

@@ -47,14 +47,72 @@ namespace Enjon
 		Honestly, I'd like for the config settings to be all held within here for the editor...
 
 		
-	*/
+	*/ 
+
+	ENJON_ENUM( )
+	enum class ConfigurationType
+	{
+		Release,
+		Debug,
+		Count
+	};
+
+	// Want to be able to serialize/deserialize .json files... eventually 
+	ENJON_CLASS( Construct )
+	class ToolChainDefinition : public Object 
+	{
+		ENJON_CLASS_BODY( ToolChainDefinition )
+
+		public:
+	
+		ENJON_PROPERTY( DisplayName = "label" )
+		String mLabel;
+
+		ENJON_PROPERTY( DisplayName = "cmake_generator" )
+		String mCMakeGenerator;
+
+		ENJON_PROPERTY( DisplayName = "command" )
+		String mCommand;
+
+		ENJON_PROPERTY( DisplayName = "args" )
+		String mArgs[ (u32)ConfigurationType::Count ];
+
+		ENJON_PROPERTY( DisplayName = "after_build_evt" )
+		String mAfterBuildEvent;
+
+		ENJON_PROPERTY( DisplayName = "output_dir" )
+		String mOutputDir;
+
+		ENJON_PROPERTY( DisplayName = "include" )
+		Vector< String > mIncludeDirectories;
+
+		ENJON_PROPERTY( DisplayName = "source" )
+		Vector< String > mSources;
+
+		ENJON_PROPERTY( DisplayName = "library_directories" )
+		Vector< String > mLibraryDirectories; 
+
+		ENJON_PROPERTY( DisplayName = "libraries" )
+		Vector< String > mLibraries; 
+	};
+
+	struct ProjectConfig
+	{
+		String mName = "";
+		String mPath = "";
+		ToolChainDefinition mToolChain;
+	};
 
 	ENJON_CLASS( Construct )
 	class Project : public Object
 	{
+		friend EditorApp;
+
 		ENJON_CLASS_BODY( Project )
 
 		public:
+
+			Project( const ProjectConfig& config );
 
 			void SetEditor( EditorApp* app );
 			void SetApplication( Enjon::Application* app ); 
@@ -78,7 +136,7 @@ namespace Enjon
 
 			String CreateBuildDirectory( );
 			
-		private:
+		protected:
 			ENJON_PROPERTY( )
 			String mProjectName = "";
 
@@ -88,8 +146,11 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			String mBuildDirectory = "";
 
+			ENJON_PROPERTY( )
+			ToolChainDefinition mToolChainDefinition;
+
 			Enjon::Application* mApp = nullptr; 
-			EditorApp* mEditor = nullptr;
+			EditorApp* mEditor = nullptr; 
 	};
 }
 
