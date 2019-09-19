@@ -319,7 +319,7 @@ struct ReflectionConfig
 	std::string mProjectName; 
 	std::vector< std::string > mFilesToParse;
 	std::vector< std::string > mAdditionalIncludes;
-	u32 mBaseId = 50000;
+	u32 mBaseId = 100000;
 	bool mIsApplication = false;
 }; 
 

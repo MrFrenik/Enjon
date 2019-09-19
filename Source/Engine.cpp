@@ -181,9 +181,9 @@ namespace Enjon
 	void Engine::SetIsStandAloneApplication( bool enabled )
 	{
 		mConfig.SetIsStandAloneApplication( enabled );
-	}
-	
-	//=======================================================
+	} 
+
+	//======================================================= 
 
 	Enjon::Result Engine::InitSubsystems()
 	{ 
@@ -200,10 +200,18 @@ namespace Enjon
 		mApp->BindApplicationMetaClasses( ); 
 
 		// Register imgui manager and initialize
-		mImGuiManager	= mSubsystemCatalog->Register< ImGuiManager >( false ); 
+		mImGuiManager = mSubsystemCatalog->Register< ImGuiManager >( false ); 
 
 		// Register remaining subsystems
-		mWindowSubsystem	= mSubsystemCatalog->Register< WindowSubsystem >( );
+		mWindowSubsystem = mSubsystemCatalog->Register< WindowSubsystem >( );
+
+		// Create main window if given ( could possibly assert this as well... )
+		assert( mConfig.mMainWindowParams != nullptr ); 
+		{ 
+			mWindowSubsystem->AddNewWindow( *mConfig.mMainWindowParams );
+			mWindowSubsystem->ForceInitWindows( );
+		}
+
 		mAssetManager		= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent 
 		mGraphics			= mSubsystemCatalog->Register< GraphicsSubsystem >( ); 
 		mInput				= mSubsystemCatalog->Register< Input >( ); 
@@ -472,6 +480,13 @@ namespace Enjon
 		input->SetMouseWheel( mouseWheel );
 
 	    return Result::PROCESS_RUNNING;
+	}
+
+	//======================================================= 
+
+	void EngineConfig::SetMainWindowParams( struct WindowParams* params )
+	{
+		mMainWindowParams = params;
 	}
 
 	//======================================================= 

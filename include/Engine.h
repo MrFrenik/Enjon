@@ -28,6 +28,7 @@ namespace Enjon
 	class MetaClass;
 	class Subsystem;
 	class WindowSubsystem;
+	struct WindowParams;
 	
 	class Engine;
 	class EngineConfig
@@ -45,11 +46,14 @@ namespace Enjon
 			bool IsStandAloneApplication( ) const;
 
 			void SetIsStandAloneApplication( bool enabled );
+
+			void SetMainWindowParams( struct WindowParams* params );
 			
 		private:
 			bool mIsStandalone = false;
 			String mRootPath; 
 			String mProjectPath;
+			struct WindowParams* mMainWindowParams = nullptr;
 	}; 
 
 	class WorldTime
@@ -158,7 +162,7 @@ namespace Enjon
 			* @brief Returns pointer to application.
 			* @return Engine* - Pointer to engine instance.
 			*/
-			const Application* GetApplication( );
+			const Application* GetApplication( ); 
 
 			/** 
 			* @brief

@@ -298,7 +298,7 @@ namespace Enjon
 
 										// Open new editor window for this material
 										WindowParams params;
-										params.mWindowClass = Object::GetClass< EditorMaterialEditWindow >();
+										params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< EditorMaterialEditWindow >(); };
 										params.mName = mat->GetName( );
 										params.mWidth = 800;
 										params.mHeight = 400;
@@ -318,7 +318,7 @@ namespace Enjon
 
 										// Open new edit window for this archetype
 										WindowParams params;
-										params.mWindowClass = Object::GetClass< EditorArchetypeEditWindow >( );
+										params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< EditorArchetypeEditWindow >(); };
 										params.mName = archType->GetName( );
 										params.mWidth = 1200;
 										params.mHeight = 800;
@@ -332,7 +332,7 @@ namespace Enjon
 
 										// Open new params
 										WindowParams params;
-										params.mWindowClass = Object::GetClass< EditorTextureEditWindow >( );
+										params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< EditorTextureEditWindow >(); };
 										params.mName = asset->GetName( );
 										params.mWidth = 1200;
 										params.mHeight = 800;

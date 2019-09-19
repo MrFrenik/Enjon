@@ -329,4 +329,21 @@ namespace Enjon
 	}
 
 	//======================================================================
+
+	void Project::LaunchApplication()
+	{ 
+#ifdef ENJON_SYSTEM_WINDOWS 
+		String engineDir = Engine::GetInstance()->GetConfig().GetRoot();
+		s32 code = system( String( "start " + engineDir + "/Build/Debug/Sandbox.exe " + mProjectPath ).c_str() ); 
+#endif
+	}
+
+	//======================================================================
 }
+
+
+
+
+
+
+

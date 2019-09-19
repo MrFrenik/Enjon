@@ -447,7 +447,7 @@ namespace Enjon
 				// Open new edit window for this archetype
 				WindowParams params;
 				//params.mWindow = new EditorArchetypeEditWindow( archType );
-				params.mWindowClass = Object::GetClass< EditorArchetypeEditWindow >( );
+				params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< EditorArchetypeEditWindow >(); };
 				params.mName = archType->GetName( );
 				params.mWidth = 1200;
 				params.mHeight = 800;

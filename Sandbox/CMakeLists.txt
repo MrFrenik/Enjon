@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6) 
 
-set (TARGET_NAME Editor)
+set (TARGET_NAME Sandbox)
 
 # Declare project file
 project(${TARGET_NAME} C CXX)
@@ -76,7 +76,7 @@ endif()
 
 # Pull in the resource file for the application
 if (MSVC)
-	set( RESOURCE_FILE ${TARGET_DIR}/editor_resource.rc )
+	set( RESOURCE_FILE ${ENJON_DIR}/Editor/editor_resource.rc )
 endif()
 
 file(
@@ -203,7 +203,7 @@ file(WRITE ${TARGET_REFLECTION_DIR}/reflection.cfg "#target_dir \"${TARGET_DIR}/
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#engine_dir \"${ENJON_DIR}\"\n") 
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#project_name \"${TARGET_NAME}\"\n") 
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#generate_app_bindings true \n") 
-file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#base_type_id 10000 \n") 
+file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#base_type_id 20000 \n") 
 file(APPEND ${TARGET_REFLECTION_DIR}/reflection.cfg "#files\n") 
 
 # Add all reflection include files

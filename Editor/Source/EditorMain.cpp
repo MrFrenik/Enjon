@@ -2,6 +2,7 @@
 
 #include <Utils/FileUtils.h>
 #include <Engine.h>
+#include <Graphics/Window.h>
 
 #include "EditorApp.h"
  
@@ -17,6 +18,9 @@ namespace FS = ghc::filesystem;
 
 using namespace Enjon; 
 
+#ifdef main
+	#undef main
+#endif
 int main(int argc, char** argv)
 { 
 	// TODO(): Hate doing it this way... just generate a config file or something...
@@ -47,13 +51,22 @@ int main(int argc, char** argv)
 		mApp.SetProjectOnLoad( projectName );
 
 		std::cout << projectName << "\n";
-	}
+	} 
 
 	Enjon::Engine mEngine; 
 	Enjon::EngineConfig mConfig; 
 
+	WindowParams params;
+	params.mFlags = WindowFlags::INVISIBLE | WindowFlags::RESIZABLE;
+	params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< Window >(); };
+	params.mWidth = 1920;
+	params.mHeight = 1080;
+	params.mName = "Enjon Editor";
+
 	// Set root path to engine
 	mConfig.SetRootPath( enjonDir ); 
+	// Set main window params
+	mConfig.SetMainWindowParams( &params );
  
 	// Startup engine
 	Enjon::Result res = mEngine.StartUp( &mApp, mConfig ); 

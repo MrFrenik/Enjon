@@ -134,6 +134,8 @@ namespace Enjon
 
 			bool IsLoaded( ) const;
 
+			void LaunchApplication();
+
 		private:
 
 			String CreateBuildDirectory( );

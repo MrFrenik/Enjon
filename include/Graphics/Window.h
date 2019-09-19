@@ -58,16 +58,18 @@ namespace Enjon
 
 	typedef std::bitset<static_cast<size_t>(WindowFlags::COUNT)> WindowFlagsMask;
 
-	struct WindowParams
+	typedef std::function< const MetaClass* (void) > MetaClassFunc;
+
+	typedef struct WindowParams
 	{ 
-		const MetaClass* mWindowClass;
+		MetaClassFunc mMetaClassFunc;
 		String mName;
 		u32 mWidth;
 		u32 mHeight;
 		WindowFlagsMask mFlags = WindowFlags::DEFAULT;
 		s32 id = -1;
 		void* mData;
-	};
+	} WindowParams;
 
 	ENJON_CLASS( )
 	class Window : public Enjon::Object

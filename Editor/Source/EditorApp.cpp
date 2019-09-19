@@ -507,6 +507,8 @@ namespace Enjon
 						mPlaying = false;
 						mMoveCamera = false;
 					}
+
+					mProject.LaunchApplication();
 				} 
 			}
 			else
@@ -2015,7 +2017,7 @@ namespace Enjon
 		window->HideWindow( );
 
 		WindowParams params;
-		params.mWindowClass = Object::GetClass< EditorLauncherWindow >();
+		params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< EditorLauncherWindow >(); };
 		params.mWidth = 900;
 		params.mHeight = 500;
 		params.mName = "Enjon: Project Browser";
@@ -2332,7 +2334,11 @@ namespace Enjon
 		if ( mPreloadProjectContext )
 		{
 			LoadProjectContext( );
-			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
+			WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+			Window* mainWindow = ws->GetWindows().at( 0 );
+			assert( mainWindow );
+			mainWindow->ShowWindow();
+			mainWindow->MaximizeWindow();
 			LoadProject( mProject );
 			mPreloadProjectContext = false; 
 		}
@@ -2341,7 +2347,11 @@ namespace Enjon
 		{
 			CreateNewProject( mNewProjectConfig );
 			LoadProjectContext( );
-			EngineSubsystem( GraphicsSubsystem )->GetMainWindow( )->ShowWindow( );
+			WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+			Window* mainWindow = ws->GetWindows().at( 0 );
+			assert( mainWindow );
+			mainWindow->ShowWindow();
+			mainWindow->MaximizeWindow();
 			LoadProject( mProject );
 			mPrecreateNewProject = false;
 		} 

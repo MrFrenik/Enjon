@@ -162,19 +162,20 @@ namespace Enjon
 		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
 		// engine config file
 		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
-		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-		Vec2 displaySize = ws->GetDisplaySize();
-		WindowParams params;
-		params.mFlags = WindowFlags::RESIZABLE;
-		params.mWindowClass = Object::GetClass< Window >( );
-		params.mWidth = displaySize.x;
-		params.mHeight = displaySize.y;
-		params.mName = "Enjon";
-		s32 wid = ws->AddNewWindow( params );
-		ws->ForceInitWindows( );
-		mWindow = ws->GetWindow( wid );
-		mWindow->MaximizeWindow( );
-		mWindows.push_back( mWindow ); 
+		//WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+		//Vec2 displaySize = ws->GetDisplaySize();
+		//WindowParams params;
+		//params.mFlags = WindowFlags::RESIZABLE;
+		//params.mWindowClass = Object::GetClass< Window >( );
+		//params.mWidth = displaySize.x;
+		//params.mHeight = displaySize.y;
+		//params.mName = "Enjon";
+		//s32 wid = ws->AddNewWindow( params );
+		//ws->ForceInitWindows( );
+		//mWindow = ws->GetWindow( wid );
+		//mWindow->MaximizeWindow( );
+		//mWindows.push_back( mWindow ); 
+		mWindow = EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 );
 
 		// Set current window
 		mCurrentWindow = mWindow;

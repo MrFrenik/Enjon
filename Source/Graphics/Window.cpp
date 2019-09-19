@@ -491,7 +491,7 @@ namespace Enjon
 		for ( auto& wp : mWindowsToInit )
 		{
 			// TODO(John): Assert that the given class is derived from Window
-			const MetaClass* cls = wp.mWindowClass;
+			const MetaClass* cls = wp.mMetaClassFunc();
 			if ( !cls ) 
 			{ 
 				continue;
