@@ -172,9 +172,10 @@ namespace Enjon
 	void EditorLauncherWindow::ProjectMenuScreen()
 	{
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		b32 projsEmpty = mApp->GetConfigSettings()->mProjectList.empty();
 
-		ImGui::SetNextWindowPos( ImVec2( ImGui::GetWindowWidth() * 0.35f, 0.f ) );
-		ImGui::SetNextWindowSize( ImVec2( ImGui::GetWindowWidth() * 0.65f, ImGui::GetWindowHeight() ) );
+		ImGui::SetNextWindowPos( projsEmpty ? ImVec2( 0.f, 0.f ) : ImVec2( ImGui::GetWindowWidth() * 0.35f, 0.f ) );
+		ImGui::SetNextWindowSize( projsEmpty ? ImGui::GetWindowSize() : ImVec2( ImGui::GetWindowWidth() * 0.65f, ImGui::GetWindowHeight() ) );
 		ImGui::Begin( "##project_crud", nullptr, ImGuiWindowFlags_NoCollapse | 
 						ImGuiWindowFlags_NoResize | 
 						ImGuiWindowFlags_NoTitleBar | 
@@ -183,7 +184,7 @@ namespace Enjon
 		);
 		{
 			// Title
-			ImGui::SetCursorPosY( ImGui::GetWindowHeight() / 5.f );
+			ImGui::SetCursorPosY( ImGui::GetWindowHeight() / 3.f );
 			{
 				igm->PushFont( "WeblySleek_32" );
 				String labl = "Enjon Editor";
@@ -459,7 +460,9 @@ namespace Enjon
 						// List all available projects on one side of the screen ( first column )
 						// Want to have access to editor app's things
 						// On second column, list project creation screen ( Create New Project, Load Project, etc. ) 
-						ProjectSelectionScreen(); 
+						if ( !mApp->GetConfigSettings()->mProjectList.empty() ) {
+							ProjectSelectionScreen(); 
+						}
 
 						// Second column, list actions for creating/loading projects
 						ProjectMenuScreen(); 
