@@ -7,6 +7,7 @@
 #include "EditorInspectorView.h" 
 #include "EditorWorldOutlinerView.h"
 #include "EditorMaterialEditWindow.h"
+#include "EditorLauncherWindow.h"
 
 #include <Engine.h>
 #include <Asset/AssetManager.h>
@@ -2014,14 +2015,16 @@ namespace Enjon
 		window->HideWindow( );
 
 		WindowParams params;
-		params.mWindowClass = Object::GetClass< Window >();
-		params.mWidth = 1200;
+		params.mWindowClass = Object::GetClass< EditorLauncherWindow >();
+		params.mWidth = 900;
 		params.mHeight = 500;
 		params.mName = "Enjon: Project Browser";
+		params.mData = this;
 		s32 wid = EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 		EngineSubsystem( WindowSubsystem )->ForceInitWindows( );
 		mProjectSelectionWindow = EngineSubsystem( WindowSubsystem )->GetWindow( wid );
 
+		/*
 		GUIContext* guiCtx = mProjectSelectionWindow->GetGUIContext( );
 
 		// Need to change this to a list of recent available projects and their paths and not a directory
@@ -2057,6 +2060,7 @@ namespace Enjon
 		//guiCtx->RegisterDockingLayout( GUIDockingLayout( "Tool Chain", nullptr, GUIDockSlotType::Slot_Top, 0.5f ) ); 
 		guiCtx->SetActiveDock( "Project Browser" );
 		guiCtx->Finalize( );
+		*/
 	}
 
 	//================================================================================================================
@@ -2225,6 +2229,13 @@ namespace Enjon
 		mConfigSettings.mToolChainDefinitions.push_back( vsMSBuild2015 );
 		mConfigSettings.mToolChainDefinitions.push_back( vsMSBuild2017 );
 		mConfigSettings.mToolChainDefinitions.push_back( vsMSBuild2019 );
+	}
+
+	//================================================================================================================ 
+
+	EditorConfigSettings* EditorApp::GetConfigSettings()
+	{
+		return &mConfigSettings;
 	}
 
 	//================================================================================================================

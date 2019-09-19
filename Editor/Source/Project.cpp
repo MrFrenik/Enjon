@@ -1,5 +1,6 @@
 #include "Project.h"
 #include "EditorApp.h"
+#include "EditorLauncherWindow.h"
 
 #include <Utils/FileUtils.h>
 #include <Engine.h>

@@ -10,6 +10,7 @@ namespace Enjon
 {
 	class Application;
 	class EditorApp;
+	class EditorLauncherWindow;
 
 	/*
 		What are the various build systems we could have? 
@@ -107,6 +108,7 @@ namespace Enjon
 	class Project : public Object
 	{
 		friend EditorApp;
+		friend EditorLauncherWindow;
 
 		ENJON_CLASS_BODY( Project )
 

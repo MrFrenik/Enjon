@@ -28,6 +28,12 @@ namespace Enjon
 
 		// Grab graphics context from world and then get framebuffer rendertarget texture
 		World* world = mWindow->GetWorld( );
+
+		// Cannot operate without a world!
+		if (!world) {
+			return;
+		}
+
 		GraphicsSubsystemContext* gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
 		u32 currentTextureId = gfxCtx->GetFrameBuffer( )->GetTexture( );
 
@@ -256,17 +262,23 @@ namespace Enjon
 		Window* window = this->GetWindow( );
 
 		// Can't operate without a window
-		assert( window != nullptr );
+		if ( window == nullptr ) {
+			return;
+		}
 
 		World* world = window->GetWorld( );
 
 		// Can't operate without a world
-		assert( world != nullptr );
+		if ( world == nullptr ) {
+			return;
+		}
 
 		GraphicsSubsystemContext* gsc = world->GetContext< GraphicsSubsystemContext >( );
 
 		// Can't operate without a graphics subsystem context
-		assert( gsc != nullptr );
+		if ( gsc == nullptr ) {
+			return;
+		}
 
 		// Get viewport of window
 		iVec2 viewPort = window->GetViewport( );
@@ -457,8 +469,8 @@ namespace Enjon
 
 		// NOTE(): This should be done automatically for the user in the backend
 		// Add window to graphics subsystem ( totally stupid way to do this )
-		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		gfx->AddWindow( this );
+		//GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		//gfx->AddWindow( this );
 
 		World* world = GetWorld( );
 		GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );

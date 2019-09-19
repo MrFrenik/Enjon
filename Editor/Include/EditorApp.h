@@ -297,6 +297,14 @@ namespace Enjon
 
 			EditorTransformWidget* GetTransformWidget( );
 
+			EditorConfigSettings* GetConfigSettings(); 
+			void PreloadProject( const Project& project );
+ 
+			void DeserializeEditorConfigSettings( ); 
+			void SerializeEditorConfigSettings( ); 
+
+			void PreCreateNewProject( const ProjectConfig& projectName );
+
 		public:
 			Vec4 mRectColor = Vec4( 0.8f, 0.3f, 0.1f, 1.0f );
 
@@ -342,16 +350,9 @@ namespace Enjon
 			void UnloadPreviousProject( );
 			void FindBuildSystem( );
 
-			void PreloadProject( const Project& project );
-
 			void CleanupGUIContext( );
 
-			void PreCreateNewProject( const ProjectConfig& projectName );
-
 			void FindProjectOnLoad( );
-
-			void DeserializeEditorConfigSettings( ); 
-			void SerializeEditorConfigSettings( );
 
 			void ToolChainView( );
 			
