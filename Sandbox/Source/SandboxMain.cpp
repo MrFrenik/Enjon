@@ -45,6 +45,8 @@ int main(int argc, char** argv)
 	mConfig.SetRootPath( enjonDir ); 
 	// Set main window params for config
 	mConfig.SetMainWindowParams( &params ); 
+	// Just for shiggles( no gui )
+	mConfig.SetIsStandAloneApplication( true );
  
 	// Startup engine
 	Enjon::Result res = mEngine.StartUp( &mApp, mConfig ); 

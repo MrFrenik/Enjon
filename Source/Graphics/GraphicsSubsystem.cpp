@@ -159,22 +159,6 @@ namespace Enjon
 		// Clear previous windows ( if any )
 		mWindows.clear( ); 
 
-		// TODO(John): Need to have a way to have an .ini that's read or grab these values from a static
-		// engine config file
-		// mWindow.Init("Game", 1920, 1080, WindowFlagsMask((u32)WindowFlags::FULLSCREEN)); 
-		//WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-		//Vec2 displaySize = ws->GetDisplaySize();
-		//WindowParams params;
-		//params.mFlags = WindowFlags::RESIZABLE;
-		//params.mWindowClass = Object::GetClass< Window >( );
-		//params.mWidth = displaySize.x;
-		//params.mHeight = displaySize.y;
-		//params.mName = "Enjon";
-		//s32 wid = ws->AddNewWindow( params );
-		//ws->ForceInitWindows( );
-		//mWindow = ws->GetWindow( wid );
-		//mWindow->MaximizeWindow( );
-		//mWindows.push_back( mWindow ); 
 		mWindow = EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 );
 
 		// Set current window
@@ -1800,13 +1784,13 @@ namespace Enjon
 					// Print out frame time 
 					if ( isStandalone )
 					{
-						auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
-						auto uiFont = FontManager::GetFont("WeblySleek_16"); 
-						f32 frameTime = 1000.0f / ( f32 )ImGui::GetIO( ).Framerate;
+						//auto wt = Engine::GetInstance( )->GetWorldTime( ).mTotalTime;
+						//auto uiFont = FontManager::GetFont("WeblySleek_16"); 
+						//f32 frameTime = 1000.0f / ( f32 )ImGui::GetIO( ).Framerate;
 
-						auto vp = GetViewport( );
-						Enjon::PrintText( 10.0f, vp.y - 20.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
-						Enjon::PrintText( 10.0f, vp.y - 40.0f, 1.0f, isStandalone ? "Standalone" : "Editor", uiFont, mUIBatch ); 
+						//auto vp = GetViewport( );
+						//Enjon::PrintText( 10.0f, vp.y - 20.0f, 1.0f, std::to_string( frameTime ) + " ms", uiFont, mUIBatch ); 
+						//Enjon::PrintText( 10.0f, vp.y - 40.0f, 1.0f, isStandalone ? "Standalone" : "Editor", uiFont, mUIBatch ); 
 					}
 				}
 				mUIBatch.End( );
