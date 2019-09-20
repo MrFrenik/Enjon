@@ -477,7 +477,8 @@ namespace Enjon
 			ImGui::End(); 
 		});
 
-		GUIContextParams params = { false };
+		GUIContextParams params = {};
+		params.mUseRootDock = false;
 		guiContext->SetGUIContextParams( params );
 		guiContext->Finalize( );
 	}
