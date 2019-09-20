@@ -134,7 +134,11 @@ namespace Enjon
 
 			bool IsLoaded( ) const;
 
-			void LaunchApplication();
+			void LaunchSandbox();
+			
+			void KillSandbox();
+
+			b32 IsSandboxRunning();
 
 		private:
 

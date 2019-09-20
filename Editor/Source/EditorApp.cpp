@@ -41,12 +41,15 @@
 
 #include <chrono>
 #include <ctime>
+#include <thread>
 #include <nfd/include/nfd.h>
 
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+
+#include <cppzmq/zmq.hpp>
 
 using namespace rapidjson;
 
@@ -67,6 +70,8 @@ funcCreateApp createAppFunc = nullptr;
 funcDeleteApp deleteAppFunc = nullptr;
 
 namespace fs = ghc::filesystem; 
+
+std::thread* zmqThread = nullptr;
 
 // ALL of this needs to change to be user dependent
 Enjon::String projectName = "TestProject";
@@ -457,6 +462,10 @@ namespace Enjon
 				auto cam = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >();
 				cam->SetPosition( mPreviousCameraTransform.GetPosition() );
 				cam->SetRotation( mPreviousCameraTransform.GetRotation() ); 
+
+				mProject.KillSandbox();
+
+				// Want to check if process is available also...
 			} 
 
 			if ( mState != ApplicationState::Paused )
@@ -508,7 +517,7 @@ namespace Enjon
 						mMoveCamera = false;
 					}
 
-					mProject.LaunchApplication();
+					mProject.LaunchSandbox();
 				} 
 			}
 			else
@@ -2242,7 +2251,7 @@ namespace Enjon
 
 	//================================================================================================================
 	 
-	Enjon::Result EditorApp::Initialize( )
+	Enjon::Result EditorApp::Initialize()
 	{ 
 		mApplicationName = "EditorApp"; 
 		mConfigSettings.mEditor = this;
@@ -2311,6 +2320,9 @@ namespace Enjon
 			LoadProjectSelectionContext();
 		}
 
+		// Set up local server for sandbox process to communicate with
+		SetupLocalServer();
+
 		return Enjon::Result::SUCCESS;
 	} 
 
@@ -2327,6 +2339,35 @@ namespace Enjon
 	Project* EditorApp::GetProject( )
 	{
 		return &mProject;
+	}
+
+	void EditorApp::SetupLocalServer()
+	{ 
+		zmqThread = new std::thread( [&]() 
+		{
+			std::cout << "Creating local server...\n"; 
+
+			zmq::context_t context = zmq::context_t( 1 );
+			zmq::socket_t socket = zmq::socket_t( context, ZMQ_REP );
+			socket.bind( "tcp://*:5555" ); 
+
+			// This has to be on a separate thread. No excuses. 
+			// Look for messages
+			while ( true )
+			{
+				zmq::message_t request;
+
+				// Wait for next request from client
+				socket.recv( &request );
+				std::cout << request.str() << "\n";
+
+				Sleep( 1 );
+
+				zmq::message_t reply( 5 );
+				memcpy( reply.data(), "World", 5 );
+				socket.send( reply );
+			} 
+		}); 
 	}
 
 	Enjon::Result EditorApp::Update( f32 dt )
@@ -2408,7 +2449,7 @@ namespace Enjon
 
 				// Update application ( ^ Could be called in the same tick )
 				app->Update( dt ); 
-			}
+			} 
 		} 
 
 		return Enjon::Result::PROCESS_RUNNING;

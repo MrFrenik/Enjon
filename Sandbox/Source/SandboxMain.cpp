@@ -24,18 +24,21 @@ int main(int argc, char** argv)
 { 
 #ifdef ENJON_SYSTEM_WINDOWS
 	// Hide console window for now ( kinda jank; need to change the subsystem instead )
-	HWND hWnd = GetConsoleWindow();
-	ShowWindow( hWnd, SW_HIDE ); 
+	//HWND hWnd = GetConsoleWindow();
+	//ShowWindow( hWnd, SW_HIDE ); 
 #endif
 
 	// TODO(): Hate doing it this way... just generate a config file or something...
 	Enjon::String curDir = fs::current_path( ).string( );
 	Enjon::String enjonDir = curDir + "/../../"; 
 	String projDir = "";
+	String projName = "";
  
-	assert( argc > 1 ); 
+	assert( argc > 2 ); 
 
 	projDir = argv[ 1 ]; 
+	projName = argv[ 2 ];
+
 	SandboxApp mApp( projDir );
 	Enjon::Engine mEngine; 
 	Enjon::EngineConfig mConfig; 
@@ -43,9 +46,9 @@ int main(int argc, char** argv)
 	WindowParams params;
 	params.mFlags = WindowFlags::RESIZABLE;
 	params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< Window >(); };
-	params.mWidth = 800;
-	params.mHeight = 600;
-	params.mName = "Sandbox";
+	params.mWidth = 900;
+	params.mHeight = 506;
+	params.mName = "Sandbox: " + projName;
 
 	// Set root path to engine
 	mConfig.SetRootPath( enjonDir ); 
@@ -60,15 +63,12 @@ int main(int argc, char** argv)
 	// If successful startup, then run the engine
 	if ( res == Enjon::Result::SUCCESS )
 	{
-		std::cout << "Got here!\n";
 		mEngine.Run( );
 	} 
 	else 
 	{ 
 		// Print error...
-	}
-
-	std::cout << "Leaving!\n";
+	} 
 	
 	return 0;
 }

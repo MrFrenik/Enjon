@@ -358,6 +358,8 @@ namespace Enjon
 			
 			void InitializeToolChains( );
 
+			void SetupLocalServer();
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;

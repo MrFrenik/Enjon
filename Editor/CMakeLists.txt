@@ -49,8 +49,9 @@ message("cxx Flags:" ${CMAKE_CXX_FLAGS})
 include_directories(${TARGET_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
 					${ENJON_DIR}/ThirdParty/Build/Include/Bullet
+					${ENJON_DIR}/ThirdParty/Build/Include/libzmq/include 
 					${ENJON_INC}
-					)
+)
 
 # Add lib directories
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
@@ -120,16 +121,12 @@ if (MSVC)
 	target_link_libraries( ${TARGET_NAME} debug glew32_d.lib optimized glew32.lib )
 	target_link_libraries( ${TARGET_NAME} debug glew32s_d.lib optimized glew32s.lib )
 	target_link_libraries( ${TARGET_NAME} debug freetype_d.lib optimized freetype.lib )
-	target_link_libraries( ${TARGET_NAME} debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
-	target_link_libraries( ${TARGET_NAME} debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
-	target_link_libraries( ${TARGET_NAME} debug Bullet3Common_d.lib optimized Bullet3Common.lib )
-	target_link_libraries( ${TARGET_NAME} debug LinearMath_d.lib optimized LinearMath.lib )
-	target_link_libraries( ${TARGET_NAME} debug BulletDynamics_d.lib optimized BulletDynamics.lib )
-	target_link_libraries( ${TARGET_NAME} debug BulletCollision_d.lib optimized BulletCollision.lib )
 	target_link_libraries( ${TARGET_NAME} debug fmt_d.lib optimized fmt.lib )
 	target_link_libraries( ${TARGET_NAME} debug liblz4_d.lib optimized liblz4.lib ) 
 	target_link_libraries( ${TARGET_NAME} debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
 	target_link_libraries( ${TARGET_NAME} debug nfd_d.lib optimized nfd.lib ) 
+	target_link_libraries( ${TARGET_NAME} debug libzmq_d.lib optimized libzmq.lib ) 
+	target_link_libraries( ${TARGET_NAME} debug libzmq2_d.lib optimized libzmq2.lib ) 
 else()
 	target_link_libraries( ${TARGET_NAME} debug Enjond optimized Enjon )
 	target_link_libraries( ${TARGET_NAME} assimp.a )

@@ -217,7 +217,7 @@ file(GLOB_RECURSE SRC_BULLET
 	 "${ENJON_BULLET_DIR}/LinearMath/*.h"
 	 "${ENJON_BULLET_DIR}/LinearMath/TaskScheduler/*.cpp"
 	 "${ENJON_BULLET_DIR}/LinearMath/TaskScheduler/*.h"
-)
+) 
 
 file(GLOB_RECURSE SHADERS "${ENJON_DIR}/Assets/Shaders/*.glsl" )
 
@@ -280,12 +280,6 @@ if (MSVC)
 	target_link_libraries( Enjon debug glew32_d.lib optimized glew32.lib )
 	target_link_libraries( Enjon debug glew32s_d.lib optimized glew32s.lib )
 	target_link_libraries( Enjon debug freetype_d.lib optimized freetype.lib )
-	#target_link_libraries( Enjon debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
-	#target_link_libraries( Enjon debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
-	#target_link_libraries( Enjon debug Bullet3Common_d.lib optimized Bullet3Common.lib )
-	#target_link_libraries( Enjon debug LinearMath_d.lib optimized LinearMath.lib )
-	#target_link_libraries( Enjon debug BulletDynamics_d.lib optimized BulletDynamics.lib )
-	#target_link_libraries( Enjon debug BulletCollision_d.lib optimized BulletCollision.lib )
 	target_link_libraries( Enjon debug fmt_d.lib optimized fmt.lib )
 	target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
 	target_link_libraries( Enjon debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 

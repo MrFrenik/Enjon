@@ -45,6 +45,8 @@ namespace Enjon
 
 			void InitializeProjectApp();
 
+			void SetupLocalClient();
+
 		protected:
 
 			/*

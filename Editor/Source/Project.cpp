@@ -330,11 +330,32 @@ namespace Enjon
 
 	//======================================================================
 
-	void Project::LaunchApplication()
+	void Project::LaunchSandbox()
 	{ 
 #ifdef ENJON_SYSTEM_WINDOWS 
 		String engineDir = Engine::GetInstance()->GetConfig().GetRoot();
-		s32 code = system( String( "start " + engineDir + "/Build/Debug/Sandbox.exe " + mProjectPath ).c_str() ); 
+		String config = "Debug"; //mEditor->GetBuildConfiguration();
+		s32 code = system( String( "start " + engineDir + "/Build/" + config + "/Sandbox.exe " + mProjectPath + " " + mProjectName ).c_str() ); 
+#endif
+	}
+
+	//======================================================================
+
+	void Project::KillSandbox()
+	{
+#ifdef ENJON_SYSTEM_WINDOWS 
+		s32 code = system( "taskkill /IM \"Sandbox.exe\"" ); 
+#endif 
+	}
+
+	//======================================================================
+
+	b32 Project::IsSandboxRunning()
+	{
+#ifdef ENJON_SYSTEM_WINDOWS
+		HWND hwnd;
+		hwnd = FindWindow( NULL, "Sandbox.exe" );
+		return ( hwnd != 0 ); 
 #endif
 	}
 
