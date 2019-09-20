@@ -28,7 +28,7 @@ enum MetaPropertyEnumDefines
 	ReadOnly
 };
 
-#define ENJON_TO_STRING( Name ) #Name
+#define ENJON_TO_STRING( Name ) #Name 
 
 /*
 	Used as boilerplate for all classes participating in object/reflection model.

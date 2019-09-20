@@ -92,10 +92,6 @@ namespace Enjon
 		// Set on vsync by default
 		SDL_GL_SetSwapInterval( 1 );
 
-		// Hide console window for now ( kinda jank; need to change the subsystem instead )
-		HWND hWnd = GetConsoleWindow();
-		ShowWindow( hWnd, SW_HIDE ); 
-
 	#endif
 
 	#ifdef ENJON_SYSTEM_OSX

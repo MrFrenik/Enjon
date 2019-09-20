@@ -22,6 +22,12 @@ using namespace Enjon;
 #endif
 int main(int argc, char** argv)
 { 
+#ifdef ENJON_SYSTEM_WINDOWS
+	// Hide console window for now ( kinda jank; need to change the subsystem instead )
+	HWND hWnd = GetConsoleWindow();
+	ShowWindow( hWnd, SW_HIDE ); 
+#endif
+
 	// TODO(): Hate doing it this way... just generate a config file or something...
 	Enjon::String curDir = fs::current_path( ).string( );
 	Enjon::String enjonDir = curDir + "/../../"; 
