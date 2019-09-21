@@ -58,6 +58,8 @@ namespace Enjon
 			* @brief Directory of the project 
 			*/
 			String mProjectDir = "";
+
+			b32 mShuttingDown = false;
 	};
 
 	// Declaration for module export

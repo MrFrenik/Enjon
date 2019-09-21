@@ -34,7 +34,7 @@ namespace Enjon
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
 		ImVec2 a = ImVec2(ImGui::GetCursorScreenPos().x - 2.f, ImGui::GetCursorScreenPos().y - 2.f);
-		ImVec2 b = ImVec2(a.x + ImGui::GetWindowWidth() * 0.93f, a.y + 35.f);
+		ImVec2 b = ImVec2(a.x + ImGui::GetWindowWidth() * 0.97f, a.y + 35.f);
 		b32 hovered = ImGui::IsMouseHoveringRect(a, b);
 		b32 active = hovered && ImGui::IsMouseClicked(0);
 		b32 selected = selectedProject == &p;
@@ -68,7 +68,7 @@ namespace Enjon
 		
 		// Doing the path... need to calculate the size to make sure the path isn't too large past the window
 		{
-			u32 len = 38;
+			u32 len = 45;
 			bool gtl = p.GetProjectPath().length() >= len;
 			String b = p.GetProjectPath().substr( 0, gtl ? len : p.GetProjectPath().length() );
 			b += gtl ? "..." : "";
@@ -94,6 +94,12 @@ namespace Enjon
 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
+		auto cleanUpAndLeave = [&]() 
+		{
+			ImGui::PopStyleVar();
+		};
+
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.f, 8.f ) );
 		ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
 		ImGui::SetNextWindowSize( ImVec2( ImGui::GetWindowWidth() * 0.35f, ImGui::GetWindowHeight() ) );
 		ImGui::Begin( "##project_list", nullptr, ImGuiWindowFlags_NoCollapse | 
@@ -128,6 +134,8 @@ namespace Enjon
 			ImGui::ListBoxFooter(); 
 		}
 		ImGui::End(); 
+
+		cleanUpAndLeave();
 	}
 
 	//=======================================================================================================

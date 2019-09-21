@@ -131,14 +131,13 @@ namespace Enjon
 			{
 				for ( u32 req_n = 0; req_n != 10; ++req_n )
 				{
-					zmq::message_t req( 5 );
-					memcpy( req.data(), "Hello", 5 );
-					socket.send( req );
-
-					zmq::message_t rep;
-					if ( socket.recv( &rep ) ) {
-						std::cout << rep.str() << "\n";
-					}
+					//zmq::message_t req( 4 );
+					//memcpy( req.data(), "Quit", 4 );
+					//socket.send( req ); 
+					//zmq::message_t rep;
+					//if ( socket.recv( &rep ) ) {
+					//	std::cout << rep.str() << "\n";
+					//}
 				} 
 			}
 		});
@@ -171,6 +170,13 @@ namespace Enjon
 	{ 
 		if (mApp)
 		{
+			zmq::context_t context = zmq::context_t( 1 );
+			zmq::socket_t socket = zmq::socket_t( context, ZMQ_REQ );
+			socket.connect( "tcp://localhost:5555" ); 
+			zmq::message_t req( 4 );
+			memcpy( req.data(), "Quit", 4 );
+			socket.send( req ); 
+
 			// Shutdown application state
 			SetApplicationState( ApplicationState::Stopped ); 
 

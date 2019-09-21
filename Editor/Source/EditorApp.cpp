@@ -446,10 +446,11 @@ namespace Enjon
 	{
 		if ( mPlaying )
 		{
-			if ( ImGui::Button( "Stop" ) )
+			if ( ImGui::Button( "Stop" ) || mNeedsShutdown )
 			{ 
 				mPlaying = false; 
 				mMoveCamera = false;
+				mNeedsShutdown = false;
 
 				// Call shut down function for game
 				if ( mProject.GetApplication() )
@@ -473,6 +474,7 @@ namespace Enjon
 				ImGui::SameLine( );
 				if ( ImGui::Button( "Pause" ) )
 				{
+					// Want to send a serialized message to the sandbox
 					SetApplicationState( ApplicationState::Paused );
 					PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
 					physx->PauseSystem( true );
@@ -2341,6 +2343,8 @@ namespace Enjon
 		return &mProject;
 	}
 
+#include <stdlib.h>
+
 	void EditorApp::SetupLocalServer()
 	{ 
 		zmqThread = new std::thread( [&]() 
@@ -2357,9 +2361,23 @@ namespace Enjon
 			{
 				zmq::message_t request;
 
-				// Wait for next request from client
-				socket.recv( &request );
-				std::cout << request.str() << "\n";
+				// Wait for next request from client 
+				if ( socket.recv( &request ) ) 
+				{
+					std::cout << request.str() << ", " << request.size() << "\n"; 
+					size_t sz = request.size();
+					char buffer[ 1024 ];
+					buffer[ sz ] = '\0';
+					memcpy( buffer, request.data(), sz );
+					if ( strncmp( buffer, "Quit", 4 ) == 0 )
+					{
+						// Gotta set something here now...
+						std::cout << "Quitting sandbox...\n"; 
+						
+						// How do? 
+						mNeedsShutdown = true;
+					}
+				}
 
 				Sleep( 1 );
 
