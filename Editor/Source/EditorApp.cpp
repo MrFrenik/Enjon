@@ -49,7 +49,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-#include <cppzmq/zmq.hpp>
+#include <zmq/zmq.hpp>
 
 using namespace rapidjson;
 

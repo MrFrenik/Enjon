@@ -15,7 +15,7 @@
 #include <Scene/SceneManager.h>
 
 #include <fs/filesystem.hpp> 
-#include <cppzmq/zmq.hpp>
+#include <zmq/zmq.hpp>
 #include <SDL2/SDL.h>
 
 #include <thread>
