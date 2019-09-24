@@ -682,10 +682,13 @@ namespace Enjon
 			{ 
 				if ( ImGui::Button( "Play" ) )
 				{ 
+					// Save scene before playing 
+					scene->Save( );
+
 					ReloadDLL(); 
 
 					mPlaying = true;
-					//mMoveCamera = true;
+					//mMoveCamera = true; 
 
 					GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 					auto cam = gfx->GetGraphicsSceneCamera( );
@@ -2276,6 +2279,16 @@ namespace Enjon
 		{
 			// Reload the dll
 			ReloadDLL( ); 
+		}
+
+		if ( mNeedSaveScene )
+		{
+			AssetHandle< Scene > scene = EngineSubsystem( SceneManager )->GetScene( );
+			if ( scene && !scene->IsDefault( ) )
+			{
+				scene->Save( );
+			}
+			mNeedSaveScene = false;
 		}
 
 		if ( mNeedRegenProject )

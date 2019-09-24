@@ -26,6 +26,113 @@ namespace Enjon
 
 	//=======================================================================================================
 
+	void EditorLauncherWindow::LoadProjectRegenPopupDialogueView()
+	{ 
+		if ( !mProjectToRegen )
+		{
+			mNeedRegenProjectPopupDialogue = false;
+			return;
+		}
+
+		const char* popupName = "Regen Project Dialogue##Modal";
+		if ( !ImGui::IsPopupOpen( popupName ) )
+		{
+			ImGui::OpenPopup( popupName ); 
+		}
+		ImGui::SetNextWindowSize( ImVec2( 800.0f, 150.0f ) );
+		ImGui::PushStyleColor( ImGuiCol_PopupBg, ImVec4( 0.1f, 0.1f, 0.1f, 1.0f ) );
+		if( ImGui::BeginPopupModal( popupName, NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove ) )
+		{
+			// Remove the build directory
+			// Remove Proc directory 
+			Project* proj = mProjectToRegen;
+
+			// Want to change current tool chain for project 
+			{ 
+				EditorConfigSettings* cfgSettings = mApp->GetConfigSettings(); 
+				b32 tcVal = !proj->mToolChainDefinition.mLabel.empty();
+				String defaultText = tcVal ? proj->mToolChainDefinition.mLabel : "Tool Chains...";
+
+				ImGui::PushStyleColor( ImGuiCol_Text, tcVal ? ImGui::GetColorU32( ImGuiCol_Text ) : ImColor( 0.9f, 0.1f, 0.f, 1.f ) );
+				ImGui::Text( "Tool Chain" ); ImGui::SameLine(); ImGui::SetCursorPosX( 100.f );
+				ImGui::PopStyleColor();
+				ImGui::PushItemWidth( ImGui::GetWindowWidth() * 0.8f ); 
+				if (ImGui::BeginCombo( "##TOOL_CHAINS", defaultText.c_str() ))
+				{
+					for (u32 i = 0; i < cfgSettings->mToolChainDefinitions.size(); ++i)
+					{
+						ToolChainDefinition& tc = cfgSettings->mToolChainDefinitions[i];
+						if (ImGui::Selectable( tc.mLabel.c_str() ))
+						{
+							proj->mToolChainDefinition = tc;
+						}
+					}
+					ImGui::EndCombo();
+				}
+			} 
+
+			if ( !proj->mToolChainDefinition.mLabel.empty() )
+			{ 
+				char tmpBuffer[1024];
+				strncpy( tmpBuffer, proj->mToolChainDefinition.mCompilerPath.c_str(), 1024 );
+				ImGui::PushItemWidth( ImGui::GetWindowWidth() * 0.77f );
+				ImGui::Text( "Compiler" ); ImGui::SameLine(); ImGui::SetCursorPosX( 100.f );
+				if (ImGui::InputText( "##compiler_path", tmpBuffer, 250 ))
+				{
+					proj->mToolChainDefinition.mCompilerPath = tmpBuffer;
+				}
+				ImGui::PopItemWidth(); 
+
+				// Do button for selecting directory
+				ImGui::SameLine(); ImGui::SetCursorPosX( ImGui::GetWindowWidth() * 0.889f );
+				if ( ImGui::Button( "...##compiler_path" ) ) 
+				{
+					// Open file picking dialogue
+					nfdchar_t* file;
+					nfdresult_t res = NFD_OpenDialog( "exe", NULL, &file );
+					if (res == NFD_OKAY)
+					{
+						proj->mToolChainDefinition.mCompilerPath = file;
+					}
+				}
+			}
+
+			b32 tcValid = !proj->mToolChainDefinition.mCompilerPath.empty() && !proj->mToolChainDefinition.mLabel.empty();
+ 
+			ImGui::PushStyleColor( ImGuiCol_Button, tcValid ? ImGui::GetColorU32( ImGuiCol_Button ) : ImColor( 0.2f, 0.2f, 0.2f, 1.f ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive, tcValid ? ImGui::GetColorU32( ImGuiCol_ButtonActive ) : ImColor( 0.2f, 0.2f, 0.2f, 1.f ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, tcValid ? ImGui::GetColorU32( ImGuiCol_ButtonHovered ) : ImColor( 0.2f, 0.2f, 0.2f, 1.f ) );
+			ImGui::PushStyleColor( ImGuiCol_Text, tcValid ? ImGui::GetColorU32( ImGuiCol_Text ) : ImColor( 0.4f, 0.4f, 0.4f, 1.f ) );
+			if ( tcValid && ImGui::Button( "Regen" ) )
+			{
+				if ( tcValid ) {
+					// Regen project
+					b32 b = proj->RegenerateProjectBuild();	// Just for now...  
+					// Compile the project
+					proj->CompileProject( ); 
+					mNeedRegenProjectPopupDialogue = false;
+					mProjectToRegen = nullptr;
+					ImGui::CloseCurrentPopup(); 
+				}
+			} 
+			ImGui::PopStyleColor( 4 );
+
+			ImGui::SameLine();
+
+			if ( ImGui::Button( "Cancel" ) )
+			{
+				mNeedRegenProjectPopupDialogue = false;
+				mProjectToRegen = nullptr;
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup( );
+		} 
+		ImGui::PopStyleColor();
+	}
+
+	//=======================================================================================================
+
 	bool EditorLauncherWindow::ProjectSelectionBox( const Project& p )
 	{ 
 		static const Project* selectedProject = nullptr;
@@ -35,7 +142,7 @@ namespace Enjon
 
 		ImVec2 a = ImVec2(ImGui::GetCursorScreenPos().x - 2.f, ImGui::GetCursorScreenPos().y - 2.f);
 		ImVec2 b = ImVec2(a.x + ImGui::GetWindowWidth() * 0.97f, a.y + 35.f);
-		b32 hovered = ImGui::IsMouseHoveringRect(a, b);
+		b32 hovered = ImGui::IsMouseHoveringRect(a, b) && !mProjectOptionStruct.mHovered;
 		b32 active = hovered && ImGui::IsMouseClicked(0);
 		b32 selected = selectedProject == &p;
 		ImColor color = selected ? ImGui::GetColorU32(ImGuiCol_HeaderActive) : 
@@ -53,7 +160,7 @@ namespace Enjon
 			ImVec2 ba = ImVec2(b.x - ts.x - margin - pad, (b.y + a.y - ts.y) / 2.f - pad);
 			ImVec2 bb = ImVec2(ba.x + ts.x + 2.f * pad, ba.y + ts.y + 2.f * pad);
 			ImVec2 ta = ImVec2(b.x - ts.x - margin, (b.y + a.y - ts.y) / 2.f);
-			b32 bHovered = ImGui::IsMouseHoveringRect(ba, bb);
+			b32 bHovered = ImGui::IsMouseHoveringRect(ba, bb) && !mProjectOptionStruct.mSelectedProject;
 			b32 bActive = bHovered && ImGui::IsMouseClicked(0);
 			ImColor bColor = bActive ? ImColor(1.f, 1.f, 1.f, 1.f) :
 							bHovered ? ImColor(1.f, 1.f, 1.f, 0.7f) :
@@ -82,8 +189,14 @@ namespace Enjon
 			} 
 		}
 
-		return retVal;
+		if ( hovered && ImGui::IsMouseClicked( 1 ) )
+		{
+			selectedProject = &p;
+			mProjectOptionStruct.mSelectedProject = const_cast< Project* >( &p );
+			mProjectOptionStruct.mPosition = Vec2( ImGui::GetMousePos( ).x, ImGui::GetMousePos().y );
+		}
 
+		return retVal; 
 	}
 
 	//=======================================================================================================
@@ -175,7 +288,7 @@ namespace Enjon
 		}
 	}
 
-	//=======================================================================================================
+	//======================================================================================================= 
 
 	void EditorLauncherWindow::ProjectMenuScreen()
 	{
@@ -459,6 +572,53 @@ namespace Enjon
 
 	//=======================================================================================================
 
+	void EditorLauncherWindow::ProjectOptionsPopup( )
+	{
+		ImGui::SetNextWindowPos( ImVec2( mProjectOptionStruct.mPosition.x, mProjectOptionStruct.mPosition.y ) );
+		ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( 0.1f, 0.1f, 0.1f, 1.f ) );
+		ImGui::Begin( "##project_selection_options", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse );
+		{
+			mProjectOptionStruct.mHovered = ImGui::IsMouseHoveringWindow( );
+			b32 clicked = ImGui::IsMouseClicked( 0 );
+			b32 leave = false;
+
+			// Show some options and thingies
+			{ 
+				if ( ImGui::MenuItem( "Launch" ) )
+				{ 
+					leave = true;
+				}
+
+				// Open project folder
+				if ( ImGui::MenuItem( "Open Folder" ) )
+				{ 
+					mProjectOptionStruct.mSelectedProject->OpenProjectFolder( );
+					leave = true;
+				}
+
+				if ( ImGui::MenuItem( "Regenerate Project" ) )
+				{ 
+					mNeedRegenProjectPopupDialogue = true; 
+					mProjectToRegen = mProjectOptionStruct.mSelectedProject;
+					leave = true;
+				}
+			} 
+
+			b32 finished = leave || ( clicked && !mProjectOptionStruct.mHovered );
+
+			if ( finished )
+			{
+				mProjectOptionStruct.mSelectedProject = nullptr;
+				mProjectOptionStruct.mPosition = Vec2( 0.f );
+				mProjectOptionStruct.mHovered = false;
+			}
+		}
+		ImGui::End( ); 
+		ImGui::PopStyleColor( );
+	} 
+
+	//=======================================================================================================
+
 	void EditorLauncherWindow::ConstructGUI()
 	{ 
 		GUIContext* guiContext = GetGUIContext( ); 
@@ -494,8 +654,14 @@ namespace Enjon
 						// List all available projects on one side of the screen ( first column )
 						// Want to have access to editor app's things
 						// On second column, list project creation screen ( Create New Project, Load Project, etc. ) 
-						if ( !mApp->GetConfigSettings()->mProjectList.empty() ) {
+						if ( !mApp->GetConfigSettings()->mProjectList.empty() ) 
+						{
 							ProjectSelectionScreen(); 
+
+							if ( mProjectOptionStruct.mSelectedProject )
+							{
+								ProjectOptionsPopup( );
+							} 
 						}
 
 						// Second column, list actions for creating/loading projects
@@ -509,6 +675,11 @@ namespace Enjon
 				} 
 			}
 			ImGui::End(); 
+
+			if ( mNeedRegenProjectPopupDialogue )
+			{
+				LoadProjectRegenPopupDialogueView();
+			}
 		});
 
 		GUIContextParams params = {};

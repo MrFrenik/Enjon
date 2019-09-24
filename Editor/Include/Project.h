@@ -159,6 +159,8 @@ namespace Enjon
 
 			b32 IsSandboxRunning();
 
+			void OpenProjectFolder( );
+
 		protected:
 
 			b32 RegenerateProjectBuild();

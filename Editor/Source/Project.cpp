@@ -562,6 +562,16 @@ namespace Enjon
 	}
 
 	//======================================================================
+
+	void Project::OpenProjectFolder( )
+	{
+#ifdef ENJON_SYSTEM_WINDOWS
+		String arg = "start \"\" \"" + mProjectPath + "\"";
+		s32 code = system( arg.c_str() ); 
+#endif
+	}
+
+	//======================================================================
 }
 
 

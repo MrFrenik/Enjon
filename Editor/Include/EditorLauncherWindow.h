@@ -18,6 +18,13 @@ namespace Enjon
 		ProjectCreation
 	};
 
+	typedef struct ProjectOptionsStruct 
+	{
+		Project* mSelectedProject = nullptr;
+		Vec2 mPosition;
+		bool mHovered = false;
+	} ProjectOptionsStruct;
+
 	ENJON_CLASS( Construct )
 	class EditorLauncherWindow : public Window
 	{
@@ -35,12 +42,17 @@ namespace Enjon
 			void ProjectMenuScreen();
 			void ProjectCreationScreen();
 			void LoadProjectScreen();
+			void ProjectOptionsPopup( );
+			void LoadProjectRegenPopupDialogueView( );
 
 		private: 
 			EditorApp* mApp = nullptr;
 			EditorLauncherScreenType mScreenType = EditorLauncherScreenType::Main;
 			Project mNewProject;
 			ToolChainDefinition* mToolChainDef = nullptr;
+			ProjectOptionsStruct mProjectOptionStruct; 
+			b32 mNeedRegenProjectPopupDialogue = false;
+			Project* mProjectToRegen = nullptr;
 	};
 }
 

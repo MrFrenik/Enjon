@@ -375,6 +375,7 @@ namespace Enjon
 			bool mNeedReload = false;
 			bool mNeedRegenProject = false; 
 			bool mNeedRegenProjectPopupDialogue = false;
+			bool mNeedSaveScene = false;
 
 			Enjon::f32 mCameraSpeed = 10.f;
 			Enjon::f32 mMouseSensitivity = 10.0f;
