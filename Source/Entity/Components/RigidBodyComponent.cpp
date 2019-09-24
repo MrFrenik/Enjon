@@ -356,4 +356,13 @@ namespace Enjon
 		return Result::SUCCESS;
 	}
 
+	//======================================================================== 
+
+	Result RigidBodyComponent::OnViewportDebugDraw()
+	{
+		return mBody.OnViewportDebugDraw();
+	}
+
+	//======================================================================== 
+
 }

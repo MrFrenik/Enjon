@@ -316,7 +316,7 @@ namespace Enjon
 	GraphicsScene* Camera::GetGraphicsScene( ) const
 	{
 		return mGraphicsScene;
-	}
+	} 
 
 	//=======================================================================================================
 }

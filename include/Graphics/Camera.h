@@ -32,7 +32,7 @@ namespace Enjon
 			/*
 			* @brief Constructor
 			*/
-			virtual void ExplicitConstructor( ) override;
+			virtual void ExplicitConstructor( ) override; 
 
 			/*
 			* @brief Constructor

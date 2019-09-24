@@ -49,7 +49,7 @@ message("cxx Flags:" ${CMAKE_CXX_FLAGS})
 include_directories(${TARGET_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
 					${ENJON_DIR}/ThirdParty/Build/Include/Bullet
-					${ENJON_DIR}/ThirdParty/Build/Include/libzmq/include
+					${ENJON_DIR}/ThirdParty/Build/Include/zmq/include
 					${ENJON_INC}
 					)
 

@@ -40,7 +40,7 @@ namespace ImGui
 		float mWeight;
 	};
 
-	void ConstructContext( ImGuiContext* ctx );
+	void RemoveDockingContext( ImGuiContext* ctx );
 
 	IMGUI_API void ShutdownDock();
 	IMGUI_API void RootDock(const ImVec2& pos, const ImVec2& size);

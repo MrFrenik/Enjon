@@ -1400,6 +1400,20 @@ namespace ImGui
 		return &mContextMap[ ctx ];
 	} 
 
+	void RemoveDockingContext( ImGuiContext* ctx )
+	{
+		if ( !ctx ) 
+		{
+			return;
+		}
+
+		auto query = mContextMap.find( ctx );
+		if ( query != mContextMap.end() )
+		{
+			mContextMap.erase( ctx );
+		}
+	}
+
 	void Print() 
 	{ 
 		// DockContext* ctx = GetCurrentDockingContext( );

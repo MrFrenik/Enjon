@@ -1484,6 +1484,11 @@ namespace Enjon
 			* @brief
 			*/
 			virtual Result OnEditorUI( );
+
+			/*
+			* @brief
+			*/
+			virtual Result OnViewportDebugDraw();
  
 			/*
 			* @brief

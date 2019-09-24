@@ -51,6 +51,7 @@ endif()
 include_directories(${ENJON_DIR}/Include
 					${ENJON_DIR}/ThirdParty/Build/Include
 					${ENJON_DIR}ThirdParty/Build/Include/Bullet
+					${ENJON_DIR}ThirdParty/Build/Include/zmq/include
 )
 
 # Output generation file
@@ -338,6 +339,8 @@ set(
 		glew32.dll
 		assimp.dll
 		assimp_d.dll
+		libzmq-v142-mt-4_3_3.dll
+		libzmq-v142-mt-gd-4_3_3.dll
 	)
 
 # List of build directories

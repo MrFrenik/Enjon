@@ -42,13 +42,19 @@ int main(int argc, char** argv)
 	SandboxApp mApp( projDir );
 	Enjon::Engine mEngine; 
 	Enjon::EngineConfig mConfig; 
+	
+#ifdef _DEBUG
+	String buildConfig = "( Debug )";
+#else
+	String buildConfig = "( Release )";
+#endif
 
 	WindowParams params;
 	params.mFlags = WindowFlags::RESIZABLE;
 	params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< Window >(); };
 	params.mWidth = 900;
 	params.mHeight = 506;
-	params.mName = "Sandbox: " + projName;
+	params.mName = "Sandbox: " + projName + " " + buildConfig;
 
 	// Set root path to engine
 	mConfig.SetRootPath( enjonDir ); 

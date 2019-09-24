@@ -136,7 +136,7 @@ namespace Enjon
 	void GUIContext::Finalize( )
 	{
 		LateInit( );
-	}
+	} 
 
 	//===================================================================================================
 
@@ -149,11 +149,14 @@ namespace Enjon
 
 	void GUIContext::ClearContext( )
 	{ 
+		// Clear docking layout with context
+		ImGui::RemoveDockingContext( mContext ); 
+
 		mGuiFuncs.clear();
 		mWindows.clear();
 		mMainMenuOptions.clear();
 		mDockingLayouts.clear(); 
-		mMainMenuLayout.clear( );
+		mMainMenuLayout.clear( ); 
 	}
 
 	//===================================================================================================

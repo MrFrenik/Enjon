@@ -67,7 +67,7 @@ namespace Enjon
 		public:
 	
 		ENJON_PROPERTY( DisplayName = "label" )
-		String mLabel;
+		String mLabel = "";
 
 		ENJON_PROPERTY( DisplayName = "cmake_generator" )
 		String mCMakeGenerator;
@@ -95,6 +95,9 @@ namespace Enjon
 
 		ENJON_PROPERTY( DisplayName = "libraries" )
 		Vector< String > mLibraries; 
+
+		ENJON_PROPERTY( DisplayName = "compiler_path" )
+		String mCompilerPath;
 	};
 
 	struct ProjectConfig
@@ -103,6 +106,22 @@ namespace Enjon
 		String mPath = "";
 		ToolChainDefinition mToolChain;
 	};
+
+	typedef struct ProjectSourceFileTemplates
+	{ 
+		String mProjectsPath = "";
+		String mProjectSourceTemplate = "";
+		String mProjectCMakeTemplate = "";
+		String mProjectDelBatTemplate = "";
+		String mProjectBuildAndRunTemplate = "";
+		String mProjectBuildAndRunCompileTemplate = "";
+		String mComponentSourceTemplate = "";
+		String mCompileProjectBatTemplate = "";
+		String mCompileProjectCMakeTemplate = "";
+		String mProjectMainTemplate = "";
+		String mProjectEnjonDefinesTemplate = "";
+		String mProjectBuildBatTemplate = "";
+	} ProjectSourceFileTemplates;
 
 	ENJON_CLASS( Construct )
 	class Project : public Object
@@ -139,6 +158,12 @@ namespace Enjon
 			void KillSandbox();
 
 			b32 IsSandboxRunning();
+
+		protected:
+
+			b32 RegenerateProjectBuild();
+
+			static b32 CreateNewProject( const ProjectConfig& projectConfig, const ProjectSourceFileTemplates& templates );
 
 		private:
 

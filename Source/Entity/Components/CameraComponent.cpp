@@ -98,4 +98,58 @@ namespace Enjon
 	}
 
 	//==================================================================== 
+
+	Result CameraComponent::OnViewportDebugDraw()
+	{
+		// Draw lines extending as frustum from center point of camera
+		// I guess this is right?...I dunno...
+		Entity* ent = GetEntity();
+		Transform wt = ent->GetWorldTransform();
+		Vec3 wp = wt.GetPosition();
+		Vec3 right = ent->Right();
+		Vec3 up = ent->Up();
+		Vec3 bward = -ent->Forward();
+		Quaternion negAAR = Quaternion::AngleAxis( Math::ToRadians( -45.f ), right );
+		Quaternion negAAU = Quaternion::AngleAxis( Math::ToRadians( -45.f ), up );
+		Quaternion posAAR = Quaternion::AngleAxis( Math::ToRadians( 45.f ), right );
+		Quaternion posAAU = Quaternion::AngleAxis( Math::ToRadians( 45.f ), up );
+
+		//Vec3 tl = wp + Vec3::Normalize(-bward * Quaternion::AngleAxis(Math::ToRadians(45.f), ent->Right()) * Quaternion::AngleAxis(Math::ToRadians(-45.f), ent->Up()) * 5.f );
+		//Vec3 tr = wp + Vec3::Normalize(-bward * Quaternion::AngleAxis(Math::ToRadians(45.f), ent->Right()) * Quaternion::AngleAxis(Math::ToRadians(45.f), ent->Up()) * 5.f );
+		//Vec3 bl = wp + Vec3::Normalize(-bward * Quaternion::AngleAxis(Math::ToRadians(-45.f), ent->Right()) * Quaternion::AngleAxis(Math::ToRadians(-45.f), ent->Up()) * 5.f );
+		//Vec3 br = wp + Vec3::Normalize(-bward * Quaternion::AngleAxis(Math::ToRadians(45.f), ent->Right()) * Quaternion::AngleAxis(Math::ToRadians(45.f), ent->Up()) * 5.f );
+
+		Vec3 tl = wp + Vec3::Normalize( bward * posAAR * negAAU ) * 5.f;
+		Vec3 tr = wp + Vec3::Normalize( bward * posAAR * posAAU ) * 5.f;
+		Vec3 bl = wp + Vec3::Normalize( bward * negAAR * negAAU ) * 5.f;
+		Vec3 br = wp + Vec3::Normalize( bward * negAAR * posAAU ) * 5.f;
+
+		// This should be a context thing...
+		//EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( wt.GetPosition(), tl );
+		//EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( wt.GetPosition(), tr );
+		//EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( wt.GetPosition(), bl );
+		//EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( wt.GetPosition(), br ); 
+
+		EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( wp, tl);
+		EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( wp, tr);
+		EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( wp, bl);
+		EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( wp, br);
+
+		EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( tl, tr );
+		EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( tr, br );
+		EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( br, bl );
+		EngineSubsystem( GraphicsSubsystem )->DrawDebugLine( bl, tl ); 
+
+		return Result::SUCCESS;
+	}
+
+	//==================================================================== 
 }
+
+
+
+
+
+
+
+

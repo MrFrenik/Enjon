@@ -94,6 +94,11 @@ namespace Enjon
 			/**
 			* @brief
 			*/
+			virtual Result OnViewportDebugDraw() override;
+
+			/**
+			* @brief
+			*/
 			void SetMass( const f32& mass );
 
 			/**

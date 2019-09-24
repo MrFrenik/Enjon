@@ -261,19 +261,8 @@ namespace Enjon
 			* @brief 
 			*/
 			String GetBuildConfig( ) const;
- 
-			/**
-			* @brief 
-			*/
-			String GetVisualStudioDirectoryPath( ) const;
 
-			String GetProjectMainTemplate( ) const;
-
-			String GetCompileProjectCMakeTemplate( ) const;
-
-			String GetBuildAndRunCompileTemplate( ) const;
-
-			String GetProjectEnjonDefinesTemplate( ) const;
+			ConfigurationType GetConfigType() const; 
 
 			Project* GetProject( );
 
@@ -305,6 +294,8 @@ namespace Enjon
 
 			void PreCreateNewProject( const ProjectConfig& projectName );
 
+			const ProjectSourceFileTemplates& GetProjectSourceFileTemplates() const;
+
 		public:
 			Vec4 mRectColor = Vec4( 0.8f, 0.3f, 0.1f, 1.0f );
 
@@ -319,7 +310,8 @@ namespace Enjon
 			void ProjectListView( ); 
 			void NewProjectView( );
 
-			void LoadProjectView( );
+			void LoadProjectPopupDialogueView( ); 
+			void LoadProjectRegenPopupDialogueView();
 			void CheckForPopups( );
 
 			void CreateNewProject( const ProjectConfig& projectName );
@@ -360,6 +352,8 @@ namespace Enjon
 
 			void SetupLocalServer();
 
+			void CopyLibraryContents( const String& projectName, const String& projectDir );
+
 		private:
 			bool mViewBool = true;
 			bool mShowCameraOptions = true;
@@ -379,6 +373,8 @@ namespace Enjon
 			bool mNeedsLoadProject = false;
 			bool mNeedRecompile = false;
 			bool mNeedReload = false;
+			bool mNeedRegenProject = false; 
+			bool mNeedRegenProjectPopupDialogue = false;
 
 			Enjon::f32 mCameraSpeed = 10.f;
 			Enjon::f32 mMouseSensitivity = 10.0f;
@@ -388,19 +384,8 @@ namespace Enjon
 
 			String mNewProjectName = "NewProject";
 			ProjectConfig mNewProjectConfig;
- 
-			String mProjectsPath = "";
-			String mProjectSourceTemplate = "";
-			String mProjectCMakeTemplate = "";
-			String mProjectDelBatTemplate = "";
-			String mProjectBuildAndRunTemplate = "";
-			String mProjectBuildAndRunCompileTemplate = "";
-			String mComponentSourceTemplate = "";
-			String mCompileProjectBatTemplate = "";
-			String mCompileProjectCMakeTemplate = "";
-			String mProjectMainTemplate = "";
-			String mProjectEnjonDefinesTemplate = "";
-			String mProjectBuildBatTemplate = "";
+
+			ProjectSourceFileTemplates mProjectSourceFileTemplates;
 
 			String mProjectOnLoad = "";
 
@@ -435,6 +420,8 @@ namespace Enjon
 
 			ENJON_PROPERTY( HideInEditor )
 			EditorConfigSettings mConfigSettings; 
+
+			ConfigurationType mBuildConfigType = ConfigurationType::Release;
 	}; 
 
 	// Declaration for module export

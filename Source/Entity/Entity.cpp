@@ -53,6 +53,8 @@ namespace Enjon
 						RemoveComponent( c->Class( ) );
 					}
 				}
+
+				c->OnViewportDebugDraw(); 
 			} 
 
 			/*

@@ -165,6 +165,13 @@ namespace Enjon
 
 	//======================================================================================
 
+	Result Object::OnViewportDebugDraw()
+	{
+		return Result::INCOMPLETE;
+	}
+
+	//======================================================================================
+
 	Result Object::MergeWith( Object* other, MergeType mergeType )
 	{
 		return Result::INCOMPLETE;

@@ -663,23 +663,33 @@ namespace Enjon
 				SetWorldTransform( wt );
 			} 
 
-			// Get bullet transform from bullet motion body
-			BTransform trans;
-			BV3 aabbMin;
-			BV3 aabbMax;
-			mBody->getMotionState( )->getWorldTransform( trans ); 
-			mShape->GetRawShape( )->getAabb( trans, aabbMin, aabbMax ); 
-
-			// Debug draw physics object
-			BTransform wt;
-			mBody->getMotionState( )->getWorldTransform( wt );
-			EngineSubsystem( PhysicsSubsystem )->GetWorld( )->debugDrawObject( wt, mShape->GetRawShape( ), BV3( 1.0f, 1.0f, 1.0f ) );
-
-			// Draw debug aabb
-			GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
-			gfx->DrawDebugAABB( PhysicsUtils::BV3ToVec3( aabbMin ), PhysicsUtils::BV3ToVec3( aabbMax ), Vec3( 0.0f, 1.0f, 0.0f ) ); 
 		} 
 
 		return Result::SUCCESS;
 	}
+
+	//========================================================================
+
+	Result RigidBody::OnViewportDebugDraw()
+	{
+		// Get bullet transform from bullet motion body
+		BTransform trans;
+		BV3 aabbMin;
+		BV3 aabbMax;
+		mBody->getMotionState( )->getWorldTransform( trans ); 
+		mShape->GetRawShape( )->getAabb( trans, aabbMin, aabbMax ); 
+
+		// Debug draw physics object
+		BTransform wt;
+		mBody->getMotionState( )->getWorldTransform( wt );
+		EngineSubsystem( PhysicsSubsystem )->GetWorld( )->debugDrawObject( wt, mShape->GetRawShape( ), BV3( 1.0f, 1.0f, 1.0f ) );
+
+		// Draw debug aabb
+		GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
+		gfx->DrawDebugAABB( PhysicsUtils::BV3ToVec3( aabbMin ), PhysicsUtils::BV3ToVec3( aabbMax ), Vec3( 0.0f, 1.0f, 0.0f ) ); 
+
+		return Result::SUCCESS;
+	}
+
+	//========================================================================
 }

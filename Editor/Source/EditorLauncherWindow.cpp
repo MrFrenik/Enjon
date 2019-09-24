@@ -328,7 +328,7 @@ namespace Enjon
 
 					// Do button for selecting directory
 					ImGui::SameLine(); ImGui::SetCursorPosX( ImGui::GetWindowWidth() * 0.889f );
-					if ( ImGui::Button( "..." ) ) 
+					if ( ImGui::Button( "...##proj_location" ) ) 
 					{
 						// Open file picking dialogue
 						nfdchar_t* folder;
@@ -362,6 +362,32 @@ namespace Enjon
 							}
 						}
 						ImGui::EndCombo();
+					}
+				}
+
+				if ( mToolChainDef )
+				{ 
+					char tmpBuffer[1024];
+					strncpy( tmpBuffer, mToolChainDef->mCompilerPath.c_str(), 1024 );
+					ImGui::PushItemWidth( ImGui::GetWindowWidth() * 0.77f );
+					ImGui::Text( "Compiler" ); ImGui::SameLine(); ImGui::SetCursorPosX( 100.f );
+					if (ImGui::InputText( "##compiler_path", tmpBuffer, 250 ))
+					{
+						mToolChainDef->mCompilerPath = tmpBuffer;
+					}
+					ImGui::PopItemWidth(); 
+
+					// Do button for selecting directory
+					ImGui::SameLine(); ImGui::SetCursorPosX( ImGui::GetWindowWidth() * 0.889f );
+					if ( ImGui::Button( "...##compiler_path" ) ) 
+					{
+						// Open file picking dialogue
+						nfdchar_t* file;
+						nfdresult_t res = NFD_OpenDialog( "exe", NULL, &file );
+						if (res == NFD_OKAY)
+						{
+							mToolChainDef->mCompilerPath = file;
+						}
 					}
 				}
 
