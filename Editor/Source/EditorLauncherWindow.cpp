@@ -491,7 +491,7 @@ namespace Enjon
 					ImGui::PopItemWidth(); 
 
 					// Do button for selecting directory
-					ImGui::SameLine(); ImGui::SetCursorPosX( ImGui::GetWindowWidth() * 0.889f );
+					ImGui::SameLine(); ImGui::SetCursorPosX( ImGui::GetWindowWidth() * 0.9f );
 					if ( ImGui::Button( "...##compiler_path" ) ) 
 					{
 						// Open file picking dialogue
@@ -576,6 +576,7 @@ namespace Enjon
 	{
 		ImGui::SetNextWindowPos( ImVec2( mProjectOptionStruct.mPosition.x, mProjectOptionStruct.mPosition.y ) );
 		ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( 0.1f, 0.1f, 0.1f, 1.f ) );
+		ImGui::SetNextWindowSize( ImVec2( 150.f, 100.f ) );
 		ImGui::Begin( "##project_selection_options", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse );
 		{
 			mProjectOptionStruct.mHovered = ImGui::IsMouseHoveringWindow( );
@@ -586,6 +587,9 @@ namespace Enjon
 			{ 
 				if ( ImGui::MenuItem( "Launch" ) )
 				{ 
+					mApp->PreloadProject( *mProjectOptionStruct.mSelectedProject );
+					WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+					ws->DestroyWindow( GetWindowID() );
 					leave = true;
 				}
 
@@ -600,6 +604,24 @@ namespace Enjon
 				{ 
 					mNeedRegenProjectPopupDialogue = true; 
 					mProjectToRegen = mProjectOptionStruct.mSelectedProject;
+					leave = true;
+				}
+
+				if ( ImGui::MenuItem( "Remove From List" ) )
+				{
+					// How to remove from list?	
+					s32 index = -1;
+					for ( u32 i = 0; i < mApp->GetConfigSettings( )->mProjectList.size( ); ++i ) {
+						if ( mProjectOptionStruct.mSelectedProject == &mApp->GetConfigSettings( )->mProjectList.at( i ) ) {
+							index = i;
+							break;
+						}
+					}
+
+					if ( index != -1 ) {
+						mApp->GetConfigSettings( )->mProjectList.erase( mApp->GetConfigSettings( )->mProjectList.begin( ) + index );
+					}
+
 					leave = true;
 				}
 			} 
