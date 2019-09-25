@@ -267,13 +267,16 @@ namespace Enjon
 				for ( auto& p : ghc::filesystem::recursive_directory_iterator( outPath ) )
 				{
 					// Get file extension of passed in file
-					String fileExt = "." + Utils::SplitString( p.path().string(), "." ).back( );
+					String path = Utils::FindReplaceAll( p.path( ).string( ), "\\", "/" );
+					auto pathVec = Utils::SplitString( path, "/" );
+					String projName = Utils::SplitString( pathVec.back( ), "." ).front();
+					String fileExt = "." + Utils::SplitString( pathVec.back( ), "." ).back();
 					if ( fileExt.compare( ".eproj" ) == 0 )
 					{
 						// Load project (want to get all of this information from the project directory, obviously)
 						Project proj; 
 						proj.SetProjectPath( String( outPath ) + "/" );
-						proj.SetProjectName( "NewProject" );					// This isn't correct...
+						proj.SetProjectName( projName );					// This isn't correct, yeah, not at all...
 						proj.SetEditor( mApp );
 						mApp->PreloadProject( proj );
 						mApp->GetConfigSettings()->mProjectList.push_back(proj);
