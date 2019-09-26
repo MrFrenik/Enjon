@@ -6,8 +6,6 @@
 #include <Graphics/GraphicsSubsystem.h>
 #include <SubsystemCatalog.h>
 
-#include <fmt/format.h>
-
 #include "EditorScaleWidget.h"
 
 namespace Enjon

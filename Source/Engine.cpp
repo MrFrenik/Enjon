@@ -18,7 +18,6 @@
 #include "SubsystemCatalog.h"
 #include "Base/World.h"
 
-#include "fmt/printf.h" 
 #include "SDL2/SDL.h"
 
 #include <assert.h>

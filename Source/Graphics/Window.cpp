@@ -12,8 +12,6 @@
 	#include <Windows.h>
 #endif
 
-#include <fmt/format.h>
-
 namespace Enjon 
 { 
 	// This ALL needs to be held within an object in the engine
@@ -209,13 +207,6 @@ namespace Enjon
 	void Window::PrintDebugInfo( )
 	{
 #ifdef ENJON_SYSTEM_WINDOWS
-		s32 x, y, sizeX, sizeY;
-		SDL_GetWindowPosition( m_sdlWindow, &x, &y ); 
-		SDL_GetWindowSize( m_sdlWindow, &sizeX, &sizeY );
-		Vec2 mouseCoords = EngineSubsystem( Input )->GetMouseCoords( ); 
-		POINT point;
-		GetCursorPos( &point ); 
-		std::cout << fmt::format( "WindowMin: <{}, {}>, WindowMax: <{}, {}>, MouseCoords: <{}, {}>, Contains: {}\n", x, y, x + sizeX, y + sizeY, point.x, point.y, IsMouseInWindow( ) );
 #endif
 	}
 

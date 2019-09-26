@@ -417,7 +417,7 @@ namespace Enjon
 
 			Vector< ReloadDLLCallback > mReloadDLLCallbacks;
 
-			Window* mProjectSelectionWindow = nullptr;
+			s32 mProjectSelectionWindow = -1;
 
 			ENJON_PROPERTY( HideInEditor )
 			EditorConfigSettings mConfigSettings; 

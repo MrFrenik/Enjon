@@ -43,6 +43,8 @@ include_directories(
 					)
 
 # Add lib directories
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Windows/Release)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Windows/Debug)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
 link_directories(${ENJON_DIR}/Build/Debug)
@@ -83,15 +85,7 @@ target_link_libraries( ${TARGET_NAME} debug SDL2main_d.lib optimized SDL2main.li
 target_link_libraries( ${TARGET_NAME} debug glew32_d.lib optimized glew32.lib )
 target_link_libraries( ${TARGET_NAME} debug glew32s_d.lib optimized glew32s.lib )
 target_link_libraries( ${TARGET_NAME} debug freetype_d.lib optimized freetype.lib )
-target_link_libraries( ${TARGET_NAME} debug Bullet3Collision_d.lib optimized Bullet3Collision.lib )
-target_link_libraries( ${TARGET_NAME} debug Bullet3Dynamics_d.lib optimized Bullet3Dynamics.lib )
-target_link_libraries( ${TARGET_NAME} debug Bullet3Common_d.lib optimized Bullet3Common.lib )
-target_link_libraries( ${TARGET_NAME} debug LinearMath_d.lib optimized LinearMath.lib )
-target_link_libraries( ${TARGET_NAME} debug BulletDynamics_d.lib optimized BulletDynamics.lib )
-target_link_libraries( ${TARGET_NAME} debug BulletCollision_d.lib optimized BulletCollision.lib )
-target_link_libraries( ${TARGET_NAME} debug fmt_d.lib optimized fmt.lib )
-target_link_libraries( ${TARGET_NAME} debug liblz4_d.lib optimized liblz4.lib ) 
-target_link_libraries( ${TARGET_NAME} debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
+target_link_libraries( ${TARGET_NAME} debug assimp.lib optimized assimp_d.lib ) 
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${TARGET_BUILD_DIR})
 
@@ -106,10 +100,10 @@ set(
 		DLL_LIST
 
 		SDL2.dll
-		freetype6.dll
+		freetype.dll
 		glew32.dll
-		assimp.dll
-		assimp_d.dll
+		assimp-vc142-mt.dll
+		assimp-vc142-mtd.dll
 	)
 
 # List of build directories

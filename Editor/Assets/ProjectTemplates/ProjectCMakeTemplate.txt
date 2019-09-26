@@ -48,6 +48,9 @@ include_directories(
 
 set(
 	ENJON_LIB_DIRS
+
+	${ENJON_DIR}/ThirdParty/Build/Libraries/Windows/Release
+	${ENJON_DIR}/ThirdParty/Build/Libraries/Windows/Debug
 	${ENJON_DIR}/ThirdParty/Build/Libraries/Release
 	${ENJON_DIR}/ThirdParty/Build/Libraries/Debug
 	${ENJON_DIR}/ThirdParty/Build/Libraries/OSX/Release
@@ -58,6 +61,8 @@ set(
 )
 
 # Add lib directories
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Windows/Release)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Windows/Debug)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/OSX/Release)
@@ -115,9 +120,7 @@ if (MSVC)
 	target_link_libraries( ${PROJ_NAME} debug glew32_d.lib optimized glew32.lib )
 	target_link_libraries( ${PROJ_NAME} debug glew32s_d.lib optimized glew32s.lib )
 	target_link_libraries( ${PROJ_NAME} debug freetype_d.lib optimized freetype.lib )
-	target_link_libraries( ${PROJ_NAME} debug fmt_d.lib optimized fmt.lib )
-	target_link_libraries( ${PROJ_NAME} debug liblz4_d.lib optimized liblz4.lib ) 
-	target_link_libraries( ${PROJ_NAME} debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
+	target_link_libraries( ${PROJ_NAME} debug assimp.lib optimized assimp_d.lib ) 
 else()
 	target_link_libraries( ${PROJ_NAME} Enjon.a )
 	target_link_libraries( ${PROJ_NAME} assimp.a )
@@ -183,9 +186,10 @@ set(
 		DLL_LIST
 
 		SDL2.dll
-		freetype6.dll
+		freetype.dll
 		glew32.dll
-		assimp.dll
+		assimp-vc142-mt.dll
+		assimp-vc142-mtd.dll
 	)
 
 # List of build directories

@@ -4,7 +4,6 @@
 #include "Math/Vec2.h"
 
 #include <iostream>
-#include <fmt/format.h>
 
 namespace Enjon 
 {  

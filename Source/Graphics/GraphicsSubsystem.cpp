@@ -43,9 +43,6 @@
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <fmt/format.h> 
-#include <fmt/string.h>
-#include <fmt/printf.h>
 
 #define SSAO_KERNEL_SIZE 16
 

@@ -22,7 +22,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <fmt/printf.h> 
 #include <stdio.h>
 
 namespace Enjon

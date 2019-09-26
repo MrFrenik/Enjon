@@ -1856,7 +1856,8 @@ namespace Enjon
 			if ( CreateProjectView( ) )
 			{
 				WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-				ws->DestroyWindow( mProjectSelectionWindow->GetWindowID() );
+				ws->DestroyWindow( mProjectSelectionWindow );
+				mProjectSelectionWindow = -1;
 			}
 		}
 		ImGui::EndDock( );
@@ -1891,9 +1892,8 @@ namespace Enjon
 		params.mHeight = 500;
 		params.mName = "Enjon: Project Browser";
 		params.mData = this;
-		s32 wid = EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
+		mProjectSelectionWindow = EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 		EngineSubsystem( WindowSubsystem )->ForceInitWindows( );
-		mProjectSelectionWindow = EngineSubsystem( WindowSubsystem )->GetWindow( wid ); 
 	}
 
 	//================================================================================================================
@@ -2009,7 +2009,7 @@ namespace Enjon
 
 		ToolChainDefinition vsMSBuild2015;
 		vsMSBuild2015.mLabel									= "VS2015_MSBuild";
-		vsMSBuild2015.mCMakeGenerator							= "\"Visual Studio 14 2015\" -A Win32";
+		vsMSBuild2015.mCMakeGenerator							= "\"Visual Studio 14 2015\"";
 		vsMSBuild2015.mCommand									= "\"${PROJ_COMPILER_PATH}\"";
 		vsMSBuild2015.mArgs[(u32)ConfigurationType::Release]	= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release";
 		vsMSBuild2015.mArgs[(u32)ConfigurationType::Debug]		= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug";
@@ -2023,7 +2023,7 @@ namespace Enjon
 
 		ToolChainDefinition vsMSBuild2017;
 		vsMSBuild2017.mLabel									= "VS2017_MSBuild";
-		vsMSBuild2017.mCMakeGenerator							= "\"Visual Studio 15 2017\" -A Win32";
+		vsMSBuild2017.mCMakeGenerator							= "\"Visual Studio 15 2017\"";
 		vsMSBuild2017.mCommand									= "\"${PROJ_COMPILER_PATH}\"";
 		vsMSBuild2017.mArgs[(u32)ConfigurationType::Release]	= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release";
 		vsMSBuild2017.mArgs[(u32)ConfigurationType::Debug]		= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug";
@@ -2037,7 +2037,7 @@ namespace Enjon
 
 		ToolChainDefinition vsMSBuild2019;
 		vsMSBuild2019.mLabel									= "VS2019_MSBuild";
-		vsMSBuild2019.mCMakeGenerator							= "\"Visual Studio 16 2019\" -A Win32";
+		vsMSBuild2019.mCMakeGenerator							= "\"Visual Studio 16 2019\"";
 		vsMSBuild2019.mCommand									= "\"${PROJ_COMPILER_PATH}\"";
 		vsMSBuild2019.mArgs[(u32)ConfigurationType::Release]	= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release";
 		vsMSBuild2019.mArgs[(u32)ConfigurationType::Debug]		= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug";

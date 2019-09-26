@@ -16,7 +16,6 @@
 #include <IO/InputManager.h>
 #include <SubsystemCatalog.h>
 #include <Engine.h>
-#include <fmt/format.h>
 
 namespace Enjon 
 { 

@@ -10,8 +10,6 @@
 #include <SubsystemCatalog.h>
 #include <IO/InputManager.h>
 
-#include <fmt/format.h> 
-
 namespace Enjon
 {
 	void EditorTransformWidget::Initialize( EditorViewport* vp )

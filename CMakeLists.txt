@@ -68,8 +68,8 @@ if ( NOT EXISTS ${ENJON_GENERATED_DIR}/Enjon_Generated.cpp )
 endif()
 
 # Add lib directories
-link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Release)
-link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Debug)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Windows/Release)
+link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/Windows/Debug)
 link_directories(${ENJON_DIR}/ThirdParty/Build/Libraries/OSX/Release)
 
 set(ENJON_SRC "${ENJON_DIR}/Source")
@@ -275,14 +275,11 @@ add_library( Enjon ${ALL_SRC})
 
 # Link libraries
 if (MSVC)
-	target_link_libraries( Enjon debug Opengl32.lib optimized Opengl32.lib ) 
 	target_link_libraries( Enjon debug SDL2_d.lib optimized SDL2.lib )
 	target_link_libraries( Enjon debug SDL2main_d.lib optimized SDL2main.lib )
 	target_link_libraries( Enjon debug glew32_d.lib optimized glew32.lib )
 	target_link_libraries( Enjon debug glew32s_d.lib optimized glew32s.lib )
 	target_link_libraries( Enjon debug freetype_d.lib optimized freetype.lib )
-	target_link_libraries( Enjon debug fmt_d.lib optimized fmt.lib )
-	target_link_libraries( Enjon debug liblz4_d.lib optimized liblz4.lib ) 
 	target_link_libraries( Enjon debug assimp-vc140-mt.lib optimized assimp-vc140-mt.lib ) 
 	target_link_libraries( Enjon debug nfd_d.lib optimized nfd.lib ) 
 else()
@@ -335,10 +332,10 @@ set(
 		DLL_LIST
 
 		SDL2.dll
-		freetype6.dll
+		freetype.dll
 		glew32.dll
-		assimp.dll
-		assimp_d.dll
+		assimp-vc142-mt.dll
+		assimp-vc142-mtd.dll
 		libzmq-v142-mt-4_3_3.dll
 		libzmq-v142-mt-gd-4_3_3.dll
 	)
