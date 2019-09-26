@@ -9,7 +9,6 @@
 #include "EditorTransformWidget.h"
 #include "EditorView.h"
 #include "EditorSceneView.h"
-#include "EditorInspectorView.h"
 #include "EditorObject.h"
 
 #include <Application.h>
@@ -31,6 +30,9 @@ namespace Enjon
 	class EditorWorldOutlinerView;
 	class EditorArchetypeEditWindow; 
 	class EditorTransformWidgetToolBar;
+	class EditorSceneView;
+	class EditorDocumentationView; 
+	class EditorInspectorView;
 
 	enum class TransformMode
 	{
@@ -405,12 +407,12 @@ namespace Enjon
 			AssetHandle<Scene> mCurrentScene; 
 
 			EditorViewport* mEditorSceneView = nullptr;
-			//EditorSceneView* mEditorSceneView = nullptr; 
 			EditorInspectorView* mInspectorView = nullptr; 
 			EditorAssetBrowserView* mAssetBroswerView = nullptr; 
 			EditorWorldOutlinerView* mWorldOutlinerView = nullptr; 
 			EditorArchetypeEditWindow* mArchetypeWindow = nullptr;
 			EditorTransformWidgetToolBar* mTransformToolBar = nullptr;
+			EditorDocumentationView* mDocumentationView = nullptr;
 
 			Camera mEditorCamera;
 			Vec3 mCameraRotator = Vec3( 0.0f ); 

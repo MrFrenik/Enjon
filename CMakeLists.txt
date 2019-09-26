@@ -19,9 +19,7 @@ set (EXECUTABLE_OUTPUT_PATH ${ENJON_BUILD_DIR})
 # Turn on ability to create folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()	
+set(CMAKE_BUILD_TYPE Release)
 	
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")	
 

@@ -3,6 +3,7 @@
 #include "EditorMaterialEditWindow.h"
 #include "EditorWorldOutlinerView.h"
 #include "EditorAssetBrowserView.h"
+#include "EditorInspectorView.h"
 #include "EditorApp.h"
 
 #include <Graphics/GraphicsSubsystem.h>

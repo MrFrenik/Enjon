@@ -57,8 +57,50 @@ namespace Enjon
 		Transform,
 		AssetHandle,
 		EntityHandle,
-		iVec3
+		iVec2,
+		iVec3,
+		iVec4
 	};
+
+#define _META_PROP_TO_STR( str )\
+	{ return str; } break;
+
+	static inline const char* MetaPropertyTypeToStr( const MetaPropertyType& type )
+	{
+		switch ( type )
+		{
+			case MetaPropertyType::Object:			{ return "Object"; } break;
+			case MetaPropertyType::Bool:			{ return "Bool"; } break;
+			case MetaPropertyType::ColorRGBA32:		{ return "ColorRGBA32"; } break;
+			case MetaPropertyType::F32:				{ return "f32"; } break;
+			case MetaPropertyType::F64:				{ return "f64;"; } break;
+			case MetaPropertyType::U8:				{ return "u8"; } break; 
+			case MetaPropertyType::U16:				{ return "u16"; } break;
+			case MetaPropertyType::U32:				{ return "u32"; } break;
+			case MetaPropertyType::U64:				{ return "u64"; } break;
+			case MetaPropertyType::S8:				{ return "s8"; } break;
+			case MetaPropertyType::S16:				{ return "s16"; } break;
+			case MetaPropertyType::S32:				{ return "s32"; } break;
+			case MetaPropertyType::S64:				{ return "s64"; } break;
+			case MetaPropertyType::String:			{ return "String"; } break;
+			case MetaPropertyType::Array:			{ return "Array"; } break;
+			case MetaPropertyType::HashMap:			{ return "HashMap"; } break;
+			case MetaPropertyType::Vec2:			{ return "Vec2"; } break;
+			case MetaPropertyType::Vec3:			{ return "Vec3"; } break;
+			case MetaPropertyType::Vec4:			{ return "Vec4"; } break;
+			case MetaPropertyType::Mat4x4:			{ return "Mat4x4"; } break;
+			case MetaPropertyType::Quat:			{ return "Quaternion"; } break;
+			case MetaPropertyType::Enum:			{ return "Enum"; } break;
+			case MetaPropertyType::UUID:			{ return "UUID"; } break;
+			case MetaPropertyType::Transform:		{ return "Transform"; } break;
+			case MetaPropertyType::AssetHandle:		{ return "AssetHandle"; } break;
+			case MetaPropertyType::EntityHandle:	{ return "EntityHandle"; } break;
+			case MetaPropertyType::iVec2:			{ return "iVec2"; } break;
+			case MetaPropertyType::iVec3:			{ return "iVec3"; } break;
+			case MetaPropertyType::iVec4:			{ return "iVec4"; } break;
+			default:								{ return "invalid"; } break;
+		}
+	}
 
 	enum MetaPropertyFlags : u32
 	{
@@ -225,6 +267,11 @@ namespace Enjon
 			* @brief
 			*/
 			MetaPropertyType GetType( ) const;
+
+			/*
+			* @brief
+			*/
+			const char* GetTypeStr( ) const;
 
 			/*
 			* @brief
@@ -1291,6 +1338,11 @@ namespace Enjon
 				}
 
 				return nullptr;
+			}
+
+			const HashMap< u32, MetaClass* >& GetRegistry( ) const
+			{
+				return mRegistry;
 			}
 
 			/**

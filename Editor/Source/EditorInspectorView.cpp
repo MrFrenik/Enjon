@@ -32,7 +32,6 @@ namespace Enjon
 		 //Get ImGuiManager subsystem
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 
-
 		// New component dialogue
 		ImColor textCol = ImGui::GetColorU32( ImGuiCol_Text );
 		ImGui::PushFont( igm->GetFont( "Roboto-MediumItalic_14" ) );

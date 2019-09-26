@@ -8,6 +8,7 @@
 #include "EditorWorldOutlinerView.h"
 #include "EditorMaterialEditWindow.h"
 #include "EditorLauncherWindow.h"
+#include "EditorDocumentationView.h"
 
 #include <Engine.h>
 #include <Asset/AssetManager.h>
@@ -1400,6 +1401,7 @@ namespace Enjon
 		if ( mAssetBroswerView ) { delete( mAssetBroswerView ); mAssetBroswerView = nullptr; }
 		if ( mInspectorView ) { delete( mInspectorView ); mInspectorView = nullptr; }
 		if ( mTransformToolBar ) { delete( mTransformToolBar ); mTransformToolBar = nullptr; }
+		if ( mDocumentationView ) { delete( mDocumentationView ); mDocumentationView = nullptr; }
 
 		Window* mainWindow = EngineSubsystem( WindowSubsystem )->GetWindows( ).at( 0 );
 		assert( mainWindow != nullptr );
@@ -1442,6 +1444,10 @@ namespace Enjon
 		mAssetBroswerView = new EditorAssetBrowserView( this, mainWindow );
 		mInspectorView = new EditorInspectorView( this, mainWindow );
 		mTransformToolBar = new EditorTransformWidgetToolBar( this, mainWindow ); 
+		mDocumentationView = new EditorDocumentationView( this, mainWindow );
+
+		// Disable documentation view by default
+		mDocumentationView->Enable( false );
 
 		// Archetype callback for scene view
 		mEditorSceneView->SetViewportCallback( ViewportCallbackType::AssetDropArchetype, [ & ] ( const void* data )
@@ -1822,6 +1828,9 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Transform ToolBar", "Play Options", GUIDockSlotType::Slot_Right, 0.7f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.6f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Bottom, 0.3f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Documentation", "Viewport", GUIDockSlotType::Slot_Tab, 1.f ) );
+
+		guiContext->SetActiveDock( "Viewport" );
 
 		guiContext->Finalize( );
 	}
@@ -2009,7 +2018,7 @@ namespace Enjon
 
 		ToolChainDefinition vsMSBuild2015;
 		vsMSBuild2015.mLabel									= "VS2015_MSBuild";
-		vsMSBuild2015.mCMakeGenerator							= "\"Visual Studio 14 2015\"";
+		vsMSBuild2015.mCMakeGenerator							= "\"Visual Studio 14 2015\" -A x64";
 		vsMSBuild2015.mCommand									= "\"${PROJ_COMPILER_PATH}\"";
 		vsMSBuild2015.mArgs[(u32)ConfigurationType::Release]	= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release";
 		vsMSBuild2015.mArgs[(u32)ConfigurationType::Debug]		= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug";
@@ -2023,7 +2032,7 @@ namespace Enjon
 
 		ToolChainDefinition vsMSBuild2017;
 		vsMSBuild2017.mLabel									= "VS2017_MSBuild";
-		vsMSBuild2017.mCMakeGenerator							= "\"Visual Studio 15 2017\"";
+		vsMSBuild2017.mCMakeGenerator							= "\"Visual Studio 15 2017\" -A x64";
 		vsMSBuild2017.mCommand									= "\"${PROJ_COMPILER_PATH}\"";
 		vsMSBuild2017.mArgs[(u32)ConfigurationType::Release]	= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Release";
 		vsMSBuild2017.mArgs[(u32)ConfigurationType::Debug]		= "${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln /t:Build /p:Configuration=Debug";

@@ -71,6 +71,11 @@ namespace Enjon
 			* @brief
 			*/
 			bool IsHovered( ) const;
+
+			/**
+			* @brief
+			*/
+			void Enable( const b32& enabled );
  
 		protected: 
 

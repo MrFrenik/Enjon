@@ -14,6 +14,11 @@ namespace Enjon
 		return mType;
 	} 
 
+	const char* MetaProperty::GetTypeStr( ) const
+	{
+		return MetaPropertyTypeToStr( mType );
+	}
+
 	bool MetaProperty::HasFlags( const MetaPropertyFlags& flags ) const
 	{
 		return ( ( mTraits.mFlags & flags ) == flags );
