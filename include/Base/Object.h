@@ -1153,6 +1153,8 @@ namespace Enjon
 
 			const PropertyTable& GetProperties( ) const { return mProperties; }
 
+			const FunctionTable& GetFunctions( ) const { return mFunctions; }
+
 			/*
 			* @brief
 			*/

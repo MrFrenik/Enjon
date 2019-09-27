@@ -72,6 +72,11 @@ namespace Enjon
 			ImGui::NewLine( ); 
 			ImGui::SetCursorPosX( 40.f );
 			ImGui::Text( "Functions: " );
+			for ( auto& f : cls->GetFunctions( ) )
+			{
+				ImGui::SetCursorPosX( 80.f );
+				ImGui::Text( "%s", f.second->GetName( ).c_str() );
+			}
 		}
 	}
 
