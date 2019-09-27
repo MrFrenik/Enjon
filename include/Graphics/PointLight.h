@@ -9,9 +9,9 @@
 
 namespace Enjon { 
 
-	class GraphicsScene;
+	class GraphicsScene; 
 
-	ENJON_CLASS( )
+	ENJON_CLASS( Construct, Description = "Here's a description of a pointlight." )
 	class PointLight : public Enjon::Object
 	{
 		ENJON_CLASS_BODY ( PointLight ) 

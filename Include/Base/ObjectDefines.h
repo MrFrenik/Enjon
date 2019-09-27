@@ -6,7 +6,8 @@
 
 enum MetaClassEnumDefines
 {
-	Abstract
+	Abstract,
+	Construct
 };
 
 enum MetaClassComponentDefines
@@ -24,7 +25,8 @@ enum MetaPropertyEnumDefines
 	Mutator,
 	Editable,
 	HideInEditor,
-	NonSerializeable,
+	NonSerializeable, 
+	Description,
 	ReadOnly
 };
 
