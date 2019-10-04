@@ -143,48 +143,71 @@ namespace Enjon
 
 	class FontAssetLoader;
 
-	ENJON_CLASS( )
-	class UIFont : public Asset
+	//ENJON_CLASS( )
+	//class UIFont : public Asset
+	//{
+	//	friend FontAssetLoader;
+	//	friend FontAtlas;
+
+	//	ENJON_CLASS_BODY( UIFont )
+
+	//	public:
+	//		/**
+	//		* @brief Constructor
+	//		*/
+	//		UIFont( const String& fontPath ); 
+
+	//		/**
+	//		* @brief
+	//		*/
+	//		bool AtlasExists( const s32& fontSize ) const;
+
+	//		/**
+	//		* @brief
+	//		*/
+	//		const FontAtlas* GetAtlas( const s32& fontSize ) const;
+
+	//	private:
+	//		/**
+	//		* @brief
+	//		*/
+	//		void AddAtlas( const s32& fontSize );
+
+	//		FT_Face GetFace( ) const 
+	//		{ 
+	//			return mFontFace;  
+	//		}
+
+	//	private:
+	//		ENJON_PROPERTY( )
+	//		String mFontPath;
+
+	//		HashMap< u32, FontAtlas > mAtlases; 
+
+	//		FT_Face mFontFace;
+	//};
+
+	typedef struct FontData
 	{
-		friend FontAssetLoader;
-		friend FontAtlas;
+		u32 mSize;
+		void* mData;
+	} FontData;
 
+	ENJON_CLASS( Construct )
+	class UIFont : public Asset 
+	{ 
 		ENJON_CLASS_BODY( UIFont )
+			
+		/**
+		* @brief Constructor
+		*/
+		UIFont( const String& fontPath ); 
 
-		public:
-			/**
-			* @brief Constructor
-			*/
-			UIFont( const String& fontPath ); 
+		Result SerializeData( ByteBuffer* buffer ) const override;
+		Result DeserializeData( ByteBuffer* buffer ) override;
 
-			/**
-			* @brief
-			*/
-			bool AtlasExists( const s32& fontSize ) const;
-
-			/**
-			* @brief
-			*/
-			const FontAtlas* GetAtlas( const s32& fontSize ) const;
-
-		private:
-			/**
-			* @brief
-			*/
-			void AddAtlas( const s32& fontSize );
-
-			FT_Face GetFace( ) const 
-			{ 
-				return mFontFace;  
-			}
-
-		private:
-			ENJON_PROPERTY( )
-			String mFontPath;
-
-			HashMap< u32, FontAtlas > mAtlases; 
-
-			FT_Face mFontFace;
+		private: 
+			FontData mFontData;
 	};
 }
 

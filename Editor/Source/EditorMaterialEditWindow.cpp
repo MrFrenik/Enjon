@@ -538,4 +538,73 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Viewport", GUIDockSlotType::Slot_Left, 0.45f ) );
 		//guiContext->Finalize( );
 	}
+
+	//=================================================================================================
+
+	void EditorGenericAssetEditWindow::Init( const WindowParams& params )
+	{
+		// Construct scene in world
+		if ( !mAsset )
+		{
+			// Initialize new world 
+			mWorld = new World( );
+			// Register contexts with world
+			mWorld->RegisterContext< GraphicsSubsystemContext >( );
+			// Set asset from data 
+			mAsset = ( Asset* )( params.mData );
+			// Construct Scene 
+			ConstructScene( );
+		} 
+	}
+
+	//================================================================================================= 
+
+	void EditorGenericAssetEditWindow::ConstructScene()
+	{
+		GUIContext* guiContext = GetGUIContext( );
+
+		// Add main menu options
+		guiContext->RegisterMainMenu( "File" ); 
+
+		// NOTE(): This should be done automatically for the user in the backend
+		// Add window to graphics subsystem ( totally stupid way to do this )
+		//GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+		//gfx->AddWindow( this );
+
+		World* world = GetWorld( ); 
+
+		guiContext->RegisterWindow( "Properties", [ & ]
+		{
+			if ( ImGui::BeginDock( "Properties" ) )
+			{
+				if ( mAsset )
+				{ 
+					World* world = GetWorld( );
+					ImGui::Text( "%s", Utils::format( "Asset: %s", mAsset.Get( )->GetName().c_str() ).c_str( ) );
+					ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+					igm->InspectObject( mAsset.Get() ); 
+				} 
+				ImGui::EndDock( );
+			}
+		} );
+
+		auto saveAssetOption = [ & ] ( )
+		{
+			if ( ImGui::MenuItem( "Save##save_asset_option", NULL ) )
+			{
+				if ( mAsset )
+				{
+					mAsset->Save();
+				}
+			}
+		};
+
+		// Register menu options
+		guiContext->RegisterMenuOption( "File", "Save##save_asset_option", saveAssetOption ); 
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", nullptr, GUIDockSlotType::Slot_Tab, 0.45f ) );
+		guiContext->SetActiveDock( "Properties" );
+		guiContext->Finalize( ); 
+	}
+
+	//=================================================================================================
 }

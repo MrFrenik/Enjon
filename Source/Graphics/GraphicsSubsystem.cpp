@@ -241,10 +241,10 @@ namespace Enjon
 		assert( guiContext->GetContext( ) != nullptr );
 
 		// Register graphics options with main window menus ( still hate the way this looks, but it's better than before )
-		guiContext->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
-		guiContext->RegisterWindow("Graphics", showGraphicsViewportFunc);
-		guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
-		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
+		//guiContext->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
+		//guiContext->RegisterWindow("Graphics", showGraphicsViewportFunc);
+		//guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
+		//guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
 
 		// Set current render texture
 		mCurrentRenderTexture = mFXAATarget->GetTexture(); 
@@ -792,6 +792,8 @@ namespace Enjon
 			mFullScreenQuad->Submit( );
 		}
 		program->Unuse( );
+
+		ImGuiPass();
 	} 
 
 	iVec2 GraphicsSubsystem::GetImGuiViewport( ) const
@@ -1758,17 +1760,17 @@ namespace Enjon
 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
-		if ( isStandalone )
-		{
-			// Queue up gui
-			igm->Render(mCurrentWindow); 
-			// Flush
-			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
-			ImGui::Render(); 
-		}
-
 		inputTarget->Bind( BindType::WRITE, false );
-		{
+		{ 
+			if ( isStandalone )
+			{
+				// Queue up gui
+				igm->Render(mCurrentWindow); 
+				// Flush
+				glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+				ImGui::Render(); 
+			}
+
 			auto shader = ShaderManager::GetShader( "Text" ); 
 			shader->Use( );
 			{

@@ -392,7 +392,6 @@ namespace Enjon
 		// Grab the engine configuration
 		EngineConfig engCfg = Engine::GetInstance( )->GetConfig( ); 
 
-		String buildConfig = mEditor->GetBuildConfig( );
 		ConfigurationType configType = mEditor->GetConfigType();
 
 		// Run the build bat for project
@@ -407,7 +406,7 @@ namespace Enjon
 
 		String configTypeStr = configType == ConfigurationType::Debug ? "Debug" : "Release"; 
 		String path = Utils::FindReplaceAll( mProjectPath + "Proc\\\\CompileProject_" + configTypeStr + ".bat", "/", "\\\\" ).c_str(); 
-		String args = const_cast<LPSTR>( ( mProjectPath + " " + mProjectName + " " + buildConfig ).c_str( ) ); 
+		String args = const_cast<LPSTR>( ( mProjectPath + " " + mProjectName + " " + configTypeStr ).c_str( ) ); 
 		String cmdLineStr = ( "cmd.exe /c " + path + " " + args ); 
 
 		char* cmdLineStrBuffer = new char[ cmdLineStr.size( ) + 1 ];

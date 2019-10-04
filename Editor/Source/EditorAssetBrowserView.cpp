@@ -340,6 +340,21 @@ namespace Enjon
 										params.mData = ( void* )asset;
 										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 									}
+									else if ( assetCls->InstanceOf< UIStyleConfig >() )
+									{
+										const Asset* asset = mSelectedAssetInfo->GetAsset();
+
+										// Open new params
+										WindowParams params;
+										params.mMetaClassFunc = [ & ] () -> const MetaClass * { return Object::GetClass< EditorGenericAssetEditWindow >(); };
+										params.mName = asset->GetName();
+										params.mWidth = 800;
+										params.mHeight = 400;
+										params.mFlags = WindowFlagsMask( (u32 )WindowFlags::RESIZABLE );
+										params.mData = ( void* )asset;
+										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
+
+									}
 								}
 							}
 						} 
@@ -675,6 +690,14 @@ namespace Enjon
 
 			FinishAssetConstruction( mat.Get( ) ); 
 		} 
+
+		if ( ImGui::Selectable( "\t+ UI Style Config" ) )
+		{
+			// Construct asset with current directory
+			AssetHandle< UIStyleConfig > ui = am->ConstructAsset< UIStyleConfig >( "NewUIStyleConfig", mCurrentDirectory );
+
+			FinishAssetConstruction( ui.Get( ) ); 
+		}
 
 		// Construct scene option
 		if ( ImGui::Selectable( "\t+ Scene" ) )

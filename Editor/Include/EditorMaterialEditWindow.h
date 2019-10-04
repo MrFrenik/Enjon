@@ -231,6 +231,27 @@ namespace Enjon
 			StaticMeshRenderable mRenderable;
 			Material* mMaterial = nullptr;
 	};
+
+	ENJON_CLASS( Construct )
+	class EditorGenericAssetEditWindow : public Window
+	{
+		ENJON_CLASS_BODY( EditorGenericAssetEditWindow ) 
+
+		public:
+
+			virtual void Init( const WindowParams& params ) override;
+
+		protected: 
+
+			void ConstructScene( );
+
+		protected:
+			
+		private:
+			AssetHandle< Asset > mAsset;
+			b32 mInitialized = false;
+			bool mViewportOpen = true; 
+	};
 }
 
 #endif

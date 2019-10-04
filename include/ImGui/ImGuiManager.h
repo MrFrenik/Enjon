@@ -7,7 +7,9 @@
 #include "ImGui/imgui_dock.h"
 
 #include "Math/Vec2.h"
+#include "Graphics/Color.h"
 #include "System/Types.h"
+#include "Asset/UIStyleConfigAssetLoader.h"
 #include "Subsystem.h"
 #include "Defines.h"
 
@@ -373,7 +375,7 @@ namespace Enjon
 			Window* mWindow = nullptr;
 			const char* mActiveDock = nullptr;
 			GUIContextParams mParams;
-	};
+	}; 
 
 	ENJON_CLASS( )
 	class ImGuiManager : public Subsystem
@@ -417,9 +419,11 @@ namespace Enjon
 			void DebugDumpArrayProperty( const Enjon::Object* object, const Enjon::MetaPropertyArrayBase* prop );
 			void DebugDumpHashMapProperty( const Enjon::Object* object, const Enjon::MetaPropertyHashMapBase* prop );
 			ImFont* GetFont( const Enjon::String& name );
-			ImGuiContext* GetContext( );
+			ImGuiContext* GetContext( ); 
 
 			void SetContextByWindow( Window* window ); 
+
+			void LoadStyle( const AssetHandle< UIStyleConfig >& config, GUIContext* ctx );
 
 		public:
 

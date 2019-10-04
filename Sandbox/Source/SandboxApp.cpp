@@ -42,8 +42,39 @@ namespace Enjon
 { 
 	//=========================================================================================
 
-	SandboxApp::SandboxApp( const String& projectpath )
-		: mProjectDir( projectpath )
+	// This has to happen anyway. Perfect!
+#ifdef ENJON_SYSTEM_WINDOWS
+	void _CopyLibraryContentsInternal( const String& projectName, const String& projectDir, const String& config, const String& projDllName )
+	{
+		String rootDir = Engine::GetInstance()->GetConfig().GetRoot();
+		String dllName = projectName + ".dll";
+		{
+			String dllPath = rootDir + "Build/" + config + "/" + projDllName + ".dll";
+			bool exists = fs::exists( dllPath );
+			if ( exists )
+			{
+				fs::remove( dllPath );
+			}
+			dllPath = projectDir;
+			if ( fs::exists( dllPath ) )
+			{
+				if ( fs::exists( dllPath + "Build/" + config + "/" + dllName ) )
+				{
+					fs::copy( fs::path( dllPath + "Build/" + config + "/" + dllName ), rootDir + "Build/" + config + "/" + projDllName + ".dll" );
+				}
+			}
+		}
+	}
+
+	void CopyLibraryContents( const String& projectName, const String& projectDir )
+	{ 
+		_CopyLibraryContentsInternal( projectName, projectDir, "Debug", "proj_s" );
+		_CopyLibraryContentsInternal( projectName, projectDir, "Release", "proj_s" );
+	}
+#endif 
+
+	SandboxApp::SandboxApp( const String& projectpath, const String& projectName )
+		: mProjectDir( projectpath ), mProjectName( projectName )
 	{ 
 	}
 
@@ -78,11 +109,57 @@ namespace Enjon
 
 	//=========================================================================================
 
-	Result SandboxApp::Initialize()
+	void SandboxApp::UnloadDLL()
 	{
+		if ( dllHandle )
+		{
+			//if ( mPlaying && buffer )
+			//{
+			//	Application* app = mProject.GetApplication( );
+			//	if ( app )
+			//	{
+			//		Enjon::ObjectArchiver::Serialize( app, buffer );
+			//		needsReload = true;
 
+			//		// Shutdown project app
+			//		ShutdownProjectApp( buffer );
+			//	}
+			//}
+
+			// Shutdown the app
+			mApp->Shutdown();
+
+			// Release scene
+			EngineSubsystem( SceneManager )->UnloadScene();
+
+			// Destroy entities
+			EngineSubsystem( EntityManager )->DestroyAll();
+			EngineSubsystem( EntityManager )->ForceCleanup();
+
+			// Clear gui context
+			EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetGUIContext()->ClearContext(); 
+
+			// Free application memory
+			if ( deleteAppFunc )
+			{
+				deleteAppFunc( mApp );
+				mApp = nullptr;
+			}
+
+			// Free library if in use
+			// FreeLibrary( dllHandle );
+			SDL_UnloadObject( dllHandle );
+			dllHandle = nullptr;
+			createAppFunc = nullptr;
+			deleteAppFunc = nullptr;
+		}
+
+	}
+
+	void SandboxApp::LoadDLL()
+	{
 	#ifdef ENJON_SYSTEM_WINDOWS
-		dllHandle = SDL_LoadObject( "proj.dll" );
+		dllHandle = SDL_LoadObject( "proj_s.dll" );
 	#endif
 
 		assert( dllHandle );
@@ -105,13 +182,28 @@ namespace Enjon
 			{
 				InitializeProjectApp( );
 			}
-		}
-		else
-		{ 
-			std::cout << "Could not load library\n";
-			return Result::FAILURE;
 		} 
+	}
 
+	void SandboxApp::ReloadDLL()
+	{
+		// Save scene temporarily
+
+		// Unload the library
+		UnloadDLL(); 
+
+		// Copy over library contents
+		CopyLibraryContents( mProjectName, mProjectDir ); 
+		
+		// Load library
+		LoadDLL();
+
+		// Reload scene in place
+	}
+
+	Result SandboxApp::Initialize()
+	{ 
+		LoadDLL(); 
 		SetupLocalClient();
 
 		return Result::SUCCESS;
@@ -154,6 +246,12 @@ namespace Enjon
 			mApp->Update( dt ); 
 		}
 
+		if ( mNeedsDLLReload )
+		{
+			ReloadDLL();
+			mNeedsDLLReload = false;
+		}
+
 		return Result::PROCESS_RUNNING; 
 	}
 
@@ -161,6 +259,12 @@ namespace Enjon
 
 	Result SandboxApp::ProcessInput( f32 dt )
 	{ 
+		Input* input = EngineSubsystem( Input );
+		if ( input->IsKeyPressed( KeyCode::R ) && input->IsKeyDown( KeyCode::LeftCtrl ) )
+		{
+			mNeedsDLLReload = true;
+		}
+
 		return Result::PROCESS_RUNNING; 
 	}
 

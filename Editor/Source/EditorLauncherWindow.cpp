@@ -626,6 +626,9 @@ namespace Enjon
 					}
 
 					leave = true;
+
+					// Serialize editor settings after loading project
+					mApp->SerializeEditorConfigSettings();
 				}
 			} 
 

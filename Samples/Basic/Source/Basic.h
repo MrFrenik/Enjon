@@ -28,11 +28,6 @@ namespace Enjon
 			* @brief Overrides application shutdown method. Gets called when application is stopped.
 			*/
 			virtual Enjon::Result Shutdown( ) override;
-
-			virtual void OnLoad( ) override;
-
-		private:
-			s32 mWindowID = -1;
 	};
 
 	// Declaration for module export

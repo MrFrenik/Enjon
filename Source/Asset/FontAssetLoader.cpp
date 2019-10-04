@@ -9,11 +9,11 @@ namespace Enjon
 
 	void FontAssetLoader::RegisterDefaultAsset( )
 	{
-		// Get file path to default font on disk
+		// Get file path to default font on disk ( don't like this, but it is what it is... )
 		String filePath = Engine::GetInstance( )->GetConfig( ).GetEngineResourcePath( ) + "/Fonts/WeblySleek/weblysleekuisb.ttf"; 
 
 		// Load font
-		Enjon::UIFont* font = new Enjon::UIFont( filePath ); 
+		UIFont* font = new UIFont( filePath ); 
 
 		// Set default
 		mDefaultAsset = font;
@@ -24,7 +24,7 @@ namespace Enjon
 	Asset* FontAssetLoader::LoadResourceFromFile( const String& filePath )
 	{
 		// Create new font
-		Enjon::UIFont* font = new Enjon::UIFont( filePath ); 
+		UIFont* font = new UIFont( filePath ); 
 
 		// Return font
 		return font;

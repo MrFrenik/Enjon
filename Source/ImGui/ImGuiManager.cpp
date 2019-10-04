@@ -1465,6 +1465,13 @@ namespace Enjon
 
 	//============================================================================================
 
+	void ImGuiManager::LoadStyle( const AssetHandle< UIStyleConfig >& config, GUIContext* ctx )
+	{ 
+		// Load the styles from the asset
+	}
+
+	//============================================================================================
+
 	void ImGuiManager::ImGuiStyles()
 	{
 		String rootPath = Engine::GetInstance()->GetConfig( ).GetRoot( );
@@ -1475,10 +1482,10 @@ namespace Enjon
 	    fontCfg.FontDataOwnedByAtlas = false;
 	    fontCfg.OversampleH = 7;
 	    fontCfg.OversampleV = 7;
-	    // fontCfg.RasterizerMultiply = 1.5f;
+	    // fontCfg.RasterizerMultiply = 1.5f; 
 
 	    // Font scale
-	    int fs = 1;
+	    int fs = 1; 
 
 		io.Fonts->Clear();
 		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs, &fontCfg );

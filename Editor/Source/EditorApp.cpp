@@ -77,11 +77,11 @@ namespace fs = ghc::filesystem;
 std::thread* zmqThread = nullptr;
 
 // ALL of this needs to change to be user dependent
-Enjon::String projectName = "TestProject";
-Enjon::String projectDLLName = projectName + ".dll";
-Enjon::String copyDir = ""; 
+//Enjon::String projectName = "TestProject";
+//Enjon::String projectDLLName = projectName + ".dll";
+//Enjon::String copyDir = ""; 
 Enjon::String mProjectsDir = "";
-Enjon::String mVisualStudioDir = ""; 
+//Enjon::String mVisualStudioDir = ""; 
 
 // Need to make two different builds for editor configurations - debug / release
 
@@ -90,65 +90,47 @@ Enjon::String mVisualStudioDir = "";
 // Need to come up with a way to set the current configuration for the editor - or at the very least, just replace the current .dll with what is loaded? 
 //Enjon::String configuration = "Release";
 //Enjon::String configuration = "RelWithDebInfo";
-Enjon::String configuration = "Debug";
+//Enjon::String configuration = "Debug";
 //Enjon::String configuration = "Bin"; 
+
+
+// Want to hot reload the .dll while in sandbox mode
 
 namespace Enjon
 {
 	// This has to happen anyway. Perfect!
 #ifdef ENJON_SYSTEM_WINDOWS
-	void EditorApp::CopyLibraryContents( const String& projectName, const String& projectDir )
-	{ 
-		Enjon::String rootDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		Enjon::String dllName =  projectName + ".dll"; 
+	void _CopyLibraryContentsInternal( const String& projectName, const String& projectDir, const String& config, const String& projDllName )
+	{
+		String rootDir = Engine::GetInstance()->GetConfig().GetRoot();
+		String dllName = projectName + ".dll";
 		{
-			//String config = mBuildConfigType == ConfigurationType::Debug ? "Debug" : "Release";
-			String config = "Debug";
-
-			// Removing the dll for this project (it's temporary, so we're going to name it a temp name)
-			String dllPath = rootDir + "Build/" + config + "/" + "proj.dll";
-			//String path = String( rootDir + "Build/" + config + "/proj.dll" );
+			String dllPath = rootDir + "Build/" + config + "/" + projDllName + ".dll";
 			bool exists = fs::exists( dllPath );
 			if ( exists )
 			{
 				fs::remove( dllPath );
 			}
-
-			// Now copy over contents from intermediate build to executable dir
 			dllPath = projectDir;
 			if ( fs::exists( dllPath ) )
 			{
 				if ( fs::exists( dllPath + "Build/" + config + "/" + dllName ) )
 				{
-					fs::copy( fs::path( dllPath + "Build/" + config + "/" + dllName ), rootDir + "Build/" + config + "/" + "proj.dll" );
+					fs::copy( fs::path( dllPath + "Build/" + config + "/" + dllName ), rootDir + "Build/" + config + "/" + projDllName + ".dll" );
 				}
-			} 
-		}
-		{
-			//String config = mBuildConfigType == ConfigurationType::Debug ? "Debug" : "Release";
-			String config = "Release";
-
-			// Removing the dll for this project (it's temporary, so we're going to name it a temp name)
-			String dllPath = rootDir + "Build/" + config + "/" + "proj.dll";
-			//String path = String( rootDir + "Build/" + config + "/proj.dll" );
-			bool exists = fs::exists( dllPath );
-			if ( exists )
-			{
-				fs::remove( dllPath );
 			}
-
-			// Now copy over contents from intermediate build to executable dir
-			dllPath = projectDir;
-			if ( fs::exists( dllPath ) )
-			{
-				if ( fs::exists( dllPath + "Build/" + config + "/" + dllName ) )
-				{
-					fs::copy( fs::path( dllPath + "Build/" + config + "/" + dllName ), rootDir + "Build/" + config + "/" + "proj.dll" );
-				}
-			} 
 		}
 	}
+
+	void EditorApp::CopyLibraryContents( const String& projectName, const String& projectDir )
+	{ 
+		_CopyLibraryContentsInternal( projectName, projectDir, "Debug", "proj" );
+		_CopyLibraryContentsInternal( projectName, projectDir, "Release", "proj" );
+		_CopyLibraryContentsInternal( projectName, projectDir, "Debug", "proj_s" );
+		_CopyLibraryContentsInternal( projectName, projectDir, "Release", "proj_s" );
+	}
 #endif
+
 #ifdef ENJON_SYSTEM_OSX
 	void EditorApp::CopyLibraryContents( const String& projectName, const String& projectDir )
 	{
@@ -1242,13 +1224,6 @@ namespace Enjon
 	ConfigurationType EditorApp::GetConfigType() const
 	{
 		return mBuildConfigType;
-	}
-
-	//================================================================================================================================
-
-	String EditorApp::GetBuildConfig( ) const
-	{
-		return configuration;
 	} 
 
 	//================================================================================================================================
@@ -2132,7 +2107,7 @@ namespace Enjon
 		mProjectSourceFileTemplates.mProjectEnjonDefinesTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectEnjonDefines.h" ).c_str( ) ); 
 
 		// Set up copy directory for project dll
-		copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/"; 
+		//copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/"; 
 
 		InitializeToolChains( );
 
@@ -2929,7 +2904,7 @@ namespace Enjon
 				// Set the path now
 				if ( fs::exists( outPath ) && fs::is_directory( outPath ) && fs::exists( String(outPath) + "/VC/" ) ) 
 				{
-					mVisualStudioDir = outPath;
+					//mVisualStudioDir = outPath;
 					retRes = Result::SUCCESS;
 				} 
 			}

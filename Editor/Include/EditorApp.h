@@ -257,12 +257,7 @@ namespace Enjon
 			/**
 			* @brief 
 			*/
-			EditorAssetBrowserView* GetEditorAssetBrowserView( );
-
-			/**
-			* @brief 
-			*/
-			String GetBuildConfig( ) const;
+			EditorAssetBrowserView* GetEditorAssetBrowserView( ); 
 
 			ConfigurationType GetConfigType() const; 
 

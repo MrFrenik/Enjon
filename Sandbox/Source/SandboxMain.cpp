@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	projDir = argv[ 1 ]; 
 	projName = argv[ 2 ];
 
-	SandboxApp mApp( projDir );
+	SandboxApp mApp( projDir, projName );
 	Enjon::Engine mEngine; 
 	Enjon::EngineConfig mConfig; 
 	

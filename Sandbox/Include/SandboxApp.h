@@ -14,7 +14,7 @@ namespace Enjon
 
 		public: 
 
-			SandboxApp( const String& projectPath );
+			SandboxApp( const String& projectPath, const String& projectName );
 
 			/**
 			* @brief Called when first initializing application. Runs through all startup code 
@@ -47,6 +47,10 @@ namespace Enjon
 
 			void SetupLocalClient();
 
+			void LoadDLL();
+			void UnloadDLL();
+			void ReloadDLL();
+
 		protected:
 
 			/*
@@ -58,8 +62,10 @@ namespace Enjon
 			* @brief Directory of the project 
 			*/
 			String mProjectDir = "";
+			String mProjectName = "";
 
 			b32 mShuttingDown = false;
+			b32 mNeedsDLLReload = false;
 	};
 
 	// Declaration for module export

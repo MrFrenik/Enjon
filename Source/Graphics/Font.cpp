@@ -3,6 +3,7 @@
 #include "System/Types.h"
 #include "Utils/Errors.h" 
 #include "Asset/FontAssetLoader.h"
+#include "ImGui/ImGuiManager.h"
 
 #include <stdexcept>
 #include <stdlib.h>
@@ -812,57 +813,98 @@ namespace Enjon
 
 	//========================================================================================================================
 
+	//UIFont::UIFont( const String& fontPath )
+	//	: mFontPath( fontPath )
+	//{ 
+	//	// FreeType library
+	//	FT_Library ft;
+
+	//	// All functions return a value different than 0 whenever an error occurred
+	//	if ( FT_Init_FreeType( &ft ) )
+	//	{
+	//		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl; 
+	//	}
+
+	//	// Load font as face
+	//	if ( FT_New_Face( ft, fontPath.c_str( ), 0, &mFontFace ) )
+	//	{
+	//		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl; 
+	//	} 
+	//} 
+
+	////========================================================================================================================
+
+	//bool UIFont::AtlasExists( const s32& fontSize ) const
+	//{
+	//	// If not found, then will reach end of atlas map and return false
+	//	return ( ( mAtlases.find( fontSize ) ) != mAtlases.end( ) ); 
+	//}
+
+	////========================================================================================================================
+	//		
+	//const FontAtlas* UIFont::GetAtlas( const s32& fontSize ) const
+	//{
+	//	UIFont* f = const_cast< UIFont* > ( this );
+
+	//	// Build atlas if doesn't exist
+	//	if ( !AtlasExists( fontSize ) )
+	//	{
+	//		f->AddAtlas( fontSize );
+	//	}
+
+	//	return &f->mAtlases[ fontSize ];
+	//}
+
+	////========================================================================================================================
+	//		
+	//void UIFont::AddAtlas( const s32& fontSize )
+	//{
+	//	// If doesn't exist, then place in map
+	//	if ( !AtlasExists( fontSize ) )
+	//	{
+	//		FontAtlas atlas( mFontPath, fontSize, this );
+	//		mAtlases[ fontSize ] = atlas;
+	//	}
+	//}
+
+	//========================================================================================================================
+
 	UIFont::UIFont( const String& fontPath )
-		: mFontPath( fontPath )
+	{
+		// Do something with imgui, dur
+		mFontData.mData = ImFileLoadToMemory( fontPath.c_str(), "rb", &mFontData.mSize, 0); 
+	}
+
+	//======================================================================================================================== 
+
+	Result UIFont::SerializeData( ByteBuffer* buffer ) const
 	{ 
-		// FreeType library
-		FT_Library ft;
-
-		// All functions return a value different than 0 whenever an error occurred
-		if ( FT_Init_FreeType( &ft ) )
+		// Write out font data size
+		buffer->Write< u32 >( mFontData.mSize ); 
+		// Write out font data
+		for ( u32 i = 0; i < mFontData.mSize; ++i )
 		{
-			std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl; 
+			buffer->Write< u8 >( (u8)mFontData[ i ] );
 		}
 
-		// Load font as face
-		if ( FT_New_Face( ft, fontPath.c_str( ), 0, &mFontFace ) )
-		{
-			std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl; 
-		} 
-	} 
-
-	//========================================================================================================================
-
-	bool UIFont::AtlasExists( const s32& fontSize ) const
-	{
-		// If not found, then will reach end of atlas map and return false
-		return ( ( mAtlases.find( fontSize ) ) != mAtlases.end( ) ); 
+		return Result::SUCCESS;
 	}
 
-	//========================================================================================================================
-			
-	const FontAtlas* UIFont::GetAtlas( const s32& fontSize ) const
-	{
-		UIFont* f = const_cast< UIFont* > ( this );
+	//======================================================================================================================== 
 
-		// Build atlas if doesn't exist
-		if ( !AtlasExists( fontSize ) )
+	Result UIFont::DeserializeData( ByteBuffer* buffer )
+	{
+		// Read in font data size
+		mFontData.mSize = buffer->Read< u32 >( ); 
+		// Read in font data
+		for ( u32 i = 0; i < mFontData.mSize; ++i )
 		{
-			f->AddAtlas( fontSize );
+			( u8 )mFontData[i]l = buffer->Read< u8 >();
 		}
 
-		return &f->mAtlases[ fontSize ];
+		return Result::SUCCESS;
 	}
 
-	//========================================================================================================================
-			
-	void UIFont::AddAtlas( const s32& fontSize )
-	{
-		// If doesn't exist, then place in map
-		if ( !AtlasExists( fontSize ) )
-		{
-			FontAtlas atlas( mFontPath, fontSize, this );
-			mAtlases[ fontSize ] = atlas;
-		}
-	}
+	//======================================================================================================================== 
+
 }

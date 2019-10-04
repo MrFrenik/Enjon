@@ -5,10 +5,9 @@ pushd %1
 
 echo "Building %projName%..."
 cd Build
-cmake ../. -G"Visual Studio 14 2015"
+cmake ../. -G "Visual Studio 16 2019"
 
-echo "Running %projName%..."
-start %projName%.sln
+echo "Done"
 
 popd
 exit 0
