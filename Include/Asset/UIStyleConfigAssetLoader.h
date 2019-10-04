@@ -228,18 +228,9 @@ namespace Enjon
 
 			ENJON_PROPERTY()
 			ColorRGBA32 Col_ListSelectionRenamed = ColorRGBA32( 0.88f, 0.40f, 0.18f, 1.00f ); 
-				
-			// Need a list of fonts to load...Therefore, going to need a way to serialize out fonts appropriately, even if it means grabbing the .ttf/.otf
-			// data and just blitting it into a serialized buffer
 
-			// Want a list of UIFont assets
-	};
 
-	struct FontDecl
-	{
-		String path,
-		u16 textSize;
-	};
+	}; 
 
 	ENJON_CLASS( )
 	class UIStyleConfigAssetLoader : public AssetLoader

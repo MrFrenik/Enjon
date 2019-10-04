@@ -27,3 +27,4 @@ IMGUI_API bool			ImGui_ImplSdlGL3_CreateDeviceObjects( ImGuiContext* ctx );
 ImGuiContext*			ImGui_ImplSdlGL3_GetContext( );
 ImGuiContext*			ImGui_ImplSdlGL3_CreateContext( );
 IMGUI_API void 			ImGui_ImplSdlGL3_UpdateViewports( ImGuiContext* ctx );
+void					ImGui_ImplSdlGL3_CreateFontsTexture( ImGuiContext* ctx );

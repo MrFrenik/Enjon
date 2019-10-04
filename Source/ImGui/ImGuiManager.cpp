@@ -1470,6 +1470,48 @@ namespace Enjon
 		// Load the styles from the asset
 	}
 
+	//============================================================================================ 
+
+	void ImGuiManager::AddFont( const String& filePath, const u32& size, GUIContext* ctx )
+	{ 
+		// Cache previous context, set context
+		ImGuiContext* prevContext = ImGui::GetCurrentContext(); 
+		ImGui::SetCurrentContext( ctx->GetContext() );
+
+		String rootPath = Engine::GetInstance()->GetConfig( ).GetRoot( );
+		String fp = rootPath + "/Assets/Fonts/";
+		ImGuiIO& io = ImGui::GetIO(); 
+		ImFontConfig fontCfg;
+	    fontCfg.FontDataOwnedByAtlas = false;
+	    fontCfg.OversampleH = 7;
+	    fontCfg.OversampleV = 7; 
+	    int fs = 1; 
+
+		io.Fonts->Clear();
+		mFonts.clear();
+		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs, &fontCfg );
+		mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs, &fontCfg );
+		mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16 * fs, &fontCfg );
+		mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs, &fontCfg );
+		mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs, &fontCfg );
+		mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs, &fontCfg );
+		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs, &fontCfg );
+		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg );
+		io.Fonts->AddFontFromFileTTF( filePath.c_str(), (f32)size, &fontCfg );
+		io.Fonts->Build();
+
+		// Recreate font texture
+		ImGui_ImplSdlGL3_CreateFontsTexture( ctx->GetContext() );
+
+		ImGuiStyle& style = ImGui::GetStyle(); 
+
+		// Set default font
+		io.FontDefault = mFonts[ "WeblySleek_16" ];
+
+		// Restore context
+		ImGui::SetCurrentContext( prevContext );
+	}
+
 	//============================================================================================
 
 	void ImGuiManager::ImGuiStyles()

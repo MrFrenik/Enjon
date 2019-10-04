@@ -96,6 +96,8 @@ Enjon::String mProjectsDir = "";
 
 // Want to hot reload the .dll while in sandbox mode
 
+bool mNeedAddFont = false;
+
 namespace Enjon
 {
 	// This has to happen anyway. Perfect!
@@ -1463,6 +1465,12 @@ namespace Enjon
 
 			ImGui::SetCursorScreenPos( ImVec2( windowPos.x + windowSize.x - txtSz.x - margin.x, windowPos.y + windowSize.y - txtSz.y - margin.y ) );
 			ImGui::Text( "%s", txt.c_str() ); 
+
+			ImGui::SetCursorPos( ImVec2( 0.f, 0.f ) );
+			if ( ImGui::Button( "Load Font"  ) )
+			{
+				mNeedAddFont = true;
+			}
 		}); 
 
 		// Register selection callback with outliner view
@@ -2209,6 +2217,14 @@ namespace Enjon
 
 	Enjon::Result EditorApp::Update( f32 dt )
 	{ 
+		if ( mNeedAddFont )
+		{
+			static u32 fsz = 10;
+			GUIContext* gCtx = EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetGUIContext();
+			EngineSubsystem( ImGuiManager )->AddFont( Engine::GetInstance()->GetConfig().GetEngineResourcePath() + "/Fonts/TheBoldFont/TheBoldFont.ttf", fsz++, gCtx );
+			mNeedAddFont = false;
+		}
+
 		if ( mPreloadProjectContext )
 		{
 			LoadProjectContext( );

@@ -3,7 +3,8 @@
 #include "System/Types.h"
 #include "Utils/Errors.h" 
 #include "Asset/FontAssetLoader.h"
-#include "ImGui/ImGuiManager.h"
+#include "ImGui/ImGuiManager.h" 
+#include "ImGui/imgui_internal.h"
 
 #include <stdexcept>
 #include <stdlib.h>
@@ -11,6 +12,7 @@
 #include <freetype/ftglyph.h>
 #include <freetype/ftoutln.h>
 #include <freetype/fttrigon.h>
+
 
 const Enjon::u32 GLYPH_SIZE = 128;
 
@@ -387,48 +389,48 @@ namespace Enjon
 
 	void PrintText( const Transform& transform, const String& text, const UIFont* font, QuadBatch& batch, const ColorRGBA32& color, const u32& fontSize )
 	{ 
-		const FontAtlas* atlas = font->GetAtlas( (s32)fontSize );
-		f32 textureWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );
-		f32 textureHeight = atlas->GetAtlasTexture( ).Get( )->GetHeight( ); 
+		//const FontAtlas* atlas = font->GetAtlas( (s32)fontSize );
+		//f32 textureWidth = atlas->GetAtlasTexture( ).Get( )->GetWidth( );
+		//f32 textureHeight = atlas->GetAtlasTexture( ).Get( )->GetHeight( ); 
 
-		Vec3 scale = transform.GetScale( );
-		Vec3 position = transform.GetPosition( );
-		f32 x = position.x;
-		f32 y = position.y;
+		//Vec3 scale = transform.GetScale( );
+		//Vec3 position = transform.GetPosition( );
+		//f32 x = position.x;
+		//f32 y = position.y;
 
-		String::const_iterator c;
-		for ( c = text.begin( ); c != text.end( ); ++c )
-		{
-			FontGlyph glyph = atlas->GetGlyph( *c );
-			f32 width = glyph.GetWidth( );
-			f32 height = glyph.GetHeight( );
+		//String::const_iterator c;
+		//for ( c = text.begin( ); c != text.end( ); ++c )
+		//{
+		//	FontGlyph glyph = atlas->GetGlyph( *c );
+		//	f32 width = glyph.GetWidth( );
+		//	f32 height = glyph.GetHeight( );
 
-			f32 u1 = glyph.GetUVOffsetX( );
-			f32 v1 = 1.0f - glyph.GetUVOffsetY( );
-			f32 u2 = u1 + ( width / textureWidth );
-			f32 v2 = v1 - ( height / textureHeight );
+		//	f32 u1 = glyph.GetUVOffsetX( );
+		//	f32 v1 = 1.0f - glyph.GetUVOffsetY( );
+		//	f32 u2 = u1 + ( width / textureWidth );
+		//	f32 v2 = v1 - ( height / textureHeight );
 
-			f32 w = width;
-			f32 h = height;
+		//	f32 w = width;
+		//	f32 h = height;
 
-			Vec2 bearing = glyph.GetBearing( );
-			f32 xpos = x + ( bearing.x * scale.x );
-			f32 ypos = y - ( height - bearing.y ) * scale.y;
+		//	Vec2 bearing = glyph.GetBearing( );
+		//	f32 xpos = x + ( bearing.x * scale.x );
+		//	f32 ypos = y - ( height - bearing.y ) * scale.y;
 
-			Vec4 uv( u1, v2, u2, v1 );
-			//Vec4 uv( 0, 0, 1, 1 );
+		//	Vec4 uv( u1, v2, u2, v1 );
+		//	//Vec4 uv( 0, 0, 1, 1 );
 
-			Transform tform;
-			tform.SetPosition( Vec3( x, y, position.z ) );
-			tform.SetRotation( transform.GetRotation( ) );
-			tform.SetScale( Vec3( scale.x, scale.y, 1.0f ) );
+		//	Transform tform;
+		//	tform.SetPosition( Vec3( x, y, position.z ) );
+		//	tform.SetRotation( transform.GetRotation( ) );
+		//	tform.SetScale( Vec3( scale.x, scale.y, 1.0f ) );
 
-			AssetHandle< Texture > atlasTexture = atlas->GetAtlasTexture( );
-			batch.Add( Vec2( w, h ), tform, uv, atlasTexture.Get( )->GetTextureId( ) );
+		//	AssetHandle< Texture > atlasTexture = atlas->GetAtlasTexture( );
+		//	batch.Add( Vec2( w, h ), tform, uv, atlasTexture.Get( )->GetTextureId( ) );
 
-			s32 advance = glyph.GetAdvance( );
-			x += (f32) advance * scale.x;
-		}
+		//	s32 advance = glyph.GetAdvance( );
+		//	x += (f32) advance * scale.x;
+		//}
 	}
 
 	//========================================================================================================================
@@ -494,126 +496,126 @@ namespace Enjon
 
 	FontAtlas::FontAtlas( const String& filePath, const s32& fontSize, const UIFont* font )
 	{ 
-		if ( font == nullptr )
-		{
-			return;
-		}
+		//if ( font == nullptr )
+		//{
+		//	return;
+		//}
 
-		// Get font face
-		FT_Face face = font->GetFace( );
+		//// Get font face
+		//FT_Face face = font->GetFace( );
 
-		// Set size to load glyphs as
-		FT_Set_Pixel_Sizes( font->GetFace( ), 0, fontSize ); 
+		//// Set size to load glyphs as
+		//FT_Set_Pixel_Sizes( font->GetFace( ), 0, fontSize ); 
 
-		// Get dimentions
-		s32 maxDim = ( 1 + ( face->size->metrics.height >> 6 ) ) * std::ceilf( std::sqrtf( MAX_NUMBER_GLYPHS ) );
-		s32 texWidth = 1;
-		while ( texWidth < maxDim )
-		{
-			texWidth <<= 1;
-		} 
-		s32 texHeight = texWidth;
+		//// Get dimentions
+		//s32 maxDim = ( 1 + ( face->size->metrics.height >> 6 ) ) * std::ceilf( std::sqrtf( MAX_NUMBER_GLYPHS ) );
+		//s32 texWidth = 1;
+		//while ( texWidth < maxDim )
+		//{
+		//	texWidth <<= 1;
+		//} 
+		//s32 texHeight = texWidth;
 
-		// Render glyphs to atlas	
-		char* pixels = (char*) calloc( texWidth * texHeight, 1 );
-		s32 penX = 0; 
-		s32 penY = 0;
+		//// Render glyphs to atlas	
+		//char* pixels = (char*) calloc( texWidth * texHeight, 1 );
+		//s32 penX = 0; 
+		//s32 penY = 0;
 
-		// Iterate through glyphs and build data
-		for ( u32 i = 0; i < MAX_NUMBER_GLYPHS; ++i )
-		{
-			FT_Load_Char( face, i, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT );
-			FT_Bitmap* bmp = &face->glyph->bitmap; 
+		//// Iterate through glyphs and build data
+		//for ( u32 i = 0; i < MAX_NUMBER_GLYPHS; ++i )
+		//{
+		//	FT_Load_Char( face, i, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT );
+		//	FT_Bitmap* bmp = &face->glyph->bitmap; 
 
-			if ( penX + bmp->width >= texWidth )
-			{
-				penX = 0;
-				penY += ( ( face->size->metrics.height >> 6 ) + 1 );
-			}
+		//	if ( penX + bmp->width >= texWidth )
+		//	{
+		//		penX = 0;
+		//		penY += ( ( face->size->metrics.height >> 6 ) + 1 );
+		//	}
 
-			// Build glyph
-			for ( u32 row = 0; row < bmp->rows; ++row )
-			{
-				for ( u32 col = 0; col < bmp->width; ++col )
-				{
-					s32 x = penX + col;
-					s32 y = penY + row;
-					pixels[ y * texWidth + x ] = bmp->buffer[ row * bmp->pitch + col ];
-				}
-			}
+		//	// Build glyph
+		//	for ( u32 row = 0; row < bmp->rows; ++row )
+		//	{
+		//		for ( u32 col = 0; col < bmp->width; ++col )
+		//		{
+		//			s32 x = penX + col;
+		//			s32 y = penY + row;
+		//			pixels[ y * texWidth + x ] = bmp->buffer[ row * bmp->pitch + col ];
+		//		}
+		//	}
 
-			// Add glyph data
-			FontGlyph gl;
-			mGlyphs[ i ] = gl;
-			FontGlyph* glyph = &mGlyphs[ i ];
-			glyph->mTextureCoordinates.x	= penX / (f32)texWidth;
-			glyph->mTextureCoordinates.y	= penY /(f32)texHeight;
-			glyph->mTextureCoordinates.z	= penX + bmp->width;
-			glyph->mTextureCoordinates.w	= penY + bmp->rows;
-			glyph->mBearing.x				= face->glyph->bitmap_left;
-			glyph->mBearing.y				= face->glyph->bitmap_top; 
-			glyph->mXAdvance				= (f32)(face->glyph->advance.x >> 6); 
-			glyph->mAtlas					= this;
+		//	// Add glyph data
+		//	FontGlyph gl;
+		//	mGlyphs[ i ] = gl;
+		//	FontGlyph* glyph = &mGlyphs[ i ];
+		//	glyph->mTextureCoordinates.x	= penX / (f32)texWidth;
+		//	glyph->mTextureCoordinates.y	= penY /(f32)texHeight;
+		//	glyph->mTextureCoordinates.z	= penX + bmp->width;
+		//	glyph->mTextureCoordinates.w	= penY + bmp->rows;
+		//	glyph->mBearing.x				= face->glyph->bitmap_left;
+		//	glyph->mBearing.y				= face->glyph->bitmap_top; 
+		//	glyph->mXAdvance				= (f32)(face->glyph->advance.x >> 6); 
+		//	glyph->mAtlas					= this;
 
-			glyph->mWidth = face->glyph->bitmap.width;
-			glyph->mHeight = face->glyph->bitmap.rows;
+		//	glyph->mWidth = face->glyph->bitmap.width;
+		//	glyph->mHeight = face->glyph->bitmap.rows;
 
-			glyph->mLeft = face->glyph->bitmap_left;
-			glyph->mTop = face->glyph->bitmap_top;
+		//	glyph->mLeft = face->glyph->bitmap_left;
+		//	glyph->mTop = face->glyph->bitmap_top;
 
-			glyph->mUVOffsetX = penX / (f32) texWidth;
-			glyph->mUVOffsetY = penY / (f32) texHeight;
+		//	glyph->mUVOffsetX = penX / (f32) texWidth;
+		//	glyph->mUVOffsetY = penY / (f32) texHeight;
 
-			penX += bmp->width + 1;
-		} 
+		//	penX += bmp->width + 1;
+		//} 
 
-		char* textureData = ( char* ) calloc( texWidth * texHeight * 4, 1 );
-		for ( s32 i = 0; i < ( texWidth * texHeight ); ++i )
-		{
-			textureData[ i * 4 + 0 ] |= pixels[ i ];
-			textureData[ i * 4 + 1 ] |= pixels[ i ];
-			textureData[ i * 4 + 2 ] |= pixels[ i ];
-			textureData[ i * 4 + 3 ] |= pixels[ i ];
-		}
-		
-		// Disable byte-alignment restriction
-		//glPixelStorei( GL_UNPACK_ALIGNMENT, 1 ); 
+		//char* textureData = ( char* ) calloc( texWidth * texHeight * 4, 1 );
+		//for ( s32 i = 0; i < ( texWidth * texHeight ); ++i )
+		//{
+		//	textureData[ i * 4 + 0 ] |= pixels[ i ];
+		//	textureData[ i * 4 + 1 ] |= pixels[ i ];
+		//	textureData[ i * 4 + 2 ] |= pixels[ i ];
+		//	textureData[ i * 4 + 3 ] |= pixels[ i ];
+		//}
+		//
+		//// Disable byte-alignment restriction
+		////glPixelStorei( GL_UNPACK_ALIGNMENT, 1 ); 
 
-		// Construct texture
-		glGenTextures( 1, &mAtlasTextureID );
-		glBindTexture( GL_TEXTURE_2D, mAtlasTextureID );
+		//// Construct texture
+		//glGenTextures( 1, &mAtlasTextureID );
+		//glBindTexture( GL_TEXTURE_2D, mAtlasTextureID );
 
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RGBA8,
-			texWidth,
-			texHeight,
-			0,
-			GL_RGBA,
-			GL_UNSIGNED_BYTE,
-			textureData
-		);
+		//glTexImage2D(
+		//	GL_TEXTURE_2D,
+		//	0,
+		//	GL_RGBA8,
+		//	texWidth,
+		//	texHeight,
+		//	0,
+		//	GL_RGBA,
+		//	GL_UNSIGNED_BYTE,
+		//	textureData
+		//);
 
-		// Set up texture params
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		//// Set up texture params
+		//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 
-		// Generate mipmaps
-		glGenerateMipmap( GL_TEXTURE_2D );
+		//// Generate mipmaps
+		//glGenerateMipmap( GL_TEXTURE_2D );
 
-		// Unbind texture 
-		glBindTexture( GL_TEXTURE_2D, 0 );
-		
-		Enjon::AssetHandle< Enjon::Texture > texture; 
-		texture.Set( new Texture( texWidth, texHeight, mAtlasTextureID ) ); 
-		mAtlasTexture = texture;
+		//// Unbind texture 
+		//glBindTexture( GL_TEXTURE_2D, 0 );
+		//
+		//Enjon::AssetHandle< Enjon::Texture > texture; 
+		//texture.Set( new Texture( texWidth, texHeight, mAtlasTextureID ) ); 
+		//mAtlasTexture = texture;
 
-		// Free all texture data
-		free( textureData );
-		free( pixels );
+		//// Free all texture data
+		//free( textureData );
+		//free( pixels );
 	}
 			
 	/*
@@ -872,7 +874,7 @@ namespace Enjon
 	UIFont::UIFont( const String& fontPath )
 	{
 		// Do something with imgui, dur
-		mFontData.mData = ImFileLoadToMemory( fontPath.c_str(), "rb", &mFontData.mSize, 0); 
+		mFontData.mData = (u8*)ImFileLoadToMemory( fontPath.c_str(), "rb", (int*)&mFontData.mSize, 0); 
 	}
 
 	//======================================================================================================================== 
@@ -884,7 +886,8 @@ namespace Enjon
 		// Write out font data
 		for ( u32 i = 0; i < mFontData.mSize; ++i )
 		{
-			buffer->Write< u8 >( (u8)mFontData[ i ] );
+			u8 b = (mFontData.mData)[ i ];
+			buffer->Write< u8 >( b );
 		}
 
 		return Result::SUCCESS;
@@ -897,9 +900,11 @@ namespace Enjon
 		// Read in font data size
 		mFontData.mSize = buffer->Read< u32 >( ); 
 		// Read in font data
+		mFontData.mData = (u8* )malloc( mFontData.mSize );
 		for ( u32 i = 0; i < mFontData.mSize; ++i )
 		{
-			( u8 )mFontData[i]l = buffer->Read< u8 >();
+			u8 b = buffer->Read< u8 >();
+			mFontData.mData[i] = b;
 		}
 
 		return Result::SUCCESS;

@@ -190,21 +190,25 @@ namespace Enjon
 	typedef struct FontData
 	{
 		u32 mSize;
-		void* mData;
+		u8* mData;
 	} FontData;
 
 	ENJON_CLASS( Construct )
 	class UIFont : public Asset 
 	{ 
-		ENJON_CLASS_BODY( UIFont )
-			
-		/**
-		* @brief Constructor
-		*/
-		UIFont( const String& fontPath ); 
+		friend FontAssetLoader;
 
-		Result SerializeData( ByteBuffer* buffer ) const override;
-		Result DeserializeData( ByteBuffer* buffer ) override;
+		ENJON_CLASS_BODY( UIFont )
+
+		public:
+			
+			/**
+			* @brief Constructor
+			*/
+			UIFont( const String& fontPath ); 
+
+			Result SerializeData( ByteBuffer* buffer ) const override;
+			Result DeserializeData( ByteBuffer* buffer ) override;
 
 		private: 
 			FontData mFontData;
