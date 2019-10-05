@@ -425,7 +425,7 @@ namespace Enjon
 
 			void LoadStyle( const AssetHandle< UIStyleConfig >& config, GUIContext* ctx );
 
-			void AddFont( const String& filePath, const u32& size, GUIContext* ctx );
+			void AddFont( const String& filePath, const u32& size, GUIContext* ctx, const char* fontName );
 
 		public:
 

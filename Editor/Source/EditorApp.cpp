@@ -1392,6 +1392,9 @@ namespace Enjon
 
 	//================================================================================================================
 
+static f32 font_val = 50.f;
+static f32 dts = 24.f;
+
 	void EditorApp::LoadProjectContext( )
 	{ 
 		mPreloadProjectContext = false; 
@@ -1462,15 +1465,40 @@ namespace Enjon
 				txt = Utils::format( "Scene: default" );
 				txtSz = ImGui::CalcTextSize( txt.c_str() );
 			}
-
+ 
 			ImGui::SetCursorScreenPos( ImVec2( windowPos.x + windowSize.x - txtSz.x - margin.x, windowPos.y + windowSize.y - txtSz.y - margin.y ) );
 			ImGui::Text( "%s", txt.c_str() ); 
 
 			ImGui::SetCursorPos( ImVec2( 0.f, 0.f ) );
 			if ( ImGui::Button( "Load Font"  ) )
 			{
+				mNeedAddFont = true; 
+			} 
+			
+			if ( ImGui::SliderFloat( "##val", &font_val, 1.f, 72.f ) )
+			{
 				mNeedAddFont = true;
 			}
+
+			f32 factor = font_val / dts;
+			ImGui::SetWindowFontScale( factor ); 
+			// I guess could set window font scale? 
+			ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+			// So, here's the idea. Set the text to whatever size is requested dynamically IF the given text size is not found for a particular font. 
+			// Then, defer the font atlas update after the frame for the given context. 
+			// Stupidly, this will fail if the text size does not match the font. 
+			// Want to be able to garbage collect and delete non-used fonts as well. Need to keep space from being wasted. 
+			// Should contexts hold their own atlases? Seems VERY wasteful. Would rather everything use the same across a device context. 
+			// ImGuiManager needs to keep a running list of available fonts loaded. Then these fonts need to have registered font sizes associated with them. 
+			// Keep a garbage collector running - check to make sure that certain font sizes are being used.
+			char buffer[1024];
+			snprintf( buffer, 1024, "%s_%d", "WeblySleek", (int )dts );
+			ImGui::PushFont( igm->GetFont( buffer ) );
+			ImGui::Text( "Test Text" );
+			//ImGui::GetWindowDrawList()->AddText( igm->GetFont( "WeblySleek_24" ), 24.f, ImGui::GetCursorScreenPos(), ImColor( 1.f, 1.f, 1.f, 1.f ), "Test Text" );
+			ImGui::SetWindowFontScale( 1.f );
+			ImGui::PopFont();
 		}); 
 
 		// Register selection callback with outliner view
@@ -2219,9 +2247,9 @@ namespace Enjon
 	{ 
 		if ( mNeedAddFont )
 		{
-			static u32 fsz = 10;
 			GUIContext* gCtx = EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetGUIContext();
-			EngineSubsystem( ImGuiManager )->AddFont( Engine::GetInstance()->GetConfig().GetEngineResourcePath() + "/Fonts/TheBoldFont/TheBoldFont.ttf", fsz++, gCtx );
+			EngineSubsystem( ImGuiManager )->AddFont( Engine::GetInstance()->GetConfig().GetEngineResourcePath() + "/Fonts/WeblySleek/weblysleekuisb.ttf", font_val, gCtx, "WeblySleek" );
+			dts = font_val;
 			mNeedAddFont = false;
 		}
 

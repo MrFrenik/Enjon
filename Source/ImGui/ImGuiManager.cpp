@@ -1468,11 +1468,13 @@ namespace Enjon
 	void ImGuiManager::LoadStyle( const AssetHandle< UIStyleConfig >& config, GUIContext* ctx )
 	{ 
 		// Load the styles from the asset
+		// Here's the issue - need a way to set multiple font sizes for any given font and then rebuild a texture upon request
+		// Cannot rebuild the texture DURING a frame, therefore it will be deferred to the next. Damn. 
 	}
 
 	//============================================================================================ 
 
-	void ImGuiManager::AddFont( const String& filePath, const u32& size, GUIContext* ctx )
+	void ImGuiManager::AddFont( const String& filePath, const u32& size, GUIContext* ctx, const char* fontName )
 	{ 
 		// Cache previous context, set context
 		ImGuiContext* prevContext = ImGui::GetCurrentContext(); 
@@ -1497,7 +1499,9 @@ namespace Enjon
 		mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs, &fontCfg );
 		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs, &fontCfg );
 		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg );
-		io.Fonts->AddFontFromFileTTF( filePath.c_str(), (f32)size, &fontCfg );
+		char buffer[1024];
+		snprintf( buffer, 1024, "%s_%d", fontName, (s32)size );
+		mFonts[ buffer ] = io.Fonts->AddFontFromFileTTF( filePath.c_str(), (f32)size, &fontCfg );
 		io.Fonts->Build();
 
 		// Recreate font texture
