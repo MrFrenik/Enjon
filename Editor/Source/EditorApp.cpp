@@ -1393,7 +1393,7 @@ namespace Enjon
 	//================================================================================================================
 
 static f32 font_val = 50.f;
-static f32 dts = 24.f;
+static f32 dts = 72.f;
 
 	void EditorApp::LoadProjectContext( )
 	{ 
@@ -1480,10 +1480,16 @@ static f32 dts = 24.f;
 				mNeedAddFont = true;
 			}
 
+			static f32 font_scale = 1.f;
+			ImGui::SliderFloat( "##scale", &font_scale, 0.1f, 2.f );
+
 			f32 factor = font_val / dts;
-			ImGui::SetWindowFontScale( factor ); 
+			//ImGui::SetWindowFontScale( font_scale ); 
 			// I guess could set window font scale? 
 			ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+
+			static int curSize = 32;
+			ImGui::SliderInt( "Size##size", &curSize, 8, 100 );
 
 			// So, here's the idea. Set the text to whatever size is requested dynamically IF the given text size is not found for a particular font. 
 			// Then, defer the font atlas update after the frame for the given context. 
@@ -1492,13 +1498,27 @@ static f32 dts = 24.f;
 			// Should contexts hold their own atlases? Seems VERY wasteful. Would rather everything use the same across a device context. 
 			// ImGuiManager needs to keep a running list of available fonts loaded. Then these fonts need to have registered font sizes associated with them. 
 			// Keep a garbage collector running - check to make sure that certain font sizes are being used.
+			int d = curSize <= 32 ? 32 : curSize > 32 && curSize <= 72 ? 72 : 100;
+			ImGui::Text( "CurSize: %d, Sz: %d", curSize, d );
 			char buffer[1024];
-			snprintf( buffer, 1024, "%s_%d", "WeblySleek", (int )dts );
+			snprintf( buffer, 1024, "%s_%d", "WeblySleek", ( int )curSize );
+			f32 fs = (f32)curSize / (f32)d;
+			ImGui::SetWindowFontScale( fs ); 
+			//ImGui::PushFont( igm->GetFont( buffer ) );
 			ImGui::PushFont( igm->GetFont( buffer ) );
+			ImGui::SetCursorScreenPos( ImVec2( 10.f, ImGui::GetCursorScreenPos().y ) );
 			ImGui::Text( "Test Text" );
 			//ImGui::GetWindowDrawList()->AddText( igm->GetFont( "WeblySleek_24" ), 24.f, ImGui::GetCursorScreenPos(), ImColor( 1.f, 1.f, 1.f, 1.f ), "Test Text" );
 			ImGui::SetWindowFontScale( 1.f );
-			ImGui::PopFont();
+			ImGui::PopFont(); 
+
+			//int scl = (int)(32.f * font_scale);
+			snprintf( buffer, 1024, "%s_%d", "WeblySleek", curSize );
+			ImGui::PushFont( igm->GetFont( buffer ) );
+			ImGui::Text( "Test Text" );
+			ImGui::PopFont( );
+
+			ImGui::Text( "scale: %.2f", fs );
 		}); 
 
 		// Register selection callback with outliner view
