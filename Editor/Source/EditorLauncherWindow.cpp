@@ -140,8 +140,8 @@ namespace Enjon
 
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
-		ImVec2 a = ImVec2(ImGui::GetCursorScreenPos().x - 2.f, ImGui::GetCursorScreenPos().y - 2.f);
-		ImVec2 b = ImVec2(a.x + ImGui::GetWindowWidth() * 0.97f, a.y + 35.f);
+		ImVec2 a = ImVec2(ImGui::GetCursorScreenPos().x - 3.f, ImGui::GetCursorScreenPos().y - 2.f);
+		ImVec2 b = ImVec2(a.x + ImGui::GetWindowWidth() * 0.975f, a.y + 35.f);
 		b32 hovered = ImGui::IsMouseHoveringRect(a, b) && !mProjectOptionStruct.mHovered;
 		b32 active = hovered && ImGui::IsMouseClicked(0);
 		b32 selected = selectedProject == &p;
@@ -370,7 +370,7 @@ namespace Enjon
 				{
 					LoadProjectScreen();
 				}
-			}
+			} 
 		}
 		ImGui::End(); 
 	}
@@ -701,6 +701,7 @@ namespace Enjon
 						ProjectCreationScreen(); 
 					} break;
 				} 
+
 			}
 			ImGui::End(); 
 

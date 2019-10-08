@@ -1484,24 +1484,25 @@ namespace Enjon
 		String fp = rootPath + "/Assets/Fonts/";
 		ImGuiIO& io = ImGui::GetIO(); 
 		ImFontConfig fontCfg;
-	    fontCfg.FontDataOwnedByAtlas = false;
-	    fontCfg.OversampleH = 7;
-	    fontCfg.OversampleV = 7; 
+	    fontCfg.FontDataOwnedByAtlas = true;
+	    //fontCfg.OversampleH = 7;
+	    //fontCfg.OversampleV = 7; 
 	    int fs = 1; 
 
 		io.Fonts->Clear();
 		mFonts.clear();
-		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs, &fontCfg );
-		mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs, &fontCfg );
-		mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16 * fs, &fontCfg );
-		mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs, &fontCfg );
-		mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs, &fontCfg );
-		mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs, &fontCfg );
-		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs, &fontCfg );
-		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg );
-		char buffer[1024];
-		snprintf( buffer, 1024, "%s_%d", fontName, (s32)size );
-		mFonts[ buffer ] = io.Fonts->AddFontFromFileTTF( filePath.c_str(), (f32)size, &fontCfg );
+			mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs, &fontCfg );
+			mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs, &fontCfg );
+			mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16 * fs, &fontCfg );
+			mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs, &fontCfg );
+			mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs, &fontCfg );
+			mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs, &fontCfg );
+			mFonts["WeblySleek_100"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 100 * fs, &fontCfg );
+			mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs, &fontCfg );
+			mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg );
+			char buffer[1024];
+			snprintf( buffer, 1024, "%s_%d", fontName, (s32)size );
+			mFonts[ buffer ] = io.Fonts->AddFontFromFileTTF( filePath.c_str(), (f32)size, &fontCfg );
 		io.Fonts->Build();
 
 		// Recreate font texture
@@ -1526,8 +1527,8 @@ namespace Enjon
 		ImGuiIO& io = ImGui::GetIO();
 		ImFontConfig fontCfg;
 	    fontCfg.FontDataOwnedByAtlas = true;
-	    fontCfg.OversampleH = 4;
-	    fontCfg.OversampleV = 4;
+	    fontCfg.OversampleH = 6;
+	    fontCfg.OversampleV = 6;
 	    // fontCfg.RasterizerMultiply = 1.5f; 
 
 	    // Font scale
@@ -1535,18 +1536,27 @@ namespace Enjon
 
 		io.Fonts->Clear();
 
-		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs );
-		mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs );
-		mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16 * fs );
-		mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs );
-		mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs );
-		mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs );
-		mFonts["WeblySleek_50"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 50 * fs );
-		mFonts["WeblySleek_72"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 72 * fs );
-		mFonts["WeblySleek_100"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 100 * fs );
-		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs );
-		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs );
-		mFonts["Roboto-MediumItalic_100"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 100 * fs );
+		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs, &fontCfg );
+		mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs, &fontCfg );
+		mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16 * fs, &fontCfg );
+		mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs, &fontCfg );
+		mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs, &fontCfg );
+		mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs, &fontCfg );
+		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs, &fontCfg );
+		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg );
+
+		//mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs );
+		//mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs );
+		//mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16 * fs );
+		//mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs );
+		//mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs );
+		//mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs );
+		//mFonts["WeblySleek_50"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 50 * fs );
+		//mFonts["WeblySleek_72"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 72 * fs );
+		//mFonts["WeblySleek_100"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 100 * fs );
+		//mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs );
+		//mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs );
+		//mFonts["Roboto-MediumItalic_100"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 100 * fs );
 		io.Fonts->Build();
 
 		// io.DisplayFramebufferScale = { 8, 8 };
@@ -1560,11 +1570,11 @@ namespace Enjon
 
 		style.WindowTitleAlign 		= ImVec2(0.5f, 0.41f);
 		style.ButtonTextAlign 		= ImVec2(0.5f, 0.5f); 
-		style.WindowPadding			= ImVec2(10, 8);
+		style.WindowPadding			= ImVec2(10, 6);
 		style.WindowRounding		= 0.0f;
-		style.FramePadding			= ImVec2(6, 4);
-		style.FrameRounding			= 2.0f;
-		style.ItemSpacing			= ImVec2(8, 3);
+		style.FramePadding			= ImVec2(6, 2);
+		style.FrameRounding			= 3.0f;
+		style.ItemSpacing			= ImVec2(8, 2);
 		style.ItemInnerSpacing		= ImVec2(2, 3);
 		style.IndentSpacing			= 20.0f;
 		style.ScrollbarSize			= 14.0f;
@@ -1572,17 +1582,17 @@ namespace Enjon
 		style.GrabMinSize			= 5.0f;
 		style.GrabRounding			= 2.0f;
 		style.Alpha					= 1.0f;
-		style.FrameBorderSize		= 0.0f;
-		style.WindowBorderSize		= 1.0f;
+		style.FrameBorderSize		= 1.0f;
+		style.WindowBorderSize		= 1.0f; 
 
 		ImVec4* colors = ImGui::GetStyle( ).Colors;
 		colors[ ImGuiCol_Text ] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
 		colors[ ImGuiCol_TextDisabled ] = ImVec4( 0.50f, 0.50f, 0.50f, 0.57f );
 		colors[ ImGuiCol_WindowBg ] = ImVec4( 0.13f, 0.13f, 0.13f, 1.00f );
 		colors[ ImGuiCol_ChildBg ] = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
-		colors[ ImGuiCol_PopupBg ] = ImVec4( 0.12f, 0.12f, 0.12f, 1.00f );
-		colors[ ImGuiCol_Border ] = ImVec4( 0.12f, 0.12f, 0.12f, 0.45f );
-		colors[ ImGuiCol_BorderShadow ] = ImVec4( 0.00f, 0.00f, 0.00f, 1.00f );
+		colors[ ImGuiCol_PopupBg ] = ImVec4( 0.08f, 0.08f, 0.08f, 1.00f );
+		colors[ ImGuiCol_Border ] = ImVec4( 0.08f, 0.08f, 0.08f, 0.28f );
+		colors[ ImGuiCol_BorderShadow ] = ImVec4( 1.00f, 1.00f, 1.00f, 0.05f );
 		colors[ ImGuiCol_FrameBg ] = ImVec4( 0.03f, 0.03f, 0.03f, 0.39f );
 		colors[ ImGuiCol_FrameBgHovered ] = ImVec4( 0.09f, 0.09f, 0.09f, 1.00f );
 		colors[ ImGuiCol_FrameBgActive ] = ImVec4( 0.16f, 0.16f, 0.16f, 1.00f );
@@ -1625,7 +1635,7 @@ namespace Enjon
 		colors[ ImGuiCol_SelectableActive ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_Selectable ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_ComboBox ] = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
-		colors[ ImGuiCol_ComboBoxHovered ] = ImVec4( 0.09f, 0.09f, 0.09f, 1.00f );
+		colors[ ImGuiCol_ComboBoxHovered ] = ImVec4( 0.16f, 0.16f, 0.16f, 1.00f );
 		colors[ ImGuiCol_ListSelection ] = ImVec4( 0.06f, 0.48f, 0.89f, 1.00f );
 		colors[ ImGuiCol_ListSelectionHovered ] = ImVec4( 0.88f, 0.40f, 0.18f, 1.00f );
 		colors[ ImGuiCol_ListSelectionActive ] = ImVec4( 0.88f, 0.40f, 0.18f, 1.00f );

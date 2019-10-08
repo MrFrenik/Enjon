@@ -33,6 +33,10 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_sdl_gl3.h"
 
+#include "Engine.h"
+#include "SubsystemCatalog.h"
+#include "ImGui/ImGuiManager.h"
+
 // SDL,GL3W
 #include <SDL2/SDL.h>
 // #ifdef ENJON_SYSTEM_OSX
@@ -51,12 +55,15 @@
 
 #include "ImGui/imgui_internal.h"
 
+using namespace Enjon;
+
 struct DeviceData
 {
 	// Data
 	Uint64       mTime = 0;
 	bool         mMousePressed[ 3 ] = { false, false, false };
 	GLuint       mFontTexture = 0;
+	int			 mBufferLocation = 0, mGammaLocation = 0, mUseSDFLocation = 0;
 	int          mShaderHandle = 0, mVertHandle = 0, mFragHandle = 0;
 	int          mAttribLocationTex = 0, mAttribLocationProjMtx = 0;
 	int          mAttribLocationPosition = 0, mAttribLocationUV = 0, mAttribLocationColor = 0;
@@ -204,6 +211,8 @@ void ImGui_ImplSdlGL3_RenderDrawData( ImDrawData* draw_data )
 	glUseProgram( data->mShaderHandle );
 	glUniform1i( data->mAttribLocationTex, 0 );
 	glUniformMatrix4fv( data->mAttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[ 0 ][ 0 ] );
+	glUniform1f( data->mBufferLocation, EngineSubsystem( ImGuiManager )->mBuffer );
+	glUniform1f( data->mGammaLocation, EngineSubsystem( ImGuiManager )->mGamma );
 	glBindVertexArray( data->mVaoHandle );
 	glBindSampler( 0, 0 ); // Rely on combined texture/sampler state.
 
@@ -233,6 +242,7 @@ void ImGui_ImplSdlGL3_RenderDrawData( ImDrawData* draw_data )
 		for ( int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++ )
 		{
 			const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[ cmd_i ];
+			glUniform1f( data->mUseSDFLocation, ( ( GLuint )( intptr_t )pcmd->TextureId == ( GLuint )( intptr_t )io.Fonts->TexID ) ? 1.f : 0.f );
 			if ( pcmd->UserCallback )
 			{
 				pcmd->UserCallback( cmd_list, pcmd );
@@ -321,6 +331,30 @@ bool ImGui_ImplSdlGL3_ProcessEvent( SDL_Event* event )
 	return false;
 }
 
+//#define IMIMPL_BUILD_SDF // Twickable
+//#ifdef IMIMPL_BUILD_SDF
+//#define EDTAA3FUNC_HAS_IMGUI_SUPPORT
+//#include "edtaa3func.h"
+//#endif //IMIMPL_BUILD_SDF
+//bool ImGui_ImplGlfw_CreateFontsTexture()
+//{
+//// Build texture atlas
+//ImGuiIO& io = ImGui::GetIO();
+//unsigned char* pixels;
+//int width, height;
+//
+//// New code -------------------------------------------------
+//if (io.Fonts->ConfigData.empty()) io.Fonts->AddFontDefault();
+//io.Fonts->Build(); // (change this line if you use [imgui_freetype](https://github.com/Vuhdo/imgui) appropriately)
+//#   ifdef IMIMPL_BUILD_SDF
+//ImGui::PostBuildForSignedDistanceFontEffect(io.Fonts);
+//#   endif //IMIMPL_BUILD_SDF
+// End new code ----------------------------------------------
+
+#include <ImGui/imgui_edtaa3func.h>
+
+#define DO_SDF_STUFF 0
+
 void ImGui_ImplSdlGL3_CreateFontsTexture( ImGuiContext* ctx )
 {
 	if ( !ctx )
@@ -332,6 +366,12 @@ void ImGui_ImplSdlGL3_CreateFontsTexture( ImGuiContext* ctx )
 	ImGuiIO& io = ImGui::GetIO( );
 	unsigned char* pixels;
 	int width, height;
+
+	// Try the sdf shtuff
+#if DO_SDF_STUFF
+	ImGui::PostBuildForSignedDistanceFontEffect( io.Fonts );
+#endif
+
 	io.Fonts->GetTexDataAsRGBA32( &pixels, &width, &height );   // Load as RGBA 32-bits for OpenGL3 demo because it is more likely to be compatible with user's existing shader.  
 
 	// Can probably keep this global
@@ -403,11 +443,19 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects( ImGuiContext* ctx )
 	const GLchar* fragment_shader =
 		"#version 150\n"
 		"uniform sampler2D Texture;\n"
+		"uniform float u_gamma;\n"
+		"uniform float u_buffer;\n"
+		"uniform float u_sdf;\n"
 		"in vec2 Frag_UV;\n"
 		"in vec4 Frag_Color;\n"
 		"out vec4 Out_Color;\n"
+		"const float smoothing = 1.0/16.0;\n"
 		"void main()\n"
 		"{\n"
+		//"	float distance = 1.0 - texture(Texture, Frag_UV.st).a;\n"
+		//"	float alpha = 1.0 - smoothstep(u_buffer, u_buffer + u_gamma, distance);\n"
+		//"	Out_Color = vec4(Frag_Color.rgb, Frag_Color.a * alpha);\n"
+		//"	Out_Color = mix( Frag_Color * texture( Texture, Frag_UV.st), Out_Color, u_sdf );\n"
 		"	Out_Color = Frag_Color * texture( Texture, Frag_UV.st);\n"
 		"}\n";
 
@@ -434,6 +482,9 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects( ImGuiContext* ctx )
 	//glAttachShader( g_ShaderHandle, g_FragHandle );
 	//glLinkProgram( g_ShaderHandle );
 
+	data->mBufferLocation = glGetUniformLocation( data->mShaderHandle, "u_buffer" );
+	data->mGammaLocation = glGetUniformLocation( data->mShaderHandle, "u_gamma" );
+	data->mUseSDFLocation = glGetUniformLocation( data->mShaderHandle, "u_sdf" );
 	data->mAttribLocationTex = glGetUniformLocation( data->mShaderHandle, "Texture" ); 
 	data->mAttribLocationProjMtx = glGetUniformLocation( data->mShaderHandle, "ProjMtx" );
 	data->mAttribLocationPosition = glGetAttribLocation( data->mShaderHandle, "Position" );

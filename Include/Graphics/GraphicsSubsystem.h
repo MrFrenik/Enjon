@@ -431,7 +431,7 @@ namespace Enjon
 			//float mSaturation;
 			ToneMapSettings mToneMapSettings = ToneMapSettings(0.77f, 2.2f, 0.61f, 7.74f, 1.3f);
 			// BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(3, 3, 2), Vec3(0.001f, 0.006f, 0.015f)); 
-			BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(1, 1, 1), Vec3(0.001f, 0.006f, 0.015f)); 
+			BloomSettings mBloomSettings = BloomSettings(Vec3(0.384f, 0.366f, 0.500f), Vec3(3, 3, 2), Vec3(0.001f, 0.006f, 0.015f)); 
 
 			bool mShowGame = true;
 			bool mShowGraphicsOptionsWindow = true;

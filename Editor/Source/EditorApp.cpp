@@ -1469,19 +1469,9 @@ static f32 dts = 72.f;
 			ImGui::SetCursorScreenPos( ImVec2( windowPos.x + windowSize.x - txtSz.x - margin.x, windowPos.y + windowSize.y - txtSz.y - margin.y ) );
 			ImGui::Text( "%s", txt.c_str() ); 
 
-			ImGui::SetCursorPos( ImVec2( 0.f, 0.f ) );
-			if ( ImGui::Button( "Load Font"  ) )
-			{
-				mNeedAddFont = true; 
-			} 
-			
-			if ( ImGui::SliderFloat( "##val", &font_val, 1.f, 72.f ) )
-			{
-				mNeedAddFont = true;
-			}
-
+			ImGui::SetCursorPos( ImVec2( 10.f, 20.f ) ); 
 			static f32 font_scale = 1.f;
-			ImGui::SliderFloat( "##scale", &font_scale, 0.1f, 2.f );
+			ImGui::SliderFloat( "##scale", &font_scale, 0.01f, 10.f );
 
 			f32 factor = font_val / dts;
 			//ImGui::SetWindowFontScale( font_scale ); 
@@ -1490,6 +1480,7 @@ static f32 dts = 72.f;
 
 			static int curSize = 32;
 			ImGui::SliderInt( "Size##size", &curSize, 8, 100 );
+			font_val = ( f32 )curSize;
 
 			// So, here's the idea. Set the text to whatever size is requested dynamically IF the given text size is not found for a particular font. 
 			// Then, defer the font atlas update after the frame for the given context. 
@@ -1498,27 +1489,27 @@ static f32 dts = 72.f;
 			// Should contexts hold their own atlases? Seems VERY wasteful. Would rather everything use the same across a device context. 
 			// ImGuiManager needs to keep a running list of available fonts loaded. Then these fonts need to have registered font sizes associated with them. 
 			// Keep a garbage collector running - check to make sure that certain font sizes are being used.
-			int d = curSize <= 32 ? 32 : curSize > 32 && curSize <= 72 ? 72 : 100;
-			ImGui::Text( "CurSize: %d, Sz: %d", curSize, d );
 			char buffer[1024];
-			snprintf( buffer, 1024, "%s_%d", "WeblySleek", ( int )curSize );
-			f32 fs = (f32)curSize / (f32)d;
-			ImGui::SetWindowFontScale( fs ); 
-			//ImGui::PushFont( igm->GetFont( buffer ) );
-			ImGui::PushFont( igm->GetFont( buffer ) );
+			snprintf( buffer, 1024, "%s_%d", "WeblySleek", curSize );
+			ImFont* f = igm->GetFont( buffer );
+			f32 scale = 1.f;
+			if ( f == nullptr ) {
+				mNeedAddFont = true;
+				scale = (f32)curSize / 16.f;
+			}
+			ImGui::SetWindowFontScale( scale * font_scale ); 
+			ImGui::PushFont( f );
 			ImGui::SetCursorScreenPos( ImVec2( 10.f, ImGui::GetCursorScreenPos().y ) );
-			ImGui::Text( "Test Text" );
+			ImGui::Text( "The quick brown fox jumps over the moon." );
 			//ImGui::GetWindowDrawList()->AddText( igm->GetFont( "WeblySleek_24" ), 24.f, ImGui::GetCursorScreenPos(), ImColor( 1.f, 1.f, 1.f, 1.f ), "Test Text" );
 			ImGui::SetWindowFontScale( 1.f );
 			ImGui::PopFont(); 
 
 			//int scl = (int)(32.f * font_scale);
-			snprintf( buffer, 1024, "%s_%d", "WeblySleek", curSize );
-			ImGui::PushFont( igm->GetFont( buffer ) );
-			ImGui::Text( "Test Text" );
-			ImGui::PopFont( );
-
-			ImGui::Text( "scale: %.2f", fs );
+			//snprintf( buffer, 1024, "%s_%d", "WeblySleek", curSize );
+			//ImGui::PushFont( igm->GetFont( buffer ) );
+			//ImGui::Text( "Test Text" );
+			//ImGui::PopFont( ); 
 		}); 
 
 		// Register selection callback with outliner view
@@ -1845,6 +1836,11 @@ static f32 dts = 72.f;
 			if (ImGui::BeginDock("Styles##options", &mShowStyles))
 			{
 				ImGui::ShowStyleEditor();	
+
+				// ImGui style
+				ImGui::Text( "SDF Parameters:" );
+				ImGui::DragFloat( "Gamma", &EngineSubsystem( ImGuiManager )->mGamma, 0.001f, 0.f, 1.f );
+				ImGui::DragFloat( "Buffer", &EngineSubsystem( ImGuiManager )->mBuffer, 0.001f, 0.f, 1.f );
 			}
 			ImGui::EndDock();
 	 	}; 

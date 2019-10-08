@@ -500,6 +500,11 @@ namespace Enjon
 			HashMap< Enjon::String, ImFont* > mFonts;
 			ImGuiContext* mContext = nullptr;
 			HashMap< SDL_Window*, ImGuiContext* > mImGuiContextMap;
+ 
+		public:
+			// SDF parameters
+			f32 mGamma = 0.085f;
+			f32 mBuffer = 0.454f;
 	};
 
 	ENJON_CLASS( )
