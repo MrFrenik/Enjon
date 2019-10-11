@@ -231,6 +231,9 @@ namespace Enjon
 		ImGuiManager* manager = EngineSubsystem( ImGuiManager );
 		manager->SetContextByWindow( mWindow ); 
 
+		// Set style for context
+		manager->LoadStyle( mParams.mUIStyle, this );
+
 		if ( mParams.mUseRootDock )
 		{
 			RootDock( ); 
@@ -1465,11 +1468,104 @@ namespace Enjon
 
 	//============================================================================================
 
-	void ImGuiManager::LoadStyle( const AssetHandle< UIStyleConfig >& config, GUIContext* ctx )
+#define Vec2ToImVec2( v )\
+	ImVec2( (v).x, (v).y )
+
+#define Col32ToImVec4( c )\
+	ImVec4( (c).r, (c).g, (c).b, (c).a )
+
+	void ImGuiManager::LoadStyle( const AssetHandle< UIStyleConfig >& handle, GUIContext* ctx )
 	{ 
+		const UIStyleConfig* asset = handle.Get();
+		if ( !asset ) {
+			return;
+		}
+
 		// Load the styles from the asset
 		// Here's the issue - need a way to set multiple font sizes for any given font and then rebuild a texture upon request
 		// Cannot rebuild the texture DURING a frame, therefore it will be deferred to the next. Damn. 
+		// Load a style for a particular context
+		ImGuiContext* prevContext = ImGui::GetCurrentContext(); 
+		ImGui::SetCurrentContext( ctx->GetContext() );
+		{	
+			// Grab reference to style
+			ImGuiStyle& style = ImGui::GetStyle(); 
+			ImGuiIO& io = ImGui::GetIO(); 
+
+			style.WindowTitleAlign 		= Vec2ToImVec2( asset->WindowTitleAlign );
+			style.ButtonTextAlign 		= Vec2ToImVec2( asset->ButtonTextAlign ); 
+			style.WindowPadding			= Vec2ToImVec2( asset->WindowPadding );
+			style.WindowRounding		= asset->WindowRounding;
+			style.FramePadding			= Vec2ToImVec2( asset->FramePadding );
+			style.FrameRounding			= asset->FrameRounding;
+			style.ItemSpacing			= Vec2ToImVec2( asset->ItemSpacing );
+			style.ItemInnerSpacing		= Vec2ToImVec2( asset->ItemInnerSpacing );
+			style.IndentSpacing			= asset->IndentSpacing;
+			style.ScrollbarSize			= asset->ScrollbarSize;
+			style.ScrollbarRounding		= asset->ScrollbarRounding;
+			style.GrabMinSize			= asset->GrabMinSize;
+			style.GrabRounding			= asset->GrabRounding;
+			style.Alpha					= asset->GrabRounding;
+			style.FrameBorderSize		= asset->FrameBorderSize;
+			style.WindowBorderSize		= asset->WindowBorderSize; 
+
+			ImVec4* colors = ImGui::GetStyle( ).Colors;
+			colors[ ImGuiCol_Text ] = Col32ToImVec4( asset->Col_Text );
+			colors[ ImGuiCol_TextDisabled ] = Col32ToImVec4( asset->Col_TextDisabled );
+			colors[ ImGuiCol_WindowBg ] = Col32ToImVec4( asset->Col_WindowBg );
+			colors[ ImGuiCol_ChildBg ] = Col32ToImVec4( asset->Col_ChildBg );
+			colors[ ImGuiCol_PopupBg ] = Col32ToImVec4( asset->Col_PopupBg );
+			colors[ ImGuiCol_Border ] = Col32ToImVec4( asset->Col_Border );
+			colors[ ImGuiCol_BorderShadow ] = Col32ToImVec4( asset->Col_BorderShadow );
+			colors[ ImGuiCol_FrameBg ] = Col32ToImVec4( asset->Col_FrameBg );
+			colors[ ImGuiCol_FrameBgHovered ] = Col32ToImVec4( asset->Col_FrameBgHovered );
+			colors[ ImGuiCol_FrameBgActive ] = Col32ToImVec4( asset->Col_FrameBgActive );
+			colors[ ImGuiCol_TitleBg ] = Col32ToImVec4( asset->Col_TitleBg );
+			colors[ ImGuiCol_TitleBgActive ] = Col32ToImVec4( asset->Col_TitleBgActive );
+			colors[ ImGuiCol_TitleBgCollapsed ] = Col32ToImVec4( asset->Col_TitleBgCollapsed );
+			colors[ ImGuiCol_MenuBarBg ] = Col32ToImVec4( asset->Col_MenuBarBg );
+			colors[ ImGuiCol_ScrollbarBg ] = Col32ToImVec4( asset->Col_ScrollbarBg );
+			colors[ ImGuiCol_ScrollbarGrab ] = Col32ToImVec4( asset->Col_ScrollbarGrab );
+			colors[ ImGuiCol_ScrollbarGrabHovered ] = Col32ToImVec4( asset->Col_ScrollbarGrabHovered );
+			colors[ ImGuiCol_ScrollbarGrabActive ] = Col32ToImVec4( asset->Col_ScrollbarGrabActive );
+			colors[ ImGuiCol_CheckMark ] = Col32ToImVec4( asset->Col_CheckMark );
+			colors[ ImGuiCol_SliderGrab ] = Col32ToImVec4( asset->Col_SliderGrab );
+			colors[ ImGuiCol_SliderGrabActive ] = Col32ToImVec4( asset->Col_SliderGrabActive );
+			colors[ ImGuiCol_Button ] = Col32ToImVec4( asset->Col_Button );
+			colors[ ImGuiCol_ButtonHovered ] = Col32ToImVec4( asset->Col_ButtonHovered );
+			colors[ ImGuiCol_ButtonActive ] = Col32ToImVec4( asset->Col_ButtonActive );
+			colors[ ImGuiCol_Header ] = Col32ToImVec4( asset->Col_Header );
+			colors[ ImGuiCol_HeaderHovered ] = Col32ToImVec4( asset->Col_HeaderHovered );
+			colors[ ImGuiCol_HeaderActive ] = Col32ToImVec4( asset->Col_HeaderActive );
+			colors[ ImGuiCol_Separator ] = Col32ToImVec4( asset->Col_Separator );
+			colors[ ImGuiCol_SeparatorHovered ] = Col32ToImVec4( asset->Col_SeparatorHovered );
+			colors[ ImGuiCol_SeparatorActive ] = Col32ToImVec4( asset->Col_SeparatorActive );
+			colors[ ImGuiCol_ResizeGrip ] = Col32ToImVec4( asset->Col_ResizeGrip );
+			colors[ ImGuiCol_ResizeGripHovered ] = Col32ToImVec4( asset->Col_ResizeGripHovered );
+			colors[ ImGuiCol_ResizeGripActive ] = Col32ToImVec4( asset->Col_ResizeGripActive );
+			colors[ ImGuiCol_CloseButton ] = Col32ToImVec4( asset->Col_CloseButton );
+			colors[ ImGuiCol_CloseButtonHovered ] = Col32ToImVec4( asset->Col_CloseButtonHovered );
+			colors[ ImGuiCol_CloseButtonActive ] = Col32ToImVec4( asset->Col_CloseButtonActive );
+			colors[ ImGuiCol_PlotLines ] = Col32ToImVec4( asset->Col_PlotLines );
+			colors[ ImGuiCol_PlotLinesHovered ] = Col32ToImVec4( asset->Col_PlotLinesHovered );
+			colors[ ImGuiCol_PlotHistogram ] = Col32ToImVec4( asset->Col_PlotHistogram );
+			colors[ ImGuiCol_PlotHistogramHovered ] = Col32ToImVec4( asset->Col_PlotHistogramHovered );
+			colors[ ImGuiCol_TextSelectedBg ] = Col32ToImVec4( asset->Col_TextSelectedBg );
+			colors[ ImGuiCol_ModalWindowDarkening ] = Col32ToImVec4( asset->Col_ModalWindowDarkening );
+			colors[ ImGuiCol_DragDropTarget ] = Col32ToImVec4( asset->Col_DragDropTarget );
+			colors[ ImGuiCol_NavHighlight ] = Col32ToImVec4( asset->Col_NavHighlight );
+			colors[ ImGuiCol_NavWindowingHighlight ] = Col32ToImVec4( asset->Col_NavWindowingHighlight );
+			colors[ ImGuiCol_SelectableHovered ] = Col32ToImVec4( asset->Col_SelectableHovered );
+			colors[ ImGuiCol_SelectableActive ] = Col32ToImVec4( asset->Col_SelectableActive );
+			colors[ ImGuiCol_Selectable ] = Col32ToImVec4( asset->Col_Selectable );
+			colors[ ImGuiCol_ComboBox ] = Col32ToImVec4( asset->Col_ComboBox );
+			colors[ ImGuiCol_ComboBoxHovered ] = Col32ToImVec4( asset->Col_ComboBoxHovered );
+			colors[ ImGuiCol_ListSelection ] = Col32ToImVec4( asset->Col_ListSelection );
+			colors[ ImGuiCol_ListSelectionHovered ] = Col32ToImVec4( asset->Col_ListSelectionHovered );
+			colors[ ImGuiCol_ListSelectionActive ] = Col32ToImVec4( asset->Col_ListSelectionActive );
+			colors[ ImGuiCol_ListSelectionRenamed ] = Col32ToImVec4( asset->Col_ListSelectionRenamed ); 
+		} 
+		ImGui::SetCurrentContext( prevContext );
 	}
 
 	//============================================================================================ 
@@ -1543,20 +1639,7 @@ namespace Enjon
 		mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs, &fontCfg );
 		mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs, &fontCfg );
 		mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs, &fontCfg );
-		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg );
-
-		//mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs );
-		//mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs );
-		//mFonts["WeblySleek_16"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 16 * fs );
-		//mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs );
-		//mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs );
-		//mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs );
-		//mFonts["WeblySleek_50"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 50 * fs );
-		//mFonts["WeblySleek_72"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 72 * fs );
-		//mFonts["WeblySleek_100"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 100 * fs );
-		//mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs );
-		//mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs );
-		//mFonts["Roboto-MediumItalic_100"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 100 * fs );
+		mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg ); 
 		io.Fonts->Build();
 
 		// io.DisplayFramebufferScale = { 8, 8 };
@@ -1572,7 +1655,7 @@ namespace Enjon
 		style.ButtonTextAlign 		= ImVec2(0.5f, 0.5f); 
 		style.WindowPadding			= ImVec2(10, 6);
 		style.WindowRounding		= 0.0f;
-		style.FramePadding			= ImVec2(6, 2);
+		style.FramePadding			= ImVec2(6, 3);
 		style.FrameRounding			= 3.0f;
 		style.ItemSpacing			= ImVec2(8, 2);
 		style.ItemInnerSpacing		= ImVec2(2, 3);

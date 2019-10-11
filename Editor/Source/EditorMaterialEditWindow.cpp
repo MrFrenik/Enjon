@@ -566,24 +566,24 @@ namespace Enjon
 		// Add main menu options
 		guiContext->RegisterMainMenu( "File" ); 
 
-		// NOTE(): This should be done automatically for the user in the backend
-		// Add window to graphics subsystem ( totally stupid way to do this )
-		//GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-		//gfx->AddWindow( this );
-
 		World* world = GetWorld( ); 
 
 		guiContext->RegisterWindow( "Properties", [ & ]
 		{
 			if ( ImGui::BeginDock( "Properties" ) )
 			{
-				if ( mAsset )
-				{ 
-					World* world = GetWorld( );
-					ImGui::Text( "%s", Utils::format( "Asset: %s", mAsset.Get( )->GetName().c_str() ).c_str( ) );
-					ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-					igm->InspectObject( mAsset.Get() ); 
-				} 
+				ImGui::ListBoxHeader( "##asset_props", ImVec2( ImGui::GetWindowWidth() - 20.f, ImGui::GetWindowHeight() - 15.f ) );
+				{
+					if ( mAsset )
+					{ 
+						World* world = GetWorld( );
+						ImGui::Text( "     Asset:" ); ImGui::SameLine(); ImGui::SetCursorPosX( ImGui::GetWindowWidth() * 0.4f );
+						ImGui::Text( "%s", Utils::format( "%s", mAsset.Get( )->GetName().c_str() ).c_str( ) );
+						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+						igm->InspectObject( mAsset.Get() ); 
+					} 
+				}
+				ImGui::ListBoxFooter();
 				ImGui::EndDock( );
 			}
 		} );

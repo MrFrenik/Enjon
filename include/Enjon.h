@@ -45,6 +45,7 @@
 #include "Scene/SceneManager.h"
 
 #include "GUI/Signal.h"
+#include "GUI/UIAsset.h"
 
 #include "IO/InputManager.h"
 

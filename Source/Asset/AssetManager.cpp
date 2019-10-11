@@ -14,6 +14,7 @@
 #include "Asset/SkeletalAnimationAssetLoader.h"
 #include "Asset/ArchetypeAssetLoader.h"
 #include "Asset/UIStyleConfigAssetLoader.h"
+#include "Asset/UIAssetLoader.h"
 #include "Utils/FileUtils.h"
 #include "Serialize/ObjectArchiver.h"
 #include "Serialize/AssetArchiver.h"
@@ -71,6 +72,7 @@ namespace Enjon
 		RegisterAssetLoader< Skeleton, SkeletonAssetLoader >( ); 
 		RegisterAssetLoader< Archetype, ArchetypeAssetLoader >( );
 		RegisterAssetLoader< UIStyleConfig, UIStyleConfigAssetLoader >();
+		RegisterAssetLoader< UI, UIAssetLoader >();
 
 		// Create file extension map
 		mFileExtensionMap[ "png" ] = GetAssetTypeId< Texture >( );

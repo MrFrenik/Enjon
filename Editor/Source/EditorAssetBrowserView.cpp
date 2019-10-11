@@ -6,6 +6,7 @@
 #include "EditorApp.h"
 #include "EditorMaterialEditWindow.h"
 #include "EditorArchetypeEditWindow.h" 
+#include "EditorUIEditWindow.h"
 #include "Project.h" 
 
 #include <Engine.h>
@@ -13,6 +14,7 @@
 #include <ImGui/ImGuiManager.h>
 #include <IO/InputManager.h>
 #include <Asset/AssetManager.h>
+#include <GUI/UIAsset.h>
 #include <Graphics/GraphicsSubsystem.h>
 #include <Scene/SceneManager.h>
 #include <Graphics/Window.h>
@@ -352,8 +354,21 @@ namespace Enjon
 										params.mHeight = 400;
 										params.mFlags = WindowFlagsMask( (u32 )WindowFlags::RESIZABLE );
 										params.mData = ( void* )asset;
-										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
+										EngineSubsystem( WindowSubsystem )->AddNewWindow( params ); 
+									}
+									else if ( assetCls->InstanceOf< UI >() )
+									{
+										const Asset* asset = mSelectedAssetInfo->GetAsset();
 
+										// Open new params
+										WindowParams params;
+										params.mMetaClassFunc = [ & ] () -> const MetaClass * { return Object::GetClass< EditorUIEditWindow >(); };
+										params.mName = asset->GetName();
+										params.mWidth = 800;
+										params.mHeight = 400;
+										params.mFlags = WindowFlagsMask( (u32 )WindowFlags::RESIZABLE );
+										params.mData = ( void* )asset;
+										EngineSubsystem( WindowSubsystem )->AddNewWindow( params ); 
 									}
 								}
 							}
@@ -690,6 +705,13 @@ namespace Enjon
 
 			FinishAssetConstruction( mat.Get( ) ); 
 		} 
+
+		if ( ImGui::Selectable( "\t+ UI" ) )
+		{
+			// Construct asset with current directory
+			AssetHandle< UI > ui = am->ConstructAsset< UI >( "NewUI", mCurrentDirectory );
+			FinishAssetConstruction( ui.Get() ); 
+		}
 
 		if ( ImGui::Selectable( "\t+ UI Style Config" ) )
 		{

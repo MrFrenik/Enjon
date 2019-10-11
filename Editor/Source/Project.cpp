@@ -236,8 +236,8 @@ namespace Enjon
 		//cmakeFile = Utils::FindReplaceAll( cmakeFile, "#PROJ_INC_DIR", projectConfig.mToolChain.mIncludeDirectories );
 
 		// Write to file
-		Enjon::Utils::WriteToFile( includeFile, projectDir + "Source/" + projectName + ".h" );
-		Enjon::Utils::WriteToFile( sourceFile, projectDir + "Source/" + projectName + ".cpp" ); 
+		//Enjon::Utils::WriteToFile( includeFile, projectDir + "Source/" + projectName + ".h" );
+		//Enjon::Utils::WriteToFile( sourceFile, projectDir + "Source/" + projectName + ".cpp" ); 
 		Enjon::Utils::WriteToFile( cmakeFile, projectDir + "CMakeLists.txt" ); 
 		Enjon::Utils::WriteToFile( delBatFile, projectDir + "Proc/" + "DelPDB.bat" ); 
 		Enjon::Utils::WriteToFile( buildAndRunFIle, projectDir + "Proc/" + "BuildAndRun.bat" ); 

@@ -877,164 +877,6 @@ namespace Enjon
 
 	//================================================================================================================================ 
 
-	bool EditorApp::CreateProjectView()
-	{
-		static ToolChainDefinition* sToolChainDef = nullptr;
-
-		auto cleanUpAndLeave = [&]( bool retVal )
-		{
-			ImGui::PopStyleColor();
-			return retVal;
-		};
-
-		// Push text color for entire screen
-		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.8f, 0.8f, 1.f ) );
-
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-		f32 offset = 1.5f;
-		//ImGui::SetCursorPosX( ( ImGui::GetWindowWidth( ) - sz.x ) / 2.f );
-		ImGui::Text( "Welcome to the" );
-		ImGui::SameLine();
-		ImGui::SetCursorPosX( ImGui::GetCursorPosX() - offset );
-		ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.f, 1.f, 1.f, 1.f ) );
-		ImGui::Text( "Project Creation" );
-		ImGui::PopStyleColor();
-		ImGui::SameLine();
-		ImGui::SetCursorPosX( ImGui::GetCursorPosX() - offset );
-		ImGui::Text( "screen." );
-		ImGui::NewLine();
-
-		char tmpBuffer[1024];
-		strncpy( tmpBuffer, mProjectsDir.c_str(), 1024 );
-
-		ImGui::Text( "Select a location for your project." );
-		ImGui::NewLine();
-
-		ImGui::PushItemWidth( 300.f );
-		if (ImGui::InputText( "##ProjectDir", tmpBuffer, 256 ))
-		{
-			if (fs::exists( tmpBuffer ))
-			{
-				mProjectsDir = String( tmpBuffer );
-			}
-		}
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
-		ImGui::SetCursorPosX( ImGui::GetCursorPosX() - 10.f );
-		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.3f, 0.3f, 0.3f, 1.f ) );
-		if (ImGui::Button( "..." ))
-		{
-			// Open file picking dialogue
-			nfdchar_t* folder;
-			nfdresult_t res = NFD_PickFolder( NULL, &folder );
-			if (res == NFD_OKAY)
-			{
-				mProjectsDir = String( folder );
-				mConfigSettings.mLastUsedProjectDirectory = String( folder );
-				SerializeEditorConfigSettings();
-			}
-		}
-		ImGui::PopStyleColor();
-
-		ImGui::SameLine();
-		strncpy( tmpBuffer, mNewProjectName.c_str(), 1024 );
-		char buffer[2048];
-		snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str(), tmpBuffer );
-		b32 projExists = fs::exists( buffer );
-		ImGui::PushItemWidth( 150.f );
-		if (ImGui::InputText( "Project Name", tmpBuffer, 50 ))
-		{
-			snprintf( (char*)buffer, 2048, "%s/%s", mProjectsDir.c_str(), tmpBuffer );
-			if (fs::exists( buffer ))
-			{
-				projExists = true;
-			}
-			mNewProjectName = String( tmpBuffer );
-		}
-		ImGui::PopItemWidth();
-
-		// Need to select a tool chain for the given project (Therefore, projects should hold onto their own tool chains, I imagine)
-		//ballsack  -  I hate everything.  
-		if (ImGui::CollapsingHeader( "Tool Chain" ))
-		{
-			ImGui::ListBoxHeader( "##tool_chain_lb" );
-			{
-				String defaultText = sToolChainDef == nullptr ? "Tool Chains..." : sToolChainDef->mLabel;
-				if (ImGui::BeginCombo( "##TOOL_CHAINS", defaultText.c_str() ))
-				{
-					for (u32 i = 0; i < mConfigSettings.mToolChainDefinitions.size(); ++i)
-					{
-						ToolChainDefinition* tc = &mConfigSettings.mToolChainDefinitions[i];
-						if (ImGui::Selectable( tc->mLabel.c_str() ))
-						{
-							sToolChainDef = tc;
-						}
-					}
-					ImGui::EndCombo();
-				}
-
-				if (sToolChainDef)
-				{
-					igm->DebugDumpObject( sToolChainDef );
-				} 
-			}
-			ImGui::ListBoxFooter();
-		}
-
-		b32 projectValid = !projExists && sToolChainDef != nullptr;
-
-		if ( projectValid )
-		{
-			ImGui::NewLine( );
-			if ( ImGui::Button( "Create New Project" ) && mNewProjectName.compare( "" ) != 0 )
-			{
-				// If project is able to be made, then make it
-				String projectPath = mProjectsDir + "/" + mNewProjectName + "/";
-				if ( !fs::exists( projectPath ) )
-				{
-					ProjectConfig config;
-					config.mPath = projectPath;
-					config.mName = mNewProjectName;
-					config.mToolChain = *sToolChainDef;
- 
-					PreCreateNewProject( config );
-					return cleanUpAndLeave( true );
-				}
-				else
-				{
-					std::cout << "Project already exists!\n";
-				} 
-			} 
-		}
-
-		// Project already exists, so display warning
-		if ( projExists )
-		{
-			ImGui::NewLine( );
-			ImGui::SetCursorPosY( ImGui::GetCursorPosY( ) + 10.f );
-			ImDrawList* dl = ImGui::GetWindowDrawList( );
-			ImVec2 a = ImGui::GetCursorScreenPos( );
-			ImVec2 b = ImVec2( a.x + 400.f, a.y + 40.f );
-			dl->AddRectFilled( a, b, ImColor( 0.9f, 0.1f, 0.f, 1.0f ) );
-			ImGui::Text( "Project already exists. Please choose a different project name." );
-		} 
-
-		if (sToolChainDef == nullptr)
-		{
-			ImGui::NewLine( );
-			ImGui::SetCursorPosY( ImGui::GetCursorPosY( ) + 10.f );
-			ImDrawList* dl = ImGui::GetWindowDrawList( );
-			ImVec2 a = ImGui::GetCursorScreenPos( );
-			ImVec2 b = ImVec2( a.x + 400.f, a.y + 40.f );
-			dl->AddRectFilled( a, b, ImColor( 0.9f, 0.1f, 0.f, 1.0f ) );
-			ImGui::Text( "Invalid Tool Chain. Please choose valid Tool Chain." ); 
-		} 
-
-		return cleanUpAndLeave( false );
-	}
-
-	//================================================================================================================================
-
 	void EditorApp::CleanupScene( )
 	{ 
 		// Force the scene to clean up ahead of frame
@@ -1469,6 +1311,7 @@ static f32 dts = 72.f;
 			ImGui::SetCursorScreenPos( ImVec2( windowPos.x + windowSize.x - txtSz.x - margin.x, windowPos.y + windowSize.y - txtSz.y - margin.y ) );
 			ImGui::Text( "%s", txt.c_str() ); 
 
+			/*
 			ImGui::SetCursorPos( ImVec2( 10.f, 20.f ) ); 
 			static f32 font_scale = 1.f;
 			ImGui::SliderFloat( "##scale", &font_scale, 0.01f, 10.f );
@@ -1510,6 +1353,7 @@ static f32 dts = 72.f;
 			//ImGui::PushFont( igm->GetFont( buffer ) );
 			//ImGui::Text( "Test Text" );
 			//ImGui::PopFont( ); 
+			*/
 		}); 
 
 		// Register selection callback with outliner view
@@ -1844,7 +1688,7 @@ static f32 dts = 72.f;
 			}
 			ImGui::EndDock();
 	 	}; 
-
+ 
 		guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
 		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
 
@@ -1883,21 +1727,7 @@ static f32 dts = 72.f;
 			return Result::FAILURE;
 		}
 		return Result::SUCCESS;
-	}
-
-	void EditorApp::NewProjectView( )
-	{ 
-		if ( ImGui::BeginDock( "New Project", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
-		{
-			if ( CreateProjectView( ) )
-			{
-				WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-				ws->DestroyWindow( mProjectSelectionWindow );
-				mProjectSelectionWindow = -1;
-			}
-		}
-		ImGui::EndDock( );
-	}
+	} 
 
 	//================================================================================================================ 
 

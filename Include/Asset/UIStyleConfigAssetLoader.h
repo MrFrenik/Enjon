@@ -64,7 +64,7 @@ namespace Enjon
 			f32 FrameBorderSize	= 0.0f;
 
 			ENJON_PROPERTY()
-			f32 WindoworderSize = 1.0f; 
+			f32 WindowBorderSize = 1.0f; 
 
 			ENJON_PROPERTY()
 			ColorRGBA32 Col_Text = ColorRGBA32( 1.00f, 1.00f, 1.00f, 1.00f );

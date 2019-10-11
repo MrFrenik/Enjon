@@ -238,6 +238,7 @@ namespace Enjon
 	typedef struct GUIContextParams
 	{
 		b32 mUseRootDock = true;
+		AssetHandle< UIStyleConfig > mUIStyle;
 	} GUIContextParams;
  
 	class GUIContext
