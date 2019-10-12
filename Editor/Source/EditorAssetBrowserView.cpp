@@ -364,8 +364,8 @@ namespace Enjon
 										WindowParams params;
 										params.mMetaClassFunc = [ & ] () -> const MetaClass * { return Object::GetClass< EditorUIEditWindow >(); };
 										params.mName = asset->GetName();
-										params.mWidth = 800;
-										params.mHeight = 400;
+										params.mWidth = 16 * 70;
+										params.mHeight = 9 * 70;
 										params.mFlags = WindowFlagsMask( (u32 )WindowFlags::RESIZABLE );
 										params.mData = ( void* )asset;
 										EngineSubsystem( WindowSubsystem )->AddNewWindow( params ); 

@@ -27,9 +27,23 @@ namespace Enjon
 
 		protected:
 
+			void Canvas();
+			void DrawUI();
+
+			void SelectElement( UIElement* element );
+			void DeselectElement();
+			ImVec2 HandleMousePan();
+
 		private:
+
+			Transform mViewportTransform = Transform( Vec3( 0.f ), Quaternion(), Vec3( 800.f, 600.f, 1.f ) );
+			Transform mCamTransform;
+
+			UIElement* mSelectedElement = nullptr;
+
 			AssetHandle< UI > mUI;
 			b32 mInitialized = false;
+			b32 mCanvasInitialized = false;
 	};
 }
 

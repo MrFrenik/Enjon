@@ -85,8 +85,11 @@ namespace Enjon
 			UICallback mOnClick;
 	}; 
 
+	ENJON_CLASS( Construct )
 	class UIElementCanvas : public UIElement
 	{
+		ENJON_CLASS_BODY( UIElementCanvas )
+
 		public:
 
 			/*
@@ -145,7 +148,6 @@ namespace Enjon
 			ENJON_PROPERTY( NonSerializeable )
 			UIElementCanvas mRoot; 
 	}; 
-	
 }
 
 #endif

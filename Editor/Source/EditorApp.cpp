@@ -2106,7 +2106,7 @@ static f32 dts = 72.f;
 			Window* mainWindow = ws->GetWindows().at( 0 );
 			assert( mainWindow );
 			mainWindow->ShowWindow();
-			mainWindow->MaximizeWindow();
+			//mainWindow->MaximizeWindow();
 			LoadProject( mProject );
 			mPreloadProjectContext = false; 
 		}
@@ -2143,7 +2143,7 @@ static f32 dts = 72.f;
 				Window* mainWindow = ws->GetWindows().at( 0 );
 				assert( mainWindow );
 				mainWindow->ShowWindow();
-				mainWindow->MaximizeWindow();
+				//mainWindow->MaximizeWindow();
 				LoadProject( mProject );
 				mPrecreateNewProject = false;
 			} 

@@ -225,9 +225,9 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			const T* operator->( )
+			T* operator->( )
 			{
-				return Get( );
+				return const_cast< T* >( Get( ) );
 			} 
 
 			/*

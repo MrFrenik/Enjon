@@ -59,8 +59,8 @@ int main(int argc, char** argv)
 	WindowParams params;
 	params.mFlags = WindowFlags::INVISIBLE | WindowFlags::RESIZABLE;
 	params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< Window >(); };
-	params.mWidth = 1920;
-	params.mHeight = 1080;
+	params.mWidth = 1000;
+	params.mHeight = 600;
 	params.mName = "Enjon Editor";
 
 	// Set root path to engine

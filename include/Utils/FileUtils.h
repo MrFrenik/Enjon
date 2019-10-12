@@ -13,6 +13,28 @@
 
 namespace Enjon { namespace Utils 
 { 
+	typedef struct TempBuffer
+	{
+		char buffer[1024];
+	} TempBuffer;
+
+	static inline TempBuffer TransientBuffer( const char* fmt, ... )
+	{
+		TempBuffer buffer;
+		va_list args1;
+		va_start( args1, fmt );
+		va_list args2;
+		va_copy( args2, args1 );
+		Vector<char> buf( 1 + std::vsnprintf( nullptr, 0, fmt, args1 ) ); // <<<
+		va_end( args1 );
+		std::vsnprintf( buf.data(), buf.size(), fmt, args2 );
+		memcpy( buffer.buffer, buf.data(), 1024 );
+		return buffer;
+	}
+
+#define TransientString( fmt, ... )\
+	( TransientBuffer( fmt, __VA_ARGS__ ) ).buffer
+
 	inline std::string read_file_sstream(const char* filePath)
 	{
 		// Get and open input file

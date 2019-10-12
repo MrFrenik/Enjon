@@ -497,7 +497,7 @@ namespace Enjon
 			// Initialize window
 			window->InitInternal( wp );
 			// Late initialize gui context
-			window->GetGUIContext( )->LateInit( );
+			//window->GetGUIContext( )->LateInit( );
 			// Resize viewport
 			window->SetViewport( iVec2( wp.mWidth, wp.mHeight ) );
 			// Add window id
