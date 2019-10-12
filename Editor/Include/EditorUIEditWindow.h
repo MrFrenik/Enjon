@@ -9,6 +9,7 @@
 #include <Graphics/Window.h>
 #include <Asset/Asset.h>
 #include <GUI/UIAsset.h>
+#include <Graphics/Camera.h>
 
 namespace Enjon
 {
@@ -37,7 +38,7 @@ namespace Enjon
 		private:
 
 			Transform mViewportTransform = Transform( Vec3( 0.f ), Quaternion(), Vec3( 800.f, 600.f, 1.f ) );
-			Transform mCamTransform;
+			Camera mCamera;
 
 			UIElement* mSelectedElement = nullptr;
 

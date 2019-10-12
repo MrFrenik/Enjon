@@ -319,6 +319,15 @@ namespace Enjon
 	} 
 
 	//=======================================================================================================
+
+	Vec3 Camera::TransformPoint( const Vec3& point ) const
+	{
+		// Want to take the point, then transform it by the matrix this camera's transform creates ( view and projection )
+		Mat4x4 vp = GetViewProjectionMatrix(); 
+		return ( vp * point ); 
+	}
+
+	//=======================================================================================================
 }
 
 

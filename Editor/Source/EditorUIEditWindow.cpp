@@ -64,7 +64,8 @@ namespace Enjon
 			justClicked = false;
 		} 
 
-		return delta;
+		f32 os = mCamera.GetOrthographicScale();
+		return ImVec2( delta.x * os, delta.y * os );
 	}
 
 	//===============================================================================================
@@ -94,9 +95,16 @@ namespace Enjon
 		// Do root canvas
 		Vec2 pos = mUI->mRoot.mPosition;
 		Transform lt = Transform( Vec3( pos, 1.f ), Quaternion(), Vec3( mUI->mRoot.mSize, 1.f ) );
-		Transform wt = lt * mCamTransform; 
-		ImVec2 a = ImVec2( wt.GetPosition().x, wt.GetPosition().y );
-		ImVec2 b = ImVec2( a.x + wt.GetScale().x, a.y + wt.GetScale().y );
+		//Transform wt = lt * mCamTransform; 
+
+		Vec3 ra = mCamera.TransformPoint( Vec3( mUI->mRoot.mPosition, 0.f ) );
+		Vec3 rb = mCamera.TransformPoint( Vec3( mUI->mRoot.mPosition, 0.f ) + Vec3( mUI->mRoot.mSize, 0.f ) );
+
+		//ImVec2 a = ImVec2( wt.GetPosition().x, wt.GetPosition().y );
+		//ImVec2 b = ImVec2( a.x + wt.GetScale().x, a.y + wt.GetScale().y );
+
+		ImVec2 a = ImVec2( ra.x, ra.y );
+		ImVec2 b = ImVec2( rb.x, rb.y );
 
 		bool hovered = ImGui::IsMouseHoveringRect( a, b ); 
 		bool active = hovered && ImGui::IsMouseDown( 0 );
@@ -132,7 +140,7 @@ namespace Enjon
 
 		dl->AddRect( a, b, hovered ? hoveredColor : active || selected ? activeColor : color ); 
 
-		mUI->mRoot.mPosition += Vec2( delta.x / mCamTransform.GetScale().x, delta.y / mCamTransform.GetScale().y );
+		//mUI->mRoot.mPosition += Vec2( delta.x / mCamTransform.GetScale().x, delta.y / mCamTransform.GetScale().y );
 	}
 
 	//===============================================================================================
@@ -181,6 +189,29 @@ namespace Enjon
 		dl->AddLine( br, ImVec2( br.x, br.y - 10.f ), color );
 	}
 
+	// TODO: when reaching zoom limits, stop camera movement as well
+	void ZoomOrthoCamera( Camera* cam, const Vec3& zoomTowards, const f32& amount )
+	{
+		// Calculate how much we will have to move towards the zoomTowards position
+		f32 os = cam->GetOrthographicScale();
+		float multiplier = (1.0f / os * amount);
+
+		// Move camera
+		Vec3 pos = cam->GetPosition();
+		pos = (pos - zoomTowards) * multiplier + zoomTowards;
+
+		// Zoom camera
+		os -= amount;
+
+		// Limit zoom
+		f32 minZoom = 0.1f;
+		f32 maxZoom = 10.f;
+		os = Math::Clamp( os, minZoom, maxZoom ); 
+
+		cam->SetPosition( pos );
+		cam->SetOrthographicScale( os );
+	}
+
 	void EditorUIEditWindow::Canvas()
 	{ 
 		// Don't want this to be scrollable, however...
@@ -199,8 +230,12 @@ namespace Enjon
 				Vec2 vs = Vec2( 900.f, 506.f );		// By default, it's the size of the Sandbox's window
 				mViewportTransform = Transform( Vec3( 0.f ), Quaternion(), Vec3( vs.x, vs.y, 1.f ) );
 				ImVec2 co = ImVec2( ImGui::GetWindowPos().x + ( ImGui::GetWindowWidth() - vs.x ) / 2.f , ImGui::GetWindowPos().y + ( ImGui::GetWindowHeight() - vs.y ) / 2.f );
-				mCamTransform = Transform( Vec3( co.x, co.y, 0.f ), Quaternion(), Vec3( 0.5f ) ); 
 				mCanvasInitialized = true;
+				mCamera = Camera( (u32)ImGui::GetWindowWidth(), (u32)ImGui::GetWindowHeight() );
+				//mCamera.SetPosition( Vec3( co.x, co.y, 0.f ) );
+				mCamera.SetPosition( Vec3( 0.f ) );
+				mCamera.SetProjectionType( ProjectionType::Orthographic );
+				mCamera.SetOrthographicScale( 1.f );
 			} 
 
 			// Just want to draw a bunch of lines for a canvas
@@ -214,49 +249,46 @@ namespace Enjon
 
 			auto dl = ImGui::GetWindowDrawList(); 
 
+			{
+				Vec3 mp = Vec3( ImGui::GetMousePos().x, ImGui::GetMousePos().y, 0.f ); 
+				Vec3 mpt = mCamera.TransformPoint( mp ); 
+				auto ts = Utils::TransientBuffer( "MPT: <%.2f, %.2f>, MP: <%.2f, %.2f>, CP: <%.2f, %.2f>", mpt.x, mpt.y, mp.x, mp.x, mCamera.GetPosition().x, mCamera.GetPosition().y ); 
+				printf( "%s\n", ts.buffer );
+			}
+
 			ImVec2 delta = HandleMousePan(); 
-			mCamTransform.SetPosition( mCamTransform.GetPosition() + Vec3( delta.x, delta.y, 0.f ) );
-			if ( win_hov && input->GetMouseWheel().y ) 
+			//mCamTransform.SetPosition( mCamTransform.GetPosition() + Vec3( delta.x, delta.y, 0.f ) );
+			mCamera.SetPosition( mCamera.GetPosition() - Vec3( delta.x, delta.y, 0.f ) );
+			printf( "MW: %.2f", input->GetMouseWheel().y );
+			if ( win_hov && input->GetMouseWheel().y );
 			{ 
-				Transform wtb = mViewportTransform * mCamTransform; 
-				ImVec2 lba = ImVec2( wtb.GetPosition().x, wtb.GetPosition().y );
-				ImVec2 lbb = ImVec2( lba.x + wtb.GetScale().x, lba.y + wtb.GetScale().y );		// Should I know about the resolution of the desired image? I think so...
+				Vec3 to = Vec3( ImGui::GetMousePos().x, ImGui::GetMousePos().y, 0.f );
+				ZoomOrthoCamera( &mCamera, to, input->GetMouseWheel().y / 5.f );
+				//Vec3 mp = Vec3( ImGui::GetMousePos().x, ImGui::GetMousePos().y, 0.f ); 
+				//Vec3 diff = ( mp - mCamera.GetPosition() );
+				//Vec3 vp = mCamera.TransformPoint( mViewportTransform.GetPosition() );
+				//Vec3 mpt = mCamera.TransformPoint( mp );
 
-				f32 y = input->GetMouseWheel().y / 10.f;
-				f32 oscl = mCamTransform.GetScale().x;
-				f32 scl = Math::Clamp( mCamTransform.GetScale().x + y, 0.1f, 10.f );
-				mCamTransform.SetScale( Math::Clamp( mCamTransform.GetScale().x + y, 0.1f, 10.f ) );
+				//f32 y = input->GetMouseWheel().y / 10.f;
+				//f32 oscl = mCamera.GetOrthographicScale();
+				//f32 scl = Math::Clamp( mCamera.GetOrthographicScale() - y, 0.1f, 10.f );
+				//mCamera.SetOrthographicScale( scl ); 
 
-				Transform wta = mViewportTransform * mCamTransform; 
-				ImVec2 laa = ImVec2( wta.GetPosition().x, wta.GetPosition().y );
-				ImVec2 lab = ImVec2( laa.x + wta.GetScale().x, laa.y + wta.GetScale().y );		// Should I know about the resolution of the desired image? I think so...
+				//// Also want to move the camera center towards the mouse
+				//// The camera's center needs to move towards the mouse ( the mouse needs to be transformed into the viewport space )
+				//if ( (oscl - scl) != 0.f )
+				//{
+				//	Vec3 vpt = mCamera.TransformPoint( mViewportTransform.GetPosition() );
+				//	Vec3 mpt2 = mCamera.TransformPoint( mp );
 
-				Vec2 ca = Vec2( ( laa.x + lab.x ) / 2.f, ( laa.y + lab.y ) / 2.f );
-				Vec2 cb = Vec2( ( lba.x + lbb.x ) / 2.f, ( lba.y + lbb.y ) / 2.f );
-				Vec2 dc = cb - ca;
-
-				// Also want to move the camera center towards the mouse
-				// The camera's center needs to move towards the mouse ( the mouse needs to be transformed into the viewport space )
-				if ( (oscl - scl) != 0.f )
-				{
-					// Have to transform the mouse position into the viewport's space first, THEN can transform it into the camera's position
-					// How to transform the mp into window space? 
-					Vec2 mp = Vec2( ImGui::GetMousePos().x, ImGui::GetMousePos().y ); 
-					Vec2 cp = Vec2( mCamTransform.GetPosition().x, mCamTransform.GetPosition().y ); 
-					Transform mt = Transform( Vec3( mp.x, mp.y, 0.f ), Quaternion(), Vec3( 1.f ) );
-					Transform wt = mt * mCamTransform; 
-					//mp = Vec2( wt.GetPosition().x, wt.GetPosition().y );
-					Vec3 diff = (wtb.GetPosition() - wta.GetPosition());
-					//dc = Vec2( wt.GetPosition().x - ca.x, wt.GetPosition().y - ca.y ); // This fucking blows...
-					//dc.x -= wt.GetPosition().x;
-					//dc.y -= wt.GetPosition().y;
-					//Vec2 norm = Vec2::Normalize( diff );
-					//f32 length = diff.Length();
-					//cp += norm * length * scl;
-					Utils::TempBuffer buff = Utils::TransientBuffer( "Diff< %.2f, %.2f >\n", dc.x, dc.y );
-					printf( buff.buffer ); 
-					mCamTransform.SetPosition( mCamTransform.GetPosition() + Vec3( dc.x, dc.y, 0.f ) );
-				}
+				//	// Have to transform the mouse position into the viewport's space first, THEN can transform it into the camera's position
+				//	// How to transform the mp into window space? 
+				//	// Distance away from center of viewport (mouse position)
+				//	// Figure out distance of camera position from mouse, transform mouse, then transform camera based on 
+				//	//diff = mCamera.TransformPoint( diff );
+				//	//mCamera.SetPosition( mCamera.GetPosition() + diff );
+				//	mCamera.SetPosition( mCamera.GetPosition() + ( mpt - mpt2 ) );
+				//}
 			} 
 
 			{
@@ -266,15 +298,21 @@ namespace Enjon
 				//printf( buff.buffer ); 
 			}
 
-			Transform wt = mViewportTransform * mCamTransform; 
+			//Transform wt = mViewportTransform * mCamTransform; 
 
-			ImVec2 la = ImVec2( wt.GetPosition().x, wt.GetPosition().y );
-			ImVec2 lb = ImVec2( la.x + wt.GetScale().x, la.y + wt.GetScale().y );		// Should I know about the resolution of the desired image? I think so...
+			Vec3 la_p = mCamera.TransformPoint( mViewportTransform.GetPosition() );
+			Vec3 lb_p = mCamera.TransformPoint( mViewportTransform.GetPosition() + mViewportTransform.GetScale() );
+
+			//ImVec2 la = ImVec2( wt.GetPosition().x, wt.GetPosition().y );
+			//ImVec2 lb = ImVec2( la.x + wt.GetScale().x, la.y + wt.GetScale().y );		// Should I know about the resolution of the desired image? I think so...
+
+			ImVec2 la = ImVec2( la_p.x, la_p.y );
+			ImVec2 lb = ImVec2( lb_p.x, lb_p.y );		// Should I know about the resolution of the desired image? I think so...
 
 			// What about some grid lines... 
-			Vec3 cp = mCamTransform.GetPosition();
-			dl->AddLine( ImVec2( la.x, la.y - 1000.f - cp.y ), ImVec2( la.x, la.y + 1000.f + cp.y ), ImColor( 0.1f, 0.8f, 0.2f, 0.3f ) );
-			dl->AddLine( ImVec2( la.x - 1000.f - cp.x, la.y ), ImVec2( la.x + 1000.f + cp.x, la.y ), ImColor( 0.1f, 0.8f, 0.2f, 0.3f ) ); 
+			//Vec3 cp = mCamTransform.GetPosition();
+			//dl->AddLine( ImVec2( la.x, la.y - 1000.f - cp.y ), ImVec2( la.x, la.y + 1000.f + cp.y ), ImColor( 0.1f, 0.8f, 0.2f, 0.3f ) );
+			//dl->AddLine( ImVec2( la.x - 1000.f - cp.x, la.y ), ImVec2( la.x + 1000.f + cp.x, la.y ), ImColor( 0.1f, 0.8f, 0.2f, 0.3f ) ); 
 
 			// Viewport
 			// Want to add a dotted rect, actually

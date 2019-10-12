@@ -213,6 +213,16 @@ namespace Enjon
 				mProjType = type; 
 			} 
 
+			Transform GetTransform() const
+			{
+				return mTransform;
+			}
+
+			/*
+			* @brief
+			*/
+			Vec3 TransformPoint( const Vec3& point ) const;
+
 			/*
 			* @brief
 			*/
