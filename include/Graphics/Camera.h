@@ -279,12 +279,11 @@ namespace Enjon
 			*/
 			GraphicsScene* GetGraphicsScene( ) const;
 
-		private:
-
 			/*
 			* @brief
 			*/
-			Vec3 Unproject( const Vec3& screenCoords );
+			Vec3 Unproject( const Vec3& screenCoords ); 
+
 
 		private:
 

@@ -34,6 +34,7 @@ namespace Enjon
 			void SelectElement( UIElement* element );
 			void DeselectElement();
 			ImVec2 HandleMousePan();
+			void DrawRectHandle( ImVec2* point );
 
 		private:
 
