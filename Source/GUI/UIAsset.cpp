@@ -50,6 +50,19 @@ namespace Enjon
 
 	//=================================================================================
 
+	void UIElementText::OnUI()
+	{
+		ImGui::SetCursorScreenPos( ImVec2( mPosition.x, mPosition.y ) );
+		ImGui::PushID( (usize)(intptr_t)this );
+		{
+			mOnSetText( this );
+		}
+		ImGui::Text( "%s", mText.c_str() );
+		ImGui::PopID();
+	}
+	
+	//=================================================================================
+
 	void UIElementButton::OnUI()
 	{ 
 		ImGui::SetCursorScreenPos( ImVec2( mPosition.x, mPosition.y ) );

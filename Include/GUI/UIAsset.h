@@ -55,7 +55,7 @@ namespace Enjon
 			ENJON_PROPERTY()
 			Vec2 mSize = Vec2( 10.f, 10.f );
 
-			ENJON_PROPERTY()
+			ENJON_PROPERTY( HideInEditor )
 			Vector< UIElement* > mChildren;
 
 			ENJON_PROPERTY( HideInEditor, NonSerializeable )
@@ -104,6 +104,23 @@ namespace Enjon
 			// Can I serialize this somehow? 
 			UICallback mOnClick;
 	}; 
+
+	ENJON_CLASS( Construct )
+	class UIElementText : public UIElement
+	 {
+		ENJON_CLASS_BODY( UIElementText )
+
+		public:
+
+			virtual void OnUI() override; 
+
+		 public:
+
+			ENJON_PROPERTY()
+			String mText = "";
+
+			UICallback mOnSetText;
+	 };
 
 	ENJON_CLASS( Construct )
 	class UIElementCanvas : public UIElement

@@ -1516,7 +1516,7 @@ namespace Enjon
 			style.ScrollbarRounding		= asset->ScrollbarRounding;
 			style.GrabMinSize			= asset->GrabMinSize;
 			style.GrabRounding			= asset->GrabRounding;
-			style.Alpha					= asset->GrabRounding;
+			style.Alpha					= Math::Clamp( asset->GrabRounding, 0.f, 1.f );
 			style.FrameBorderSize		= asset->FrameBorderSize;
 			style.WindowBorderSize		= asset->WindowBorderSize; 
 

@@ -389,7 +389,6 @@ namespace Enjon
 			selected = true;
 		} 
 
-		//if ( mouseClicked && !hovered && ImGui::IsMouseHoveringWindow() && selected && !usedHandle && !HoveringAnyElementRecursive( &mUI->mRoot, &mCamera ) )
 		if ( mouseClicked && !hovered && ImGui::IsMouseHoveringWindow() && selected && !usedHandle && !HoveringAnyElementRecursive( &mUI->mRoot, &mCamera ) )
 		{
 			DeselectElement();
@@ -410,16 +409,37 @@ namespace Enjon
 
 		// Transform position of stuff 
 		if ( !usedHandle && selected ) {
-			//Vec3 fa = ra;
-			//fa += Vec3( delta.x, delta.y, 0.f );
-			//Vec3 fp = Mat4x4::Inverse( mCamera.GetViewProjectionMatrix( ) ) * fa; 
-			//element->mPosition = Vec2( fp.x, fp.y ); 
-			element->mPosition += Vec2( delta.x, delta.y ); 
+			Vec2 fa = Vec2( a.x, a.y );
+			fa += Vec2( delta.x, delta.y );
+			Vec3 fp = Mat4x4::Inverse( mCamera.GetViewProjectionMatrix( ) ) * Vec3( fa, 0.f ); 
+			element->mPosition = Vec2( fp.x, fp.y * mCamera.GetAspectRatio() ); 
 		} 
 
-		//if ( active || selected || hovered ) {
-			dl->AddRect( a, b, active || selected ? activeColor : hovered ? hoveredColor : color ); 
-		//}
+		// Moving element via keyboard commands
+		if ( selected )
+		{
+			Input* input = EngineSubsystem( Input );
+			if ( input->IsKeyPressed( KeyCode::Up ) )
+			{
+				element->mPosition.y += 1.f;
+			}
+			if ( input->IsKeyPressed( KeyCode::Down ) )
+			{
+				element->mPosition.y += 1.f;
+			}
+			if ( input->IsKeyPressed( KeyCode::Right ) )
+			{
+				element->mPosition.x -= 1.f;
+			}
+			if ( input->IsKeyPressed( KeyCode::Left ) )
+			{
+				element->mPosition.x -= 1.f;
+			} 
+		}
+
+		if ( selected ) {
+			dl->AddRect( a, b, activeColor ); 
+		}
 
 		// Children
 		for ( auto& c : element->mChildren )
@@ -742,13 +762,20 @@ namespace Enjon
 							button->mLabel = "Button";
 						}
 
+						if ( ImGui::Button( "Add Text" ) )
+						{
+							UIElementText* text = (UIElementText*)mUI->mRoot.AddChild( new UIElementText() );
+							text->mPosition = mUI->mRoot.mPosition + Vec2( 20.f, 20.f );
+							text->mSize = Vec2( 20.f, 10.f );
+							text->mLabel = "Text";
+							text->mText = "Text";
+						}
+
 						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 						if ( mSelectedElement )
 						{
 							igm->InspectObject( mSelectedElement ); 
 						} 
-
-						//igm->InspectObject( mUI->mRoot.mChildren.at( 0 ) ); 
 					} 
 
 				}
