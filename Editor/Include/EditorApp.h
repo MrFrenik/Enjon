@@ -427,4 +427,100 @@ namespace Enjon
 
 }
 
-#endif
+#endif 
+
+/* 
+	ENJON_CLASS( Construct )
+	class RenderPass : public Object
+	{ 
+		ENJON_CLASS_BODY( RenderPass )
+
+		public: 
+	};
+ 
+	// Want to render out to my own render target as well
+	ENJON_CLASS( Construct )
+	class UIRenderPass : public RenderPass
+	{
+		ENJON_CLASS_BODY( UIRenderPass )
+
+		friend GraphicsSubsystemContext;
+
+		// Just render this shiz out, honey bear
+		public: 
+
+			void Render()
+			{
+				// Set up everything necessary for rendering out
+				
+				// Bind shader
+				Shader* shader = GraphicsSubsystem::GetShader( ShaderHandle );
+
+				// Bind uniforms for shader 
+
+				// Render out ui for this particular window
+			}
+			
+		protected:
+
+			void Init()
+			{ 
+			} 
+
+			AssetHandle< UI > mUI;
+			RenderTarget mTarget;
+	};
+
+	void Init()
+	{
+		AssetHandle< UI > ui = EngineSubsystem( AssetManager )->GetAsset< UI >( "my_ui" );
+
+		// Set up custom render pass
+		UIRenderPass* pass = new UIRenderPass( ui );
+
+		// Could be a step in the right direction, I surpose.
+		GraphicsSubsystemContext* gfx = mWindow->GetWorld()->GetContext< GraphicsSubsystemContext >();
+		gfx->AddCustomPass( pass );
+	}
+
+	ENJON_CLASS( Construct )
+	class RenderPipeline : public Object
+	{
+		ENJON_CLASS_BODY( RenderPipeline )
+
+		public:
+
+		protected:
+
+		private:
+
+	}; 
+
+	class GBufferRenderPass : public Object
+	{
+	};
+
+	class BloomRenderPass : public Object
+	{ 
+	};
+
+	// Render pipeline is just a collection of passes ( it's a graph, genius )
+
+
+	void InitYourApp()
+	{
+		// Grab the graphics context from your window
+		GraphicsSubsystemContext* gCtx = mWindow->GetWorld()->GetContext< GraphicsSubsystemContex >();
+		if ( gCtx )
+		{
+			AssetHandle< RenderPipeline > pipeline = EngineSubsystem( AssetManager )->GetAsset< RenderPipeline >( "my_pipline" );
+			gCtx->SetRenderPipeline( pipeline ); 
+	}
+*/
+
+
+
+
+
+
+

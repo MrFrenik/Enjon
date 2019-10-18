@@ -1,6 +1,7 @@
 #include "Graphics/GraphicsSubsystem.h"
 #include "Graphics/FrameBuffer.h"
 #include "Graphics/GBuffer.h"
+#include "Graphics/RenderPass.h"
 #include "Graphics/FullScreenQuad.h"
 #include "Graphics/SpriteBatch.h"
 #include "Graphics/FontManager.h"
@@ -132,6 +133,34 @@ namespace Enjon
 	}
 
 	//======================================================================================================
+
+	void GraphicsSubsystemContext::AddCustomPass( RenderPass* pass )
+	{
+		mCustomPasses.push_back( pass );
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystemContext::RemoveCustomPass( RenderPass* pass )
+	{
+		std::remove( mCustomPasses.begin(), mCustomPasses.end(), pass );
+	}
+
+	//======================================================================================================
+
+	void GraphicsSubsystemContext::EnableRenderWorld( const b32& enable )
+	{
+		mRenderWorld = enable;
+	}
+
+	//====================================================================================================== 
+
+	b32 GraphicsSubsystemContext::GetEnableRenderWorld() const
+	{
+		return mRenderWorld;
+	}
+
+	//====================================================================================================== 
 
 	GraphicsScene* GraphicsSubsystem::GetGraphicsScene( )
 	{
@@ -657,34 +686,43 @@ namespace Enjon
 			w->MakeCurrent( ); 
 
 			World* world = w->GetWorld( ); 
-			GraphicsSubsystemContext* gfxCtx = nullptr;
+			GraphicsSubsystemContext* gfxCtx = world ? world->GetContext< GraphicsSubsystemContext >() : nullptr; 
 
 			if ( world )
 			// if ( false )
 			{
 				// Grab graphics context
-				gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
+				//gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
 
-				// Gbuffer pass
-				GBufferPass( gfxCtx );
-				// SSAO pass
-				SSAOPass( gfxCtx );
-				// Lighting pass
-				LightingPass( gfxCtx );
-				// Luminance Pass
-				LuminancePass( gfxCtx );
-				// Bloom pass
-				BloomPass( gfxCtx);
-				// Composite Pass
-				CompositePass( mLightingBuffer, gfxCtx );
-				// Motion Blur Pass
-				MotionBlurPass( mCompositeTarget, gfxCtx );
-				// FXAA pass
-				FXAAPass( mMotionBlurTarget, gfxCtx ); 
+				if ( gfxCtx->GetEnableRenderWorld() )
+				{
+					// Gbuffer pass
+					GBufferPass( gfxCtx );
+					// SSAO pass
+					SSAOPass( gfxCtx );
+					// Lighting pass
+					LightingPass( gfxCtx );
+					// Luminance Pass
+					LuminancePass( gfxCtx );
+					// Bloom pass
+					BloomPass( gfxCtx);
+					// Composite Pass
+					CompositePass( mLightingBuffer, gfxCtx );
+					// Motion Blur Pass
+					MotionBlurPass( mCompositeTarget, gfxCtx );
+					// FXAA pass
+					FXAAPass( mMotionBlurTarget, gfxCtx ); 
+				}
 
 				// Do UI pass
 				//UIPass( mFXAATarget, gfxCtx ); 
-				 UIPass( gfxCtx->GetFrameBuffer( ), gfxCtx );
+				 //UIPass( gfxCtx->GetFrameBuffer( ), gfxCtx );
+
+				 // Custom context passes
+				 //for ( auto& p : gfxCtx->mCustomPasses )
+				 //{
+					// p->Render();
+				 //}
 			} 
 	 
 			// Clear default buffer
@@ -698,7 +736,7 @@ namespace Enjon
 			else
 			{
 				// Otherwise Enjon Editor views
-				ImGuiPass(); 
+				ImGuiPass( gfxCtx ); 
 			} 
 
 			mCurrentWindow->SwapBuffer(); 
@@ -793,7 +831,7 @@ namespace Enjon
 		}
 		program->Unuse( );
 
-		ImGuiPass();
+		ImGuiPass( ctx );
 	} 
 
 	iVec2 GraphicsSubsystem::GetImGuiViewport( ) const
@@ -1729,7 +1767,13 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::ImGuiPass()
+#define __DO_IMGUI_INTERNAL( ... )\
+	igm->Render( mCurrentWindow );\
+	glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);\
+	ImGui::Render();\
+	ImGui_ImplSdlGL3_RenderDrawData( ImGui::GetDrawData( ) ); 
+
+	void GraphicsSubsystem::ImGuiPass( GraphicsSubsystemContext* ctx )
 	{
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 
@@ -1737,15 +1781,21 @@ namespace Enjon
 		static bool show_frame_rate = false;
 		static bool show_graphics_window = true;
 		static bool show_app_layout = false;
-		static bool show_game_viewport = true;
+		static bool show_game_viewport = true; 
 
-        // Queue up gui
-		igm->Render( mCurrentWindow );
+		if ( ctx && ctx->mWriteUIIntoFrameBuffer )
+		{
+			ctx->GetFrameBuffer()->Bind();
+			{
+				__DO_IMGUI_INTERNAL();
+			}
+			ctx->GetFrameBuffer()->Unbind();
+		}
+		else
+		{ 
+			__DO_IMGUI_INTERNAL();
+		}
 
-        // Flush
-        glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
-        ImGui::Render(); 
-		ImGui_ImplSdlGL3_RenderDrawData( ImGui::GetDrawData( ) );
 	}
 
 	//======================================================================================================
@@ -1758,17 +1808,18 @@ namespace Enjon
 
 		Camera* camera = scene->GetActiveCamera( );
 
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 
 		inputTarget->Bind( BindType::WRITE, false );
 		{ 
 			if ( isStandalone )
 			{
 				// Queue up gui
-				igm->Render(mCurrentWindow); 
-				// Flush
-				glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
-				ImGui::Render(); 
+				//igm->Render(mCurrentWindow); 
+				//// Flush
+				//glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+				//ImGui::Render(); 
+				//ImGui_ImplSdlGL3_RenderDrawData( ImGui::GetDrawData( ) );
 			}
 
 			auto shader = ShaderManager::GetShader( "Text" ); 

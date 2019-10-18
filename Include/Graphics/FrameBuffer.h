@@ -9,6 +9,7 @@
 #include "Math/Vec4.h"
 #include "GLEW/glew.h"
 #include "Defines.h"
+#include "Graphics/Color.h"
 #include "Base/Object.h"
 
 namespace Enjon 
@@ -75,6 +76,8 @@ namespace Enjon
 				return Vec2(mWidth, mHeight); 
 			}
 
+			void SetClearColor( const ColorRGBA32& color );
+
 		protected:
 			GLuint		mFrameBufferID; // The FBO ID
 			GLuint		mTargetID; 		// The texture id
@@ -84,6 +87,7 @@ namespace Enjon
 			u32			mWidth; 		// FBO width
 			u32			mHeight; 		// FBO height
 			Vec4		mViewport;
+			ColorRGBA32 mClearColor = RGBA32_Black();
 	};
 
 }

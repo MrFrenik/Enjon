@@ -246,6 +246,7 @@ namespace Enjon
 		friend Window;
 		friend ImGuiManager;
 		friend WindowSubsystem;
+		friend GraphicsSubsystem;
 
 		public:
 
@@ -270,6 +271,11 @@ namespace Enjon
 			ImGuiContext* GetContext( )
 			{
 				return mContext;
+			}
+
+			void SetContext( ImGuiContext* context )
+			{
+				mContext = context;
 			}
 
 			/** 
@@ -344,7 +350,12 @@ namespace Enjon
 			* @brief 
 			* @note NOT TO BE CALLED OUTSIDE OF IMGUI CODE
 			*/
-			void RootDock( );
+			void RootDock( ); 
+
+			/** 
+			* @brief
+			*/
+			void Render( ); 
 
 		protected:
 
@@ -358,12 +369,7 @@ namespace Enjon
 			/** 
 			* @brief
 			*/
-			s32 MainMenu( );
-
-			/** 
-			* @brief
-			*/
-			void Render( );
+			s32 MainMenu( ); 
 
 		private: 
 			Vector<GUICallbackFunc> mGuiFuncs;
@@ -427,6 +433,8 @@ namespace Enjon
 			void LoadStyle( const AssetHandle< UIStyleConfig >& config, GUIContext* ctx );
 
 			void AddFont( const String& filePath, const u32& size, GUIContext* ctx, const char* fontName );
+
+			ImGuiContext* GetContextByWindow( Window* window );
 
 		public:
 

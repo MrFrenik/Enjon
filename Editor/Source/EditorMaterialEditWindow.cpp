@@ -380,9 +380,9 @@ namespace Enjon
 		guiContext->RegisterMainMenu( "View" );
 
 		// Create viewport
-		mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
+		mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this, "Viewport" );
 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( mViewport->GetViewName().c_str(), nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( mViewport->GetViewName().c_str(), nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) ); 
 
 		// NOTE(): This should be done automatically for the user in the backend
 		// Add window to graphics subsystem ( totally stupid way to do this )
@@ -406,7 +406,7 @@ namespace Enjon
 
 		guiContext->RegisterWindow( "Properties", [ & ]
 		{
-			if ( ImGui::BeginDock( "Properties", &mViewportOpen ) )
+			if ( ImGui::BeginDock( "Properties" ) )
 			{
 				if ( mMaterial )
 				{
@@ -435,7 +435,7 @@ namespace Enjon
 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Viewport", GUIDockSlotType::Slot_Left, 0.45f ) );
-		//guiContext->Finalize( );
+		guiContext->Finalize( );
 	} 
 
 	void EditorTextureEditWindow::Init( const WindowParams& params )
@@ -465,7 +465,7 @@ namespace Enjon
 		// Create viewport
 		mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( mViewport->GetViewName( ).c_str( ), nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( mViewport->GetViewName( ).c_str( ), nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
 
 		// NOTE(): This should be done automatically for the user in the backend
 		// Add window to graphics subsystem ( totally stupid way to do this )
@@ -536,6 +536,7 @@ namespace Enjon
 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Viewport", GUIDockSlotType::Slot_Left, 0.45f ) );
+		guiContext->SetActiveDock( "Viewport" );
 		//guiContext->Finalize( );
 	}
 

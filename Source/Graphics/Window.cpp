@@ -264,13 +264,16 @@ namespace Enjon
 					case SDL_WINDOWEVENT_RESIZED: 
 					{
 						// For now only reinitialize the frame buffers for main window
-						if ( event.window.windowID == SDL_GetWindowID( EngineSubsystem( GraphicsSubsystem )->GetMainWindow()->GetSDLWindow() ) )
+						if ( event.window.windowID == SDL_GetWindowID( EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetSDLWindow() ) )
 						{
 							gs->ReinitializeFrameBuffers( );
 						}
 
-						// Resize viewport
-						SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
+						if ( event.window.windowID == SDL_GetWindowID( GetSDLWindow() ) )
+						{ 
+							// Resize viewport
+							SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
+						} 
 					}
 					break; 
 
@@ -425,6 +428,11 @@ namespace Enjon
 		CleanupWindows( );
 		// Initialize any new windows
 		InitializeWindows( ); 
+
+		for ( auto& w : mWindows )
+		{
+			w->Update();
+		}
 	}
 
 	//==============================================================================================
@@ -554,22 +562,25 @@ namespace Enjon
 		{
 			for ( auto& id : mWindowsToDestroy )
 			{
-				Window* w = mWindowIDMap.find( id )->second;
-				if ( w )
+				if ( mWindowIDMap.find( id ) != mWindowIDMap.end() )
 				{
-					// Remove from windows list
-					auto it = std::remove( mWindows.begin( ), mWindows.end( ), w );
-					mWindows.erase( it );
-
-					for ( auto& win : w->Destroy( ) )
+					Window* w = mWindowIDMap.find( id )->second;
+					if ( w )
 					{
-						postDestroy.push_back( win );
-					}
+						// Remove from windows list
+						auto it = std::remove( mWindows.begin( ), mWindows.end( ), w );
+						mWindows.erase( it );
 
-					mWindowIDMap.erase( id ); 
-					igm->RemoveWindowFromContextMap( w->m_sdlWindow ); 
-					delete w;
-					w = nullptr; 
+						for ( auto& win : w->Destroy( ) )
+						{
+							postDestroy.push_back( win );
+						}
+
+						mWindowIDMap.erase( id ); 
+						igm->RemoveWindowFromContextMap( w->m_sdlWindow ); 
+						delete w;
+						w = nullptr; 
+					} 
 				}
 			} 
 		} 
@@ -617,6 +628,11 @@ namespace Enjon
 		CleanupWindows( );
 		// Initialize any new windows
 		InitializeWindows( ); 
+
+		for ( auto& w : mWindows )
+		{
+			w->Update();
+		}
 	}
 
 	//==============================================================================================

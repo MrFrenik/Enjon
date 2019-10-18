@@ -47,15 +47,17 @@ namespace Enjon
 		}
 
 		template < typename T >
-		void RegisterContext( )
+		T* RegisterContext( )
 		{
 			SubsystemContext::AssertIsSubsystemContext< T >( );
+			const MetaClass* cls = Object::GetClass< T >( );
 			if ( !HasContext< T >( ) )
 			{
-				const MetaClass* cls = Object::GetClass< T >( );
 				// Construct new context and set world reference to this
 				mContextMap[ cls->GetTypeId( ) ] = new T( this );
 			}
+
+			return (T*)mContextMap[ cls->GetTypeId() ];
 		}
 
 		template < typename T >

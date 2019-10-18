@@ -361,14 +361,27 @@ namespace Enjon
 										const Asset* asset = mSelectedAssetInfo->GetAsset();
 
 										// Open new params
-										WindowParams params;
-										params.mMetaClassFunc = [ & ] () -> const MetaClass * { return Object::GetClass< EditorUIEditWindow >(); };
-										params.mName = asset->GetName();
-										params.mWidth = 16 * 70;
-										params.mHeight = 9 * 70;
-										params.mFlags = WindowFlagsMask( (u32 )WindowFlags::RESIZABLE );
-										params.mData = ( void* )asset;
-										EngineSubsystem( WindowSubsystem )->AddNewWindow( params ); 
+										{
+											WindowParams params;
+											params.mMetaClassFunc = [ & ] () -> const MetaClass * { return Object::GetClass< EditorUIEditWindow >(); };
+											params.mName = asset->GetName();
+											params.mWidth = 16 * 70;
+											params.mHeight = 9 * 70;
+											params.mFlags = WindowFlagsMask( (u32)WindowFlags::RESIZABLE );
+											params.mData = ( void* )asset;
+											EngineSubsystem( WindowSubsystem )->AddNewWindow( params ); 
+										}
+
+										{
+											WindowParams params;
+											params.mMetaClassFunc = [ & ] () -> const MetaClass * { return Object::GetClass< EditorUICanvasWindow >(); };
+											params.mName = asset->GetName() + ": Canvas";
+											params.mWidth = 16 * 40;
+											params.mHeight = 9 * 40;
+											params.mFlags = WindowFlagsMask( (u32)WindowFlags::RESIZABLE | (u32)WindowFlags::INVISIBLE );
+											params.mData = ( void* )asset;
+											EngineSubsystem( WindowSubsystem )->AddNewWindow( params ); 
+										}
 									}
 								}
 							}

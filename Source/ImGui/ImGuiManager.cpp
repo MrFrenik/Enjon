@@ -143,7 +143,7 @@ namespace Enjon
 	void GUIContext::SetGUIContextParams( const GUIContextParams& params )
 	{
 		mParams = params;
-	}
+	} 
 
 	//===================================================================================================
 
@@ -326,6 +326,8 @@ namespace Enjon
 		return menuHeight;
 	} 
 
+	//======================================================================================== 
+
 	Result ImGuiManager::Initialize( )
 	{
 		return Result::SUCCESS;
@@ -358,6 +360,15 @@ namespace Enjon
 			ImGui::SetCurrentContext( ctx );
 		}
 		mContext = ctx;
+	}
+
+	ImGuiContext* ImGuiManager::GetContextByWindow( Window* window )
+	{
+		if ( mImGuiContextMap.find( window->GetSDLWindow() ) != mImGuiContextMap.end() )
+		{
+			return mImGuiContextMap[window->GetSDLWindow()];
+		}
+		return nullptr;
 	}
 
 	ImGuiContext* ImGuiManager::Init(Window* window)

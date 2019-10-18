@@ -204,6 +204,11 @@ namespace Enjon
 			*/
 			static void SetWindowCursor( CursorType type );
 
+			void SetGUIContext( const GUIContext& ctx )
+			{
+				mGUIContext = ctx;
+			}
+
 			/*
 			* @brief
 			*/

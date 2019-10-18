@@ -35,11 +35,31 @@ namespace Enjon
 				// Do nothing...
 			}
 
+			/*
+			* @brief
+			*/
+			UIElement* AddChild( UIElement* element ); 
+
+			/*
+			* @brief
+			*/
+			UIElement* RemoveChild( UIElement* element );
+		
+
 			ENJON_PROPERTY()
 			String mLabel = "";
 
 			ENJON_PROPERTY()
 			Vec2 mPosition = Vec2( 0.f );
+
+			ENJON_PROPERTY()
+			Vec2 mSize = Vec2( 10.f, 10.f );
+
+			ENJON_PROPERTY()
+			Vector< UIElement* > mChildren;
+
+			ENJON_PROPERTY( HideInEditor, NonSerializeable )
+			UIElement* mParent = nullptr;
 	}; 
 
 	// Not sure if I like this here...need a way to be able to view this in the editor and set the function
@@ -95,25 +115,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void OnUI() override;
-
-			/*
-			* @brief
-			*/
-			UIElement* AddChild( UIElement* element ); 
-
-			/*
-			* @brief
-			*/
-			UIElement* RemoveChild( UIElement* element );
-		
-		public:
-
-			ENJON_PROPERTY()
-			Vec2 mSize = Vec2( 10.f, 10.f );
-
-			ENJON_PROPERTY()			
-			Vector< UIElement* > mChildren;
+			virtual void OnUI() override; 
 	}; 
 
 	ENJON_CLASS( )

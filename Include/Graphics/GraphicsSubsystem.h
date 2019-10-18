@@ -26,6 +26,7 @@ namespace Enjon
 	class Shader;
 	class ShaderUniform;
 	class World;
+	class RenderPass;
 
 	ENJON_CLASS( )
 	class GraphicsSubsystemContext : public SubsystemContext
@@ -72,11 +73,30 @@ namespace Enjon
 			*/
 			void ReinitializeFrameBuffers( const iVec2& viewport );
 
+			/**
+			* @brief
+			*/
+			void AddCustomPass( RenderPass* pass );
+
+			/**
+			* @brief
+			*/
+			void RemoveCustomPass( RenderPass* pass );
+
+			void EnableRenderWorld( const b32& enable );
+
+			b32 GetEnableRenderWorld() const; 
+
+		public:
+			b32 mWriteUIIntoFrameBuffer = false;
+
 		protected: 
 			GraphicsScene mScene;
 			FrameBuffer* mBackBuffer = nullptr;	// Eventually will need to just have a rendertarget that can be used with a "global" framebuffer
 			FrameBuffer* mObjectIDBuffer = nullptr;
 			Mat4x4 mPreviousViewProjectionMatrix = Mat4x4::Identity( );
+			Vector< RenderPass* > mCustomPasses;
+			b32 mRenderWorld = true;
 	};
 
 	struct ToneMapSettings
@@ -349,7 +369,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void ImGuiPass( );
+			void ImGuiPass( GraphicsSubsystemContext* ctx );
 
 			/**
 			*@brief

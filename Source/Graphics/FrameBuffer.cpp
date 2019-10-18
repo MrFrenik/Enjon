@@ -33,7 +33,7 @@ namespace Enjon
 	    // - color buffer
 	    glGenTextures(1, &mTexture);
 	    glBindTexture(GL_TEXTURE_2D, mTexture);
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, mWidth, mHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texParam);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texParam);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -88,6 +88,7 @@ namespace Enjon
 
 				if ( clear )
 				{
+					glClearColor( mClearColor.r, mClearColor.g, mClearColor.b, mClearColor.a );
 					glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 				}
 
@@ -111,6 +112,11 @@ namespace Enjon
 		// Stop acquiring and unbind the FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glPopAttrib();
+	}
+
+	void FrameBuffer::SetClearColor( const ColorRGBA32& color )
+	{
+		mClearColor = color;
 	}
 }
 

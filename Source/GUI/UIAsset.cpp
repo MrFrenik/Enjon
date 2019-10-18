@@ -52,9 +52,9 @@ namespace Enjon
 
 	void UIElementButton::OnUI()
 	{ 
-		ImGui::SetCursorPos( ImVec2( mPosition.x, mPosition.y ) );
+		ImGui::SetCursorScreenPos( ImVec2( mPosition.x, mPosition.y ) );
 		ImGui::PushID( (usize )(intptr_t )this );
-		if ( ImGui::Button( mLabel.c_str() ) )
+		if ( ImGui::Button( mLabel.c_str(), ImVec2( mSize.x, mSize.y ) ) )
 		{
 			mOnClick( this );
 		}
@@ -88,7 +88,7 @@ namespace Enjon
 
 	//=================================================================================
 
-	UIElement* UIElementCanvas::AddChild( UIElement* element )
+	UIElement* UIElement::AddChild( UIElement* element )
 	{
 		mChildren.push_back( element );
 		return element;
@@ -96,7 +96,7 @@ namespace Enjon
 
 	//=================================================================================
 	
-	UIElement* UIElementCanvas::RemoveChild( UIElement* element )
+	UIElement* UIElement::RemoveChild( UIElement* element )
 	{
 		// Swap and pop? Not safe to do this operation during a GUI call
 		std::remove( mChildren.begin(), mChildren.end(), element );
