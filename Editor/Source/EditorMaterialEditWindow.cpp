@@ -537,7 +537,7 @@ namespace Enjon
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Viewport", GUIDockSlotType::Slot_Left, 0.45f ) );
 		guiContext->SetActiveDock( "Viewport" );
-		//guiContext->Finalize( );
+		guiContext->Finalize( );
 	}
 
 	//=================================================================================================

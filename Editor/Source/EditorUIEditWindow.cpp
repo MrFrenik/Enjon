@@ -1,3 +1,5 @@
+
+
 #include "EditorUIEditWindow.h"
 #include "EditorMaterialEditWindow.h"
 #include "EditorApp.h"
@@ -103,11 +105,7 @@ namespace Enjon
 			GraphicsSubsystemContext* gCtx = mWorld->RegisterContext< GraphicsSubsystemContext >( );
  
 			// Set asset from data 
-			mUI = ( UI* )( params.mData );
-
-			// Construct custom render pass for context 
-			//mUIPass = new UIRenderPass( mUI, this ); 
-			//gCtx->AddCustomPass( mUIPass );
+			mUI = ( UI* )( params.mData ); 
 
 			// Don't need to render the world with this context ( this will be abstracted away eventually into render pipelines )
 			gCtx->EnableRenderWorld( false );
@@ -121,18 +119,6 @@ namespace Enjon
 
 	void EditorUIEditWindow::Update()
 	{ 
-		//if ( !mInitialized )
-		//{ 
-		//	//// Canvas window
-		//	//WindowParams canvasParams;
-		//	//canvasParams.mWidth = 800;
-		//	//canvasParams.mWidth = 600;
-		//	//canvasParams.mMetaClassFunc = [ & ] () -> const MetaClass * { return Object::GetClass < EditorUICanvasWindow >(); };
-		//	//canvasParams.mName = "UI Canvas";
-		//	//mCanvasWindowID = (s32)EngineSubsystem( WindowSubsystem )->AddNewWindow( canvasParams );
-		//	////EngineSubsystem( WindowSubsystem )->ForceInitWindows(); 
-		//	//mInitialized = true;
-		//} 
 	}
 
 	//=================================================================================
@@ -201,7 +187,8 @@ namespace Enjon
 
 	Vec4 GetRectHandle( const ImVec2& center, Camera* camera )
 	{ 
-		f32 r = 10.f / camera->GetOrthographicScale( );
+		//f32 r = 5.f * camera->GetOrthographicScale( );
+		f32 r = 7.f;
 		ImVec2 a = ImVec2( center.x - r / 2.f, center.y - r / 2.f );
 		ImVec2 b = ImVec2( a.x + r, a.y + r );
 		return Vec4( a.x, a.y, b.x, b.y );
@@ -213,9 +200,9 @@ namespace Enjon
 		static ImVec2 onClickPos = ImVec2( 0.f, 0.f );
 		static bool justClicked = false;
 		static s32 selectedID = -1;
-		f32 r = 10.f / mCamera.GetOrthographicScale( );
-		ImVec2 a = ImVec2( center.x - r / 2.f, center.y - r / 2.f );
-		ImVec2 b = ImVec2( a.x + r, a.y + r );
+		Vec4 rh = GetRectHandle( center, &mCamera );
+		ImVec2 a = ImVec2( rh.x, rh.y );
+		ImVec2 b = ImVec2( rh.z, rh.w );
 		bool isHovered = ImGui::IsMouseHoveringRect( a, b );
 		bool isMouseDown = ImGui::IsMouseDown( 0 );
 		bool isMouseClicked = ImGui::IsMouseClicked( 0 );
@@ -249,7 +236,7 @@ namespace Enjon
 			isSelected = false;
 		} 
 
-		dl->AddRectFilled( a, b, isHovered ? ImColor( 0.9f, 0.2f, 0.1f, 1.f ) : isSelected ? ImColor( 1.f, 0.3f, 0.2f, 1.f ) : ImColor( 1.f, 1.f, 1.f, 0.1f ) );
+		dl->AddRectFilled( a, b, isHovered ? ImColor( 1.0f, 0.2f, 0.1f, 1.f ) : isSelected ? ImColor( 1.f, 0.3f, 0.2f, 1.f ) : ImColor( 0.6f, 0.2f, 0.1f, 1.0f ) );
 		return isSelected;
 	}
 
@@ -301,7 +288,21 @@ namespace Enjon
 			hovered &= HoveringAnyElementRecursive( c, camera );
 		}
 		return hovered; 
-	} 
+	}
+
+#define __TransformElementInternalByHandle( fa, fb, element, camera )\
+	do {\
+		f32 length = (fb - fa).Length();\
+		Vec3 fp = Mat4x4::Inverse( camera.GetViewProjectionMatrix( ) ) * Vec3( (fa), 0.f );\
+		Vec3 fp2 = Mat4x4::Inverse( camera.GetViewProjectionMatrix( ) ) * Vec3( (fb), 0.f );\
+		if ( (fp2.x - fp.x) > 1.f && ((fp2.y - fp.y) * camera.GetAspectRatio()) > 1.f )\
+		{\
+			element->mPosition = Vec2( fp.x, fp.y * camera.GetAspectRatio() );\
+			element->mSize = Vec2( (fp2.x - fp.x), (fp2.y - fp.y) * camera.GetAspectRatio() );\
+		}\
+		usedHandle = true;\
+	} while ( 0 )
+
 
 	void EditorUIEditWindow::DrawUIElementsRecursive( UIElement* element )
 	{
@@ -334,50 +335,44 @@ namespace Enjon
 		// Scale widget
 		bool usedHandle = false;
 		if ( selected ) { 
+			// Top Left
 			if ( DrawRectHandle( a, 0, &delta ) ) { 
-				delta = ImVec2( delta.x * mCamera.GetOrthographicScale(), delta.y * mCamera.GetOrthographicScale() );
-				element->mSize -= Vec2( delta.x, delta.y );	// TL 
-				element->mPosition += Vec2( delta.x, delta.y );
-				usedHandle = true;
+				__TransformElementInternalByHandle( Vec2( a.x + delta.x, a.y + delta.y ), Vec2( b.x, b.y ), element, mCamera );
 			}
 
+			// Top Right
 			if ( DrawRectHandle( ImVec2( b.x, a.y ), 1, &delta ) ) { 
-				element->mSize += Vec2( delta.x, -delta.y );	// TR
-				element->mPosition += Vec2( 0.f, delta.y );	// TR
-				usedHandle = true;
+				__TransformElementInternalByHandle( Vec2( a.x, a.y + delta.y ), Vec2( b.x + delta.x, b.y ), element, mCamera );
 			}
 
+			// Right
 			if ( DrawRectHandle( ImVec2( b.x, (a.y + b.y) / 2.f ), 2, &delta ) ) {
-				element->mSize += Vec2( delta.x, 0.f );
-				usedHandle = true;
+				__TransformElementInternalByHandle( Vec2( a.x, a.y ), Vec2( b.x + delta.x, b.y ), element, mCamera ); 
 			}
 
+			// Top
 			if ( DrawRectHandle( ImVec2( (a.x + b.x) / 2.f, a.y ), 3, &delta ) ) {
-				element->mSize += Vec2( 0.f, -delta.y ); // TR
-				element->mPosition += Vec2( 0.f, delta.y );
-				usedHandle = true;
+				__TransformElementInternalByHandle( Vec2( a.x, a.y + delta.y ), Vec2( b.x, b.y ), element, mCamera );
 			}
 
-			if ( DrawRectHandle( ImVec2( a.x, b.y ), 4, &delta ) ) {				// BL
-				element->mSize -= Vec2( delta.x, -delta.y );
-				element->mPosition += Vec2( delta.x, 0.f );
-				usedHandle = true;
+			// Bottom Left
+			if ( DrawRectHandle( ImVec2( a.x, b.y ), 4, &delta ) ) {
+				__TransformElementInternalByHandle( Vec2( a.x + delta.x, a.y ), Vec2( b.x, b.y + delta.y ), element, mCamera );
 			}
 
+			// Left
 			if ( DrawRectHandle( ImVec2( a.x, (a.y + b.y) / 2.f ), 5, &delta ) ) {
-				element->mSize += Vec2( -delta.x, 0.f ); // BL
-				element->mPosition += Vec2( delta.x, 0.f );
-				usedHandle = true;
+				__TransformElementInternalByHandle( Vec2( a.x + delta.x, a.y ), Vec2( b.x, b.y ), element, mCamera );
 			}
 
+			// Bottom 
 			if ( DrawRectHandle( ImVec2( (a.x + b.x) / 2.f, b.y ), 6, &delta ) ) {
-				element->mSize += Vec2( 0.f, delta.y ); // BL
-				usedHandle = true;
+				__TransformElementInternalByHandle( Vec2( a.x, a.y ), Vec2( b.x, b.y + delta.y ), element, mCamera );
 			}
 
+			// Bottom Right
 			if ( DrawRectHandle( b, 7, &delta ) ) {									// BR		
-				element->mSize += Vec2( delta.x, delta.y );
-				usedHandle = true;
+				__TransformElementInternalByHandle( Vec2( a.x, a.y ), Vec2( b.x + delta.x, b.y + delta.y ), element, mCamera );
 			} 
 		} 
 
@@ -421,7 +416,7 @@ namespace Enjon
 			Input* input = EngineSubsystem( Input );
 			if ( input->IsKeyPressed( KeyCode::Up ) )
 			{
-				element->mPosition.y += 1.f;
+				element->mPosition.y -= 1.f;
 			}
 			if ( input->IsKeyPressed( KeyCode::Down ) )
 			{
@@ -429,7 +424,7 @@ namespace Enjon
 			}
 			if ( input->IsKeyPressed( KeyCode::Right ) )
 			{
-				element->mPosition.x -= 1.f;
+				element->mPosition.x += 1.f;
 			}
 			if ( input->IsKeyPressed( KeyCode::Left ) )
 			{
@@ -438,7 +433,7 @@ namespace Enjon
 		}
 
 		if ( selected ) {
-			dl->AddRect( a, b, activeColor ); 
+			AddDashedLineRect( a, b, activeColor );
 		}
 
 		// Children
@@ -446,140 +441,19 @@ namespace Enjon
 		{
 			DrawUIElementsRecursive( c );
 		}
-	}
-
-	void EditorUIEditWindow::DrawUI()
-	{ 
-		auto dl = ImGui::GetWindowDrawList();
-
-		// Handle interacting with widget
-		static ImVec2 onClickPos = ImVec2( 0.f, 0.f );
-		static bool justClicked = false;
-
-		// Do root canvas
-		Vec2 pos = mUI->mRoot.mPosition;
-		Transform lt = Transform( Vec3( pos, 1.f ), Quaternion(), Vec3( mUI->mRoot.mSize, 1.f ) );
-
-		Vec3 ra = mCamera.TransformPoint( Vec3( mUI->mRoot.mPosition, 0.f ) );
-		Vec3 rb = mCamera.TransformPoint( Vec3( mUI->mRoot.mPosition, 0.f ) + Vec3( mUI->mRoot.mSize, 0.f ) ); 
-		ImVec2 a = ImVec2( ra.x, ra.y );
-		ImVec2 b = ImVec2( rb.x, rb.y );
-
-		bool hovered = ImGui::IsMouseHoveringRect( a, b ); 
-		bool active = hovered && ImGui::IsMouseDown( 0 );
-		bool selected = ( mSelectedElement == &mUI->mRoot );
-		bool mouseClicked = ImGui::IsMouseClicked( 0 );
-		bool mouseDown = ImGui::IsMouseDown( 0 );
-		ImVec2 mp = ImGui::GetMousePos();
-
-		ImVec2 delta = ImVec2( 0.f, 0.f );
-
-		if ( hovered && mouseClicked )
-		{
-			DeselectElement();
-			SelectElement( &mUI->mRoot );
-			onClickPos = mp;
-		} 
-
-		// Scale widget
-		bool usedHandle = false;
-		if ( selected ) { 
-
-			if ( DrawRectHandle( a, 0, &delta ) ) { 
-				delta = ImVec2( delta.x * mCamera.GetOrthographicScale(), delta.y * mCamera.GetOrthographicScale() );
-				mUI->mRoot.mSize -= Vec2( delta.x, delta.y );	// TL 
-				mUI->mRoot.mPosition += Vec2( delta.x, delta.y );
-				usedHandle = true;
-			}
-
-			if ( DrawRectHandle( ImVec2( b.x, a.y ), 1, &delta ) ) { 
-				mUI->mRoot.mSize += Vec2( delta.x, -delta.y );	// TR
-				mUI->mRoot.mPosition += Vec2( 0.f, delta.y );	// TR
-				usedHandle = true;
-			}
-
-			if ( DrawRectHandle( ImVec2( b.x, (a.y + b.y) / 2.f ), 2, &delta ) ) {
-				mUI->mRoot.mSize += Vec2( delta.x, 0.f );
-				usedHandle = true;
-			}
-
-			if ( DrawRectHandle( ImVec2( (a.x + b.x) / 2.f, a.y ), 3, &delta ) ) {
-				mUI->mRoot.mSize += Vec2( 0.f, -delta.y ); // TR
-				mUI->mRoot.mPosition += Vec2( 0.f, delta.y );
-				usedHandle = true;
-			}
-
-			if ( DrawRectHandle( ImVec2( a.x, b.y ), 4, &delta ) ) {				// BL
-				mUI->mRoot.mSize -= Vec2( delta.x, -delta.y );
-				mUI->mRoot.mPosition += Vec2( delta.x, 0.f );
-				usedHandle = true;
-			}
-
-			if ( DrawRectHandle( ImVec2( a.x, (a.y + b.y) / 2.f ), 5, &delta ) ) {
-				mUI->mRoot.mSize += Vec2( -delta.x, 0.f ); // BL
-				mUI->mRoot.mPosition += Vec2( delta.x, 0.f );
-				usedHandle = true;
-			}
-
-			if ( DrawRectHandle( ImVec2( (a.x + b.x) / 2.f, b.y ), 6, &delta ) ) {
-				mUI->mRoot.mSize += Vec2( 0.f, delta.y ); // BL
-				usedHandle = true;
-			}
-
-			if ( DrawRectHandle( b, 7, &delta ) ) {									// BR		
-				mUI->mRoot.mSize += Vec2( delta.x, delta.y );
-				usedHandle = true;
-			} 
-		} 
-
-		if ( mouseClicked && !hovered && ImGui::IsMouseHoveringWindow() && selected && !usedHandle )
-		{
-			DeselectElement();
-			selected = false;
-		} 
-		
-		ImColor activeColor = ImColor( 0.9f, 0.4f, 0.1f, 1.f );
-		ImColor hoveredColor = ImColor( 0.8f, 0.2f, 0.f, 1.f );
-		ImColor color = ImColor( 1.f, 1.f, 1.f, 1.f );
-
-		// Move element if selected
-		if ( mouseDown && selected && !usedHandle )
-		{ 
-			delta = ImVec2( mp.x - onClickPos.x, mp.y - onClickPos.y ); 
-			onClickPos = mp;
-		} 
-
-		// Transform position of stuff 
-		//ra = mCamera.TransformPoint( Vec3( mUI->mRoot.mPosition, 0.f ) );
-		//rb = mCamera.TransformPoint( Vec3( mUI->mRoot.mPosition, 0.f ) + Vec3( mUI->mRoot.mSize, 0.f ) ); 
-		//a = ImVec2( ra.x, ra.y );
-		//b = ImVec2( rb.x, rb.y );
-		if ( !usedHandle ) {
-			Vec3 fa = ra;
-			fa += Vec3( delta.x, delta.y, 0.f );
-			Vec3 fp = Mat4x4::Inverse( mCamera.GetViewProjectionMatrix( ) ) * fa; 
-			mUI->mRoot.mPosition = Vec2( fp.x, fp.y ); 
-
-			//ra = mCamera.TransformPoint( Vec3( mUI->mRoot.mPosition, 0.f ) );
-			//rb = mCamera.TransformPoint( Vec3( mUI->mRoot.mPosition, 0.f ) + Vec3( mUI->mRoot.mSize, 0.f ) ); 
-			//a = ImVec2( ra.x, ra.y );
-			//b = ImVec2( rb.x, rb.y ); 
-		}
-
-		dl->AddRect( a, b, hovered ? hoveredColor : active || selected ? activeColor : color ); 
-	}
+	} 
 
 	//===============================================================================================
 
-	void AddDashedLine( const ImVec2& a, const ImVec2& b, const ImColor& color )
+	void EditorUIEditWindow::AddDashedLine( const ImVec2& a, const ImVec2& b, const ImColor& color )
 	{
 		auto dl = ImGui::GetWindowDrawList();
 
 		Vec2 diff = ( Vec2( b.x, b.y ) - Vec2( a.x, a.y ) );
 		Vec2 norm = Vec2::Normalize( diff );
 		f32 length = diff.Length();
-		u32 numSteps = 20;
-		f32 sa = length / (f32)numSteps;
+		u32 numSteps = 12;
+		f32 sa = 10.f;
 
 		Vec2 start = Vec2( a.x, a.y );
 		ImVec2 la = a;
@@ -592,7 +466,7 @@ namespace Enjon
 		}
 	}
 
-	void AddDashedLineRect( const ImVec2& a, const ImVec2& b, const ImColor& color )
+	void EditorUIEditWindow::AddDashedLineRect( const ImVec2& a, const ImVec2& b, const ImColor& color )
 	{
 		auto dl = ImGui::GetWindowDrawList();
 		ImVec2 tl = a;
@@ -646,9 +520,6 @@ namespace Enjon
 	{ 
 		if ( !mCanvasInitialized )
 		{
-			Vec2 vs = Vec2( 900.f, 506.f );		// By default, it's the size of the Sandbox's window
-			mViewportTransform = Transform( Vec3( 0.f ), Quaternion(), Vec3( vs.x, vs.y, 1.f ) );
-			ImVec2 co = ImVec2( ImGui::GetWindowPos().x + ( ImGui::GetWindowWidth() - vs.x ) / 2.f , ImGui::GetWindowPos().y + ( ImGui::GetWindowHeight() - vs.y ) / 2.f );
 			mCanvasInitialized = true;
 			mCamera = Camera( (u32)500, (u32)300 );
 			mCamera.SetPosition( Vec3( 0.f ) );
@@ -662,26 +533,17 @@ namespace Enjon
 		{
 			if ( w->Class()->InstanceOf< EditorUICanvasWindow >() )
 			{
-				ImGui::ListBoxHeader( "##canvas", ImVec2( ImGui::GetWindowWidth() * 0.97f, ImGui::GetWindowHeight() * 0.95f ) );
+				ImGui::ListBoxHeader( "##canvas", ImVec2( ImGui::GetWindowWidth() * 0.975f, ImGui::GetWindowHeight() * 0.975f ) );
 				{
+					Input* input = EngineSubsystem( Input );
 					u32 sw = w->GetScreenWidth();
 					u32 sh = w->GetScreenHeight();
 					GraphicsSubsystemContext* ctx = w->GetWorld()->GetContext< GraphicsSubsystemContext >(); 
-
-					mCamera.SetAspectRatio( (f32 )sh / (f32 )sw );
+					mCamera.SetAspectRatio( (f32 )sh / (f32 )sw ); 
 
 					bool win_hov = ImGui::IsMouseHoveringWindow(); 
-
-					if ( win_hov && ImGui::IsMouseClicked( 0 ) )
-					{ 
-						Vec2 ea = mUI->mRoot.mPosition;
-						Vec2 eb = mUI->mRoot.mPosition + mUI->mRoot.mSize; 
-					}
-
-					Input* input = EngineSubsystem( Input );
 					
 					ImVec2 delta = HandleMousePan(); 
-
 					mCamera.SetPosition( mCamera.GetPosition() - Vec3( delta.x, delta.y, 0.f ) );
 
 					if ( win_hov && input->GetMouseWheel().y )
@@ -693,14 +555,15 @@ namespace Enjon
 					auto dl = ImGui::GetWindowDrawList();
 					ImTextureID img = (ImTextureID)Int2VoidP(ctx->GetFrameBuffer()->GetTexture());
 
-					ImVec2 ia = Vec2ToImVec2( mCamera.TransformPoint( Vec3( 0.f, 0.f, 0.f ) ) );
-					ImVec2 ib = Vec2ToImVec2( mCamera.TransformPoint( Vec3( sw, sh ) ) ) ;
+					// Viewport dimensions transformed to camera space
+					ImVec2 va = Vec2ToImVec2( mCamera.TransformPoint( Vec3( 0.f, 0.f, 0.f ) ) );
+					ImVec2 vb = Vec2ToImVec2( mCamera.TransformPoint( Vec3( sw, sh ) ) ) ;
 
 					// Add border around viewport to denote where it be
-					AddDashedLineRect( ia, ib, ImColor( 1.f, 1.f, 1.f, 0.5f ) );
+					AddDashedLineRect( va, vb, ImColor( 1.f, 1.f, 1.f, 0.5f ) );
 
 					// Add image from ui buffer
-					dl->AddImage( img, ia, ib, ImVec2( 0, 1 ), ImVec2( 1, 0 ) );
+					dl->AddImage( img, va, vb, ImVec2( 0, 1 ), ImVec2( 1, 0 ) );
 
 					DrawUIElementsRecursive( &mUI->mRoot ); 
 				} 
@@ -825,7 +688,7 @@ namespace Enjon
 	void EditorUICanvasWindow::Init( const WindowParams& params )
 	{
 		// Construct scene in world
-		if ( !mInitialized )
+		if ( !mWorld )
 		{
 			// Initialize new world 
 			mWorld = new World( );
@@ -836,9 +699,7 @@ namespace Enjon
 			// Set asset from data 
 			mUI = ( UI* )( params.mData );
 			// Construct Scene 
-			ConstructScene( );
-
-			//mInitialized = true;
+			ConstructScene( ); 
 		} 
 	}
 

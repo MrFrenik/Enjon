@@ -85,16 +85,16 @@ namespace Enjon
 			ImVec2 HandleMousePan();
 			bool DrawRectHandle( const ImVec2& center, const u32& id, ImVec2* delta ); 
 			void DrawUIElementsRecursive( UIElement* element );
+			void AddDashedLine( const ImVec2& a, const ImVec2& b, const ImColor& color );
+			void AddDashedLineRect( const ImVec2& a, const ImVec2& b, const ImColor& color );
 
 		private:
 
 			s32 mCanvasWindowID = -1;
-			Transform mViewportTransform = Transform( Vec3( 0.f ), Quaternion(), Vec3( 800.f, 600.f, 1.f ) );
 			Camera mCamera;
 
 			UIElement* mSelectedElement = nullptr;
 
-			UIRenderPass* mUIPass = nullptr;
 			AssetHandle< UI > mUI;
 			b32 mInitialized = false;
 			b32 mCanvasInitialized = false;
