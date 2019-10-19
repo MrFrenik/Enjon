@@ -338,6 +338,12 @@ namespace Enjon
 			* @brief 
 			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
 			*/
+			void SetUIStyleConfig( const AssetHandle< UIStyleConfig >& style );
+
+			/** 
+			* @brief 
+			* @note NOT TO BE CALLED WHILE EXECUTING ANY IMGUI CODE
+			*/
 			void ClearContext( );
 
 			/** 

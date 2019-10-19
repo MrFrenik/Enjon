@@ -87,6 +87,8 @@ namespace Enjon
 			void DrawUIElementsRecursive( UIElement* element );
 			void AddDashedLine( const ImVec2& a, const ImVec2& b, const ImColor& color );
 			void AddDashedLineRect( const ImVec2& a, const ImVec2& b, const ImColor& color );
+			bool CanSelectThisElement( UIElement* element, Camera* camera ); 
+			void ElementOutliner( UIElement* element );
 
 		private:
 
@@ -98,6 +100,8 @@ namespace Enjon
 			AssetHandle< UI > mUI;
 			b32 mInitialized = false;
 			b32 mCanvasInitialized = false;
+
+			Vec2 mViewportSize = Vec2( 16.f * 70.f, 9.f * 70.f );
 	};
 }
 

@@ -265,8 +265,13 @@ namespace Enjon
 		return (ImGui::IsMouseHoveringRect( ImVec2( dims.x, dims.y ), ImVec2( dims.z, dims.w ) ) );
 	}
 
-	bool CanSelectThisElement( UIElement* element, Camera* camera )
+	bool EditorUIEditWindow::CanSelectThisElement( UIElement* element, Camera* camera )
 	{
+		if ( element == &mUI->mRoot )
+		{
+			return false;
+		}
+
 		// Look to see if ANY of the elements below this one are selectable. If not, then you good, playa
 		bool canSelect = MouseHoveringElement( element, camera );
 
@@ -591,6 +596,23 @@ namespace Enjon
 
 	//=================================================================================
 
+	void EditorUIEditWindow::ElementOutliner( UIElement* element )
+	{ 
+		Utils::TempBuffer str = Utils::TransientBuffer( "%s##%zu", element->mLabel.c_str(), (u32)(usize)element );
+		if ( ImGui::Selectable( str.buffer, ( element == mSelectedElement ) ) )
+		{
+			DeselectElement();
+			SelectElement( element );
+		}
+
+		for ( auto& c : element->mChildren ) 
+		{
+			ElementOutliner( c );
+		}
+	}
+
+	//=================================================================================
+
 	void EditorUIEditWindow::ConstructScene()
 	{ 
 		GUIContext* guiContext = GetGUIContext( ); 
@@ -605,46 +627,100 @@ namespace Enjon
 			if ( ImGui::BeginDock( "Canvas" ) )
 			{ 
 				Canvas(); 
-				ImGui::EndDock();
 			}
+			ImGui::EndDock( ); 
 		}); 
 
-		guiContext->RegisterWindow( "Properties", [ & ]
+		guiContext->RegisterWindow( "UI Palette", [ & ] ()
 		{
-			if ( ImGui::BeginDock( "Properties" ) )
+			if ( ImGui::BeginDock( "UI Palette" ) )
 			{
-				ImGui::ListBoxHeader( "##asset_props", ImVec2( ImGui::GetWindowWidth() - 20.f, ImGui::GetWindowHeight() - 15.f ) );
+				ImGui::ListBoxHeader( "##ui_palette", ImVec2( ImGui::GetWindowWidth() - 20.f, ImGui::GetWindowHeight() - 15.f ) );
 				{
 					if ( mUI )
 					{ 
-						if ( ImGui::Button( "Add Button" ) )
+						if ( ImGui::Selectable( "Text Button" ) )
 						{
 							UIElementButton* button = (UIElementButton*)mUI->mRoot.AddChild( new UIElementButton() );
-							button->mPosition = mUI->mRoot.mPosition + Vec2( 20.f, 20.f );
+							button->mPosition = Vec2( 20.f, 20.f );
 							button->mSize = Vec2( 20.f, 10.f );
 							button->mLabel = "Button";
 						}
 
-						if ( ImGui::Button( "Add Text" ) )
+						if ( ImGui::Selectable( "Text Box" ) )
 						{
 							UIElementText* text = (UIElementText*)mUI->mRoot.AddChild( new UIElementText() );
-							text->mPosition = mUI->mRoot.mPosition + Vec2( 20.f, 20.f );
+							text->mPosition = Vec2( 20.f, 20.f );
 							text->mSize = Vec2( 20.f, 10.f );
 							text->mLabel = "Text";
 							text->mText = "Text";
-						}
+						} 
 
+						if ( ImGui::Selectable( "Image" ) )
+						{
+							UIElementImage* image = (UIElementImage*)mUI->mRoot.AddChild( new UIElementImage() );
+							image->mPosition = Vec2( 20.f, 20.f );
+							image->mSize = Vec2( 20.f, 10.f );
+							image->mLabel = "Image"; 
+						}
+					} 
+				}
+				ImGui::ListBoxFooter(); 
+			}
+			ImGui::EndDock( ); 
+		}); 
+
+		guiContext->RegisterWindow( "UI Properties", [ & ] ()
+		{
+			if ( ImGui::BeginDock( "UI Properties" ) )
+			{
+				ImGui::ListBoxHeader( "##elem_inspector", ImVec2( ImGui::GetWindowWidth() - 20.f, ImGui::GetWindowHeight() - 15.f ) );
+				{
+					if ( mUI )
+					{ 
+						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+						igm->InspectObject( mUI.Get() ); 
+					} 
+				}
+				ImGui::ListBoxFooter();
+			} 
+			ImGui::EndDock( ); 
+		});
+
+		guiContext->RegisterWindow( "Inspector", [ & ]
+		{
+			if ( ImGui::BeginDock( "Inspector" ) )
+			{
+				ImGui::ListBoxHeader( "##elem_inspector", ImVec2( ImGui::GetWindowWidth() - 20.f, ImGui::GetWindowHeight() - 15.f ) );
+				{
+					if ( mUI )
+					{ 
 						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 						if ( mSelectedElement )
 						{
 							igm->InspectObject( mSelectedElement ); 
 						} 
 					} 
-
 				}
 				ImGui::ListBoxFooter();
-				ImGui::EndDock( );
 			}
+			ImGui::EndDock( );
+		});
+
+		guiContext->RegisterWindow( "Outliner", [ & ] ()
+		{
+			if ( ImGui::BeginDock( "Outliner" ) )
+			{
+				ImGui::ListBoxHeader( "##elem_outliner", ImVec2( ImGui::GetWindowWidth() - 20.f, ImGui::GetWindowHeight() - 15.f ) );
+				{
+					if ( mUI )
+					{ 
+						ElementOutliner( &mUI->mRoot );
+					} 
+				}
+				ImGui::ListBoxFooter();
+			}
+			ImGui::EndDock();
 		});
 
 		auto saveAssetOption = [ & ] ( )
@@ -672,14 +748,17 @@ namespace Enjon
 			ImGui::EndDock();
 	 	}; 
  
-		guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
-		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
+		//guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
+		//guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
 
 		// Register menu options
 		guiContext->RegisterMenuOption( "File", "Save##save_asset_option", saveAssetOption ); 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Canvas", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Canvas", GUIDockSlotType::Slot_Left, 0.25f ) );
-		guiContext->SetActiveDock( "Canvas" );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "Canvas", GUIDockSlotType::Slot_Left, 0.25f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "UI Properties", "Inspector", GUIDockSlotType::Slot_Tab, 0.5f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "UI Palette", "Canvas", GUIDockSlotType::Slot_Right, 0.2f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Outliner", "UI Palette", GUIDockSlotType::Slot_Top, 0.6f ) );
+		guiContext->SetActiveDock( "Inspector" );
 		guiContext->Finalize( ); 
 	}
 
@@ -712,7 +791,10 @@ namespace Enjon
 			SetViewport( GetViewport() );
 			mInitialized = true;
 			mWorld->GetContext< GraphicsSubsystemContext >()->GetFrameBuffer()->SetClearColor( ColorRGBA32( 1.f, 1.f, 1.f, 0.f ) );
-		}
+		} 
+
+		GUIContext* gCtx = GetGUIContext();
+		gCtx->SetUIStyleConfig( mUI->mStyleConfig );
 	}
 
 	//================================================================================= 
@@ -731,13 +813,15 @@ namespace Enjon
 
 			if ( mUI )
 			{
+				mUI->mRoot.mPosition = Vec2( -5000.f, -5000.f );
+				mUI->mRoot.mSize = Vec2( 10000.f, 10000.f );
 				mUI->OnUI();
 			} 
 		}); 
 
 		auto saveAssetOption = [ & ] ( )
 		{
-			if ( ImGui::MenuItem( "Save##save_asset_option", NULL ) )
+			if ( ImGui::MenuItem( "Save##save_asset_option", NULL ) ) 
 			{
 			}
 		}; 

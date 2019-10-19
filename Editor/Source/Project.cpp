@@ -137,7 +137,7 @@ namespace Enjon
 
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// Run the bat file to build and run the solution
-		s32 code = system( String( "call " + buildDir + "Intermediate/" + "Build.bat" + " " + mProjectName + " " + buildDir + "Intermediate/" ).c_str() ); 
+		s32 code = system( String( "call \"" + buildDir + "Intermediate/" + "Build.bat" + "\" " + mProjectName + " \"" + buildDir + "Intermediate/\"" ).c_str() ); 
 
 		// Copy the executable to the main project build directory
 		if ( fs::exists( buildDir + "Intermediate/Release/" + mProjectName + ".exe" ) )
@@ -251,7 +251,7 @@ namespace Enjon
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// Start the projection solution
-		s32 code = system( String( "call " + projectDir + "Proc/" + "BuildAndRun.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
+		s32 code = system( String( "call \"" + projectDir + "Proc/" + "BuildAndRun.bat\"" + " \"" + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + "\" " + projectName ).c_str() ); 
 		if ( code == 0 )
 		{ 
 			return true; 
@@ -338,7 +338,7 @@ namespace Enjon
 		// Now call BuildAndRun.bat
 #ifdef ENJON_SYSTEM_WINDOWS 
 		// Start the projection solution
-		s32 code = system( String( "call " + projectDir + "Proc/" + "BuildAndRun.bat" + " " + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + " " + projectName ).c_str() ); 
+		s32 code = system( String( "call \"" + projectDir + "Proc/" + "BuildAndRun.bat\"" + " \"" + Enjon::Utils::FindReplaceAll( projectDir, "/", "\\" ) + "\" " + projectName ).c_str() ); 
 		if ( code == 0 )
 		{ 
 			return true; 
@@ -407,7 +407,9 @@ namespace Enjon
 		String configTypeStr = configType == ConfigurationType::Debug ? "Debug" : "Release"; 
 		String path = Utils::FindReplaceAll( mProjectPath + "Proc\\\\CompileProject_" + configTypeStr + ".bat", "/", "\\\\" ).c_str(); 
 		String args = const_cast<LPSTR>( ( mProjectPath + " " + mProjectName + " " + configTypeStr ).c_str( ) ); 
-		String cmdLineStr = ( "cmd.exe /c " + path + " " + args ); 
+		String cmdLineStr = ( "cmd.exe /c \"" + path + "\" \"" + args + "\"" ); 
+
+		s32 code = system( String( "call \"" + mProjectPath + "Proc/" + "CompileProject_" + configTypeStr + ".bat\"" + " \"" + Enjon::Utils::FindReplaceAll( mProjectPath, "/", "\\" ) + "\" " + mProjectName ).c_str() ); 
 
 		char* cmdLineStrBuffer = new char[ cmdLineStr.size( ) + 1 ];
 		strncpy( cmdLineStrBuffer, cmdLineStr.c_str( ), cmdLineStr.size( ) ); 

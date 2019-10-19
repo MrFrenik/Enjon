@@ -1,6 +1,14 @@
 #include "GUI/UIAsset.h"
 #include "Serialize/ObjectArchiver.h"
 #include "ImGui/imgui.h"
+#include "Engine.h"
+#include "Subsystem.h"
+#include "SubsystemCatalog.h"
+#include "ImGui/ImGuiManager.h"
+#include "Engine.h"
+#include "Subsystem.h"
+#include "SubsystemCatalog.h"
+#include "Asset/AssetManager.h"
 
 namespace Enjon
 { 
@@ -9,7 +17,8 @@ namespace Enjon
 	Result UI::SerializeData( ByteBuffer* buffer ) const
 	{ 
 		// Write out root canvas to buffer
-		return ObjectArchiver::Serialize( &mRoot, buffer ); 
+		ObjectArchiver::Serialize( &mRoot, buffer ); 
+		return Result::INCOMPLETE;
 	}
 
 	//=================================================================================
@@ -17,7 +26,8 @@ namespace Enjon
 	Result UI::DeserializeData( ByteBuffer* buffer )
 	{ 
 		// Read in canvas from buffer
-		return ObjectArchiver::Deserialize( buffer, &mRoot );
+		ObjectArchiver::Deserialize( buffer, &mRoot );
+		return Result::INCOMPLETE;
 	} 
 
 	//=================================================================================
@@ -76,6 +86,17 @@ namespace Enjon
 
 	//=================================================================================
 
+	void UIElementImage::OnUI()
+	{
+		ImGui::SetCursorScreenPos( ImVec2( mPosition.x, mPosition.y ) );
+		ImGui::PushID( ( usize )( intptr_t )this );
+		ImTextureID img = mImage ? (ImTextureID )Int2VoidP( mImage->GetTextureId() ) : (ImTextureID)EngineSubsystem( AssetManager )->GetDefaultAsset< Texture >()->GetTextureId(); 
+		ImGui::Image( img, ImVec2( mSize.x, mSize.y ) );
+		ImGui::PopID();
+	}
+
+	//=================================================================================
+
 	void UIElementCanvas::OnUI()
 	{
 		ImGui::SetNextWindowPos( ImVec2( mPosition.x, mPosition.y ) );
@@ -114,6 +135,21 @@ namespace Enjon
 		// Swap and pop? Not safe to do this operation during a GUI call
 		std::remove( mChildren.begin(), mChildren.end(), element );
 		return element;
+	}
+
+	//=================================================================================
+
+	Result UI::OnEditorUI()
+	{
+		// Show the asset handle property
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		const MetaProperty* prop = Class()->GetPropertyByName( ENJON_TO_STRING( mStyleConfig ) );
+		if ( prop )
+		{
+			igm->DebugDumpProperty( this, prop );
+		}
+
+		return Result::SUCCESS;
 	}
 
 	//=================================================================================
