@@ -5,6 +5,8 @@
 #include "System/Types.h"
 #include "Math/Maths.h"
 #include "Asset/Asset.h"
+#include "Graphics/Texture.h"
+#include "Asset/UIStyleConfigAssetLoader.h"
 
 namespace Enjon
 { 
@@ -46,7 +48,7 @@ namespace Enjon
 			UIElement* RemoveChild( UIElement* element );
 		
 
-			ENJON_PROPERTY()
+			ENJON_PROPERTY( HideInEditor )
 			String mLabel = "";
 
 			ENJON_PROPERTY()
@@ -123,6 +125,23 @@ namespace Enjon
 	 };
 
 	ENJON_CLASS( Construct )
+	class UIElementImage : public UIElement
+	{
+		ENJON_CLASS_BODY( UIElementImage )
+
+		public:
+
+			virtual void OnUI() override;
+
+		public:
+
+			ENJON_PROPERTY()
+			AssetHandle< Texture > mImage;
+			
+			UICallback mOnSetImage;
+	};
+
+	ENJON_CLASS( Construct )
 	class UIElementCanvas : public UIElement
 	{
 		ENJON_CLASS_BODY( UIElementCanvas )
@@ -154,6 +173,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			virtual Result OnEditorUI() override;
+
+			/*
+			* @brief
+			*/
 			void OnUI() const;
 
 			/*
@@ -164,8 +188,11 @@ namespace Enjon
 		public: 
 
 			// Will handle all serialization of ui manually
-			ENJON_PROPERTY( NonSerializeable )
+			ENJON_PROPERTY( NonSerializeable, HideInEditor ) 
 			UIElementCanvas mRoot; 
+
+			ENJON_PROPERTY( HideInEditor )
+			AssetHandle< UIStyleConfig > mStyleConfig;
 	}; 
 }
 

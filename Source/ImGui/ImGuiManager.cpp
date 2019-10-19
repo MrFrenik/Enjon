@@ -90,8 +90,8 @@ namespace Enjon
 			if ( ImGui::BeginDock( dockName.c_str(), nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoResize ) )
 			{
 				windowFunc();
+				ImGui::EndDock( ); 
 			}
-			ImGui::EndDock( ); 
 		};
 
 		RegisterWindow( dockName, dockFunc );
@@ -144,6 +144,13 @@ namespace Enjon
 	{
 		mParams = params;
 	} 
+
+	//===================================================================================================
+
+	void GUIContext::SetUIStyleConfig( const AssetHandle< UIStyleConfig >& style )
+	{
+		mParams.mUIStyle = style;
+	}
 
 	//===================================================================================================
 
@@ -1188,7 +1195,7 @@ namespace Enjon
 						}
 						if ( val )
 						{
-							ImGuiManager::DebugDumpObject( val.Get( ) );
+							//ImGuiManager::DebugDumpObject( val.Get( ) );
 						}
 					}
 				}
