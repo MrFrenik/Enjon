@@ -12,6 +12,8 @@
 #include <Graphics/Camera.h>
 #include <Graphics/RenderPass.h>
 
+#include <Utils/Property.h>
+
 namespace Enjon
 {
 	class FrameBuffer;
@@ -100,8 +102,8 @@ namespace Enjon
 			AssetHandle< UI > mUI;
 			b32 mInitialized = false;
 			b32 mCanvasInitialized = false;
-
-			Vec2 mViewportSize = Vec2( 16.f * 70.f, 9.f * 70.f );
+ 
+			Vec2 mViewportSize = Vec2( 16.f * 70.f, 9.f * 70.f ); 
 	};
 }
 

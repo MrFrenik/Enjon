@@ -1118,6 +1118,8 @@ namespace Enjon
 			// // 	// }
 			// } 
 
+			void SetValue( Object* objA, const MetaProperty* propA, const Object* objB, const MetaProperty* propB );
+
 			/** 
 			* @brief
 			*/
@@ -1817,7 +1819,7 @@ namespace Enjon
 				m( );
 			}
 		}
-	} 
+	}
 
 	// MetaClass::~MetaClass( )
 	// {

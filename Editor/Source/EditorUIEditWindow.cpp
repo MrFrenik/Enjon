@@ -10,6 +10,8 @@
 #include <Utils/FileUtils.h>
 #include <IO/InputManager.h>
 
+#include <Utils/Property.h>
+
 namespace Enjon
 { 
 
@@ -549,8 +551,9 @@ namespace Enjon
 					bool win_hov = ImGui::IsMouseHoveringWindow(); 
 					
 					ImVec2 delta = HandleMousePan(); 
-					mCamera.SetPosition( mCamera.GetPosition() - Vec3( delta.x, delta.y, 0.f ) );
-
+					
+					// Move camera
+					mCamera.SetPosition( mCamera.GetPosition() - Vec3( delta.x, delta.y, 0.f ) ); 
 					if ( win_hov && input->GetMouseWheel().y )
 					{
 						Vec3 to = Vec3( ImGui::GetMousePos().x, ImGui::GetMousePos().y, 0.f );
@@ -589,7 +592,6 @@ namespace Enjon
 			if ( w->Class()->InstanceOf< EditorUICanvasWindow >() )
 			{ 
 				ws->DestroyWindow( w->GetWindowID() );
-				ws->ForceCleanupWindows();
 			}
 		}
 	}
@@ -621,6 +623,15 @@ namespace Enjon
 		guiContext->RegisterMainMenu( "File" ); 
 
 		World* world = GetWorld( ); 
+
+		//// If I could create a signal/slot/property system via the UI subsystem...
+		//mProperty = new Property< Vec2& >( mUI->mRoot.mPosition );
+		////mProperty = new Property< Vec2& >( mUI->mRoot.mPosition );
+		//auto func = ( [ & ] ( Vec2& v ) 
+		//{ 
+		//	printf( "This seems to have workd!\n" );
+		//});
+		//mProperty->OnChange().Connect( func ); 
 
 		guiContext->RegisterWindow( "Canvas", [ & ] 
 		{
@@ -680,6 +691,7 @@ namespace Enjon
 					{ 
 						ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 						igm->InspectObject( mUI.Get() ); 
+						igm->InspectObject( &mUI->mRoot );
 					} 
 				}
 				ImGui::ListBoxFooter();
@@ -794,10 +806,21 @@ namespace Enjon
 		} 
 
 		GUIContext* gCtx = GetGUIContext();
-		gCtx->SetUIStyleConfig( mUI->mStyleConfig );
+		gCtx->SetUIStyleConfig( mUI->mStyleConfig ); 
 	}
 
 	//================================================================================= 
+
+#define CALL_FUNC( v, ... )\
+	(v)( __VA_ARGS__ )
+
+class Test
+{
+	public:
+		static inline void DoThing( ) { 
+			printf( "Did thing!\n" );
+		}
+};
 
 	void EditorUICanvasWindow::ConstructScene()
 	{
@@ -808,13 +831,12 @@ namespace Enjon
 
 		World* world = GetWorld( ); 
 
+
 		// Do need to set up rendering pipelines. This isn't going to do what I want.
-		guiContext->RegisterWindow( "Canvas", [ & ] () {
+		guiContext->RegisterWindow( "Canvas", [ & ] () { 
 
 			if ( mUI )
 			{
-				mUI->mRoot.mPosition = Vec2( -5000.f, -5000.f );
-				mUI->mRoot.mSize = Vec2( 10000.f, 10000.f );
 				mUI->OnUI();
 			} 
 		}); 
@@ -837,4 +859,142 @@ namespace Enjon
 	}
 
 	//================================================================================= 
-}
+} 
+
+/*
+	// Want a way to handle these concepts: 
+		- Event binding
+		- Property binding (two way, if possible)		- Need to assign specific objects to this, if this will occur. COuld do this via a UUID registration system, yet that would require EVERY serialized object to have a 16-byte UUID associated with it.
+
+		Application setup: 
+
+		Result MyApp::Initializion()
+		{
+			// Cloning instance of ui from asset manager
+			AssetHandle< UI > ui = EngineSubsystem( AssetManager )->GetAsset< UI >( "myUI" ); 
+			UI* uiInstance = ui->MakeInstance();	
+			
+			// Binding various functionality to specific
+			uiInstance->BindEventCallback< UIElementButton, OnClickEvent >( "#specific_button_id", function );
+			uiInstance->BindProperty( UIElementButton >( "#specific_button_id", mText, this, mProperty ); 
+		}
+
+		UI::BindEventCallback( uiInstance, OnClickEvent, "#specific_button_id", function );
+		UI::BindProperty( uiInstance, "#specific_button_id", mText, this, mProperty );
+
+		template < typename T >
+		void UI::BindProperty( const String& id, const String& ePropName, const Object* obj, const String& oPropName )
+		{
+			// Iterate through tree
+			UITreeIterator* iter = &mRoot;
+			for ( auto& e : IterateTree( iter ) )
+			{ 
+				if ( e->mID.IsEqualTo( id ) )
+				{
+					const MetaClass* eCls = e->Class();
+					const MetaClass* oCls = obj->Class();
+
+					const MetaProperty* eProp = eCls->GetPropertyByName( ePropName );
+					const MetaProperty* oProp = oCls->GetPropertyByName( oPropName );
+
+					if ( eProp && oProp && eProp->GetType() == oProp->GetType() )
+					{
+						// Register signal and property in event manager to deal with this mess? Not sure how to handle this...
+						// How to detect changes? Don't want to poll for this, of course...
+						EventManager::BindProperties( eProp, e, oProp, o );
+					} 
+				}
+			} 
+
+			// The issue here is that object pointers are subject to change...and the event manager MUST unregister properties whenever the meta registry is changed
+			void EventManager::SetUpBinding( const MetaProperty* propA, const Object* objA, const MetaProperty* propB, const Object* objB )
+			{ 
+				// One way binding
+				auto bind_func = [&]() { 
+					MetaClass::SetValue( objA, propA, objB, propB );
+				};
+
+				// Push this into a property binding? 
+
+				// Unique key? 
+			} 
+
+			// Have to make sure that the two are the same property type? 
+			// What happens when an object is deleted?
+		}
+
+		void UIElementButton::OnUI()
+		{
+			// Do stuff
+			if ( ImGui::Button( ConstChar( mText ) ) )
+			{ 
+				// 
+				EventManager::FireEvent( OnClickEvent
+			}
+		}
+
+		void UIElementText::OnUI()
+		{
+			// Set up ...
+			ImGui::Text( "%s", mText.c_str() );				--> Want a succinct, clean way to safely bind this property to some other object's property
+		} 
+
+		// Run this subsystem every frame and pump events out? 
+		EventManager
+		{
+			void Update()
+			{
+				// Run through all bindings and update them? God, that sounds fucking awful...
+				for ( auto& b : mBindings )
+				{
+					b();
+				}
+			}
+		};
+
+		// Something that can bind something with some stuff and things
+		class Event : public Object
+		{ 
+		};
+
+		// Yeah, but just changing values directly will not work...
+
+		// Binding properties sets up a few things - 
+			- The event manager must be notified to link the two data sources together via introspected object instances and their properties
+			- The direction of the binding must be established ( one way or two way binding )
+			- Events must be polled for changes to either data source
+				- Pump out events to listeners on change whenever found - Can this be done automatically, however? I don't believe so...
+
+			- There is such a TIGHT coupling between specific objects. This makes me very uncomfortable. It's an incredibly brittle system. 
+			- Would need a way to easily and automatically remove bindings upon either object being deleted or changing location in memory
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

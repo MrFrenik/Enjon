@@ -411,6 +411,7 @@ namespace Enjon
 
 		s32 code = system( String( "call \"" + mProjectPath + "Proc/" + "CompileProject_" + configTypeStr + ".bat\"" + " \"" + Enjon::Utils::FindReplaceAll( mProjectPath, "/", "\\" ) + "\" " + mProjectName ).c_str() ); 
 
+		/*
 		char* cmdLineStrBuffer = new char[ cmdLineStr.size( ) + 1 ];
 		strncpy( cmdLineStrBuffer, cmdLineStr.c_str( ), cmdLineStr.size( ) ); 
 		cmdLineStrBuffer[ cmdLineStr.size( ) ] = '\0'; 
@@ -442,6 +443,7 @@ namespace Enjon
 		CloseHandle( pi.hThread );
 
 		delete cmdLineStrBuffer;
+		*/
 #endif
 		
 		return Result::SUCCESS; 

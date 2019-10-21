@@ -436,7 +436,7 @@ namespace Enjon
 
 			void SetContextByWindow( Window* window ); 
 
-			void LoadStyle( const AssetHandle< UIStyleConfig >& config, GUIContext* ctx );
+			void LoadStyle( const AssetHandle< UIStyleConfig >& config, GUIContext* ctx = nullptr );
 
 			void AddFont( const String& filePath, const u32& size, GUIContext* ctx, const char* fontName );
 

@@ -137,7 +137,14 @@ namespace Enjon
 
 			ENJON_PROPERTY()
 			AssetHandle< Texture > mImage;
+
+			ENJON_PROPERTY( )
+			Vec2 mUV0 = Vec2( 0.0f, 0.f );
+
+			ENJON_PROPERTY( )
+			Vec2 mUV1 = Vec2( 1.0f, 1.f );
 			
+			// Want to make these events that can be registered
 			UICallback mOnSetImage;
 	};
 

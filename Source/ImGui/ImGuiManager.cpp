@@ -1504,7 +1504,11 @@ namespace Enjon
 		// Cannot rebuild the texture DURING a frame, therefore it will be deferred to the next. Damn. 
 		// Load a style for a particular context
 		ImGuiContext* prevContext = ImGui::GetCurrentContext(); 
-		ImGui::SetCurrentContext( ctx->GetContext() );
+		if ( ctx ) {
+			ImGui::SetCurrentContext( ctx->GetContext( ) );
+		}
+
+		// Set styles
 		{	
 			// Grab reference to style
 			ImGuiStyle& style = ImGui::GetStyle(); 

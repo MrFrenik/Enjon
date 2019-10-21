@@ -34,6 +34,9 @@ namespace Enjon
 	
 	void UI::OnUI() const
 	{
+		// Load ui style, if possible
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		igm->LoadStyle( mStyleConfig );
 		const_cast< UI* >( this )->mRoot.OnUI();
 	}
 
@@ -62,7 +65,9 @@ namespace Enjon
 
 	void UIElementText::OnUI()
 	{
-		ImGui::SetCursorScreenPos( ImVec2( mPosition.x, mPosition.y ) );
+		//ImGui::SetCursorScreenPos( ImVec2( mPosition.x, mPosition.y ) );
+		ImVec2 cp = ImGui::GetCursorPos( );
+		ImGui::SetCursorPos( ImVec2( cp.x + mPosition.x, cp.y + mPosition.y ) );
 		ImGui::PushID( (usize)(intptr_t)this );
 		{
 			mOnSetText( this );
@@ -75,7 +80,8 @@ namespace Enjon
 
 	void UIElementButton::OnUI()
 	{ 
-		ImGui::SetCursorScreenPos( ImVec2( mPosition.x, mPosition.y ) );
+		ImVec2 cp = ImGui::GetCursorPos( );
+		ImGui::SetCursorPos( ImVec2( cp.x + mPosition.x, cp.y + mPosition.y ) );
 		ImGui::PushID( (usize )(intptr_t )this );
 		if ( ImGui::Button( mLabel.c_str(), ImVec2( mSize.x, mSize.y ) ) )
 		{
@@ -88,10 +94,11 @@ namespace Enjon
 
 	void UIElementImage::OnUI()
 	{
-		ImGui::SetCursorScreenPos( ImVec2( mPosition.x, mPosition.y ) );
+		ImVec2 cp = ImGui::GetCursorPos( );
+		ImGui::SetCursorPos( ImVec2( cp.x + mPosition.x, cp.y + mPosition.y ) );
 		ImGui::PushID( ( usize )( intptr_t )this );
-		ImTextureID img = mImage ? (ImTextureID )Int2VoidP( mImage->GetTextureId() ) : (ImTextureID)EngineSubsystem( AssetManager )->GetDefaultAsset< Texture >()->GetTextureId(); 
-		ImGui::Image( img, ImVec2( mSize.x, mSize.y ) );
+		ImTextureID img = mImage ? ( ImTextureID )Int2VoidP( mImage->GetTextureId( ) ) : ( ImTextureID )Int2VoidP( EngineSubsystem( AssetManager )->GetDefaultAsset< Texture >( )->GetTextureId( ) );
+		ImGui::Image( img, ImVec2( mSize.x, mSize.y ), ImVec2( mUV0.x, mUV0.y ), ImVec2( mUV1.x, mUV1.y ) );
 		ImGui::PopID();
 	}
 
