@@ -748,6 +748,8 @@ namespace Enjon
 
 			virtual usize GetSizeInBytes( const Object* object ) const = 0;
 
+			const MetaClass* GetValueMetaClass() const;
+
 			~MetaPropertyHashMapBase( )
 			{ 
 				delete mKeyProperty;
@@ -761,6 +763,7 @@ namespace Enjon
 			MetaProperty* mValueProperty = nullptr;
 			MetaPropertyType mKeyType;
 			MetaPropertyType mValueType;
+			String mValueMetaClassName = "Invalid";
 	}; 
 
 	template <typename K, typename V>
@@ -771,7 +774,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			MetaPropertyHashMap( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, MetaPropertyType keyType, MetaPropertyType valType, MetaProperty* keyProp, MetaProperty* valProp )
+			MetaPropertyHashMap( MetaPropertyType type, const std::string& name, u32 offset, u32 propIndex, MetaPropertyTraits traits, MetaPropertyType keyType, MetaPropertyType valType, MetaProperty* keyProp, MetaProperty* valProp, const std::string& valueMetaClsName )
 			{ 
 				// Default meta property member variables
 				mType = type;
@@ -783,6 +786,7 @@ namespace Enjon
 				mValueProperty = valProp;
 				mKeyType = keyType;
 				mValueType = valType;
+				mValueMetaClassName = valueMetaClsName;
 			}
 
 			/*
@@ -843,6 +847,12 @@ namespace Enjon
 			{
 				HashMap< K, V >* rawMap = GetRaw( object );
 				return rawMap->begin( );
+			}
+
+			bool KeyExists( const Object* object, const K& key ) const
+			{ 
+				HashMap< K, V >* rawMap = GetRaw( object );
+				return ( rawMap->find( key ) != rawMap->end() );
 			}
 
 			/*

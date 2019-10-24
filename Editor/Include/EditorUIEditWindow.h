@@ -14,6 +14,9 @@
 
 #include <Utils/Property.h>
 
+// Quick test for this yoga shit
+#include <yoga/Yoga.h>
+
 namespace Enjon
 {
 	class FrameBuffer;
@@ -58,6 +61,8 @@ namespace Enjon
 		private:
 			b32 mInitialized = false;
 			AssetHandle< UI > mUI;
+ 
+			YGNodeRef mRootNode = nullptr;
 	};
 
 	ENJON_CLASS( Construct )

@@ -121,6 +121,42 @@ namespace Enjon
 
 	void EditorUIEditWindow::Update()
 	{ 
+		Input* input = EngineSubsystem( Input );
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+
+		for ( auto& wi : ws->GetWindows() )
+		{
+			if ( wi->Class()->InstanceOf< EditorUICanvasWindow >() )
+			{
+				f32 w = wi->GetScreenWidth();
+				f32 h = wi->GetScreenHeight();
+
+				bool refreshSize = false;
+				if ( input->IsKeyPressed( KeyCode::Up ) ) {
+					h += 10.f;
+					refreshSize = true;
+				}
+				if ( input->IsKeyPressed( KeyCode::Down ) ) {
+					h -= 10.f;
+					refreshSize = true;
+				}
+				if ( input->IsKeyPressed( KeyCode::Left ) ) {
+					w -= 10.f;
+					refreshSize = true;
+				}
+				if ( input->IsKeyPressed( KeyCode::Right ) ) {
+					w += 10.f;
+					refreshSize = true;
+				} 
+
+				if ( refreshSize ) {
+					printf( "Size: <%.2f, %.2f>\n", w, h ); 
+					wi->SetSize( iVec2( w, h ) );
+				}
+				break;
+			}
+		}
+
 	}
 
 	//=================================================================================
@@ -244,8 +280,8 @@ namespace Enjon
 
 	Vec4 TransformElement( UIElement* element, Camera* camera )
 	{ 
-		Vec2 ea = element->mPosition;
-		Vec2 eb = element->mPosition + element->mSize; 
+		Vec2 ea = element->GetCalculatedLayoutPosition();
+		Vec2 eb = element->GetCalculatedLayoutPosition() + element->GetCalculatedLayoutSize(); 
 
 		Vec3 ra = camera->TransformPoint( Vec3( ea.x, ea.y / camera->GetAspectRatio(), 0.f ) );
 		Vec3 rb = camera->TransformPoint( Vec3( eb.x, eb.y / camera->GetAspectRatio() , 0.f ) ); 
@@ -305,7 +341,7 @@ namespace Enjon
 		if ( (fp2.x - fp.x) > 1.f && ((fp2.y - fp.y) * camera.GetAspectRatio()) > 1.f )\
 		{\
 			element->mPosition = Vec2( fp.x, fp.y * camera.GetAspectRatio() );\
-			element->mSize = Vec2( (fp2.x - fp.x), (fp2.y - fp.y) * camera.GetAspectRatio() );\
+			element->SetSize( Vec2( (fp2.x - fp.x), (fp2.y - fp.y) * camera.GetAspectRatio() ) );\
 		}\
 		usedHandle = true;\
 	} while ( 0 )
@@ -321,10 +357,10 @@ namespace Enjon
 		static bool usingHandle = false;
 
 		// Do root canvas
-		Vec2 pos = element->mPosition;
+		Vec2 pos = element->GetCalculatedLayoutPosition();
 
-		Vec2 ea = element->mPosition;
-		Vec2 eb = element->mPosition + element->mSize; 
+		Vec2 ea = element->GetCalculatedLayoutPosition();
+		Vec2 eb = element->GetCalculatedLayoutPosition() + element->GetCalculatedLayoutSize(); 
 
 		Vec4 tdims = TransformElement( element, &mCamera );
 		ImVec2 a = ImVec2( tdims.x, tdims.y );
@@ -547,6 +583,7 @@ namespace Enjon
 					u32 sh = w->GetScreenHeight();
 					GraphicsSubsystemContext* ctx = w->GetWorld()->GetContext< GraphicsSubsystemContext >(); 
 					mCamera.SetAspectRatio( (f32 )sh / (f32 )sw ); 
+					//mCamera.SetAspectRatio( 1.f); 
 
 					bool win_hov = ImGui::IsMouseHoveringWindow(); 
 					
@@ -566,6 +603,8 @@ namespace Enjon
 					// Viewport dimensions transformed to camera space
 					ImVec2 va = Vec2ToImVec2( mCamera.TransformPoint( Vec3( 0.f, 0.f, 0.f ) ) );
 					ImVec2 vb = Vec2ToImVec2( mCamera.TransformPoint( Vec3( sw, sh ) ) ) ;
+
+					printf( "VA: <%.2f, %.2f>, VB: <%.2f, %.2f>\n", va.x, va.y, vb.x, vb.y );
 
 					// Add border around viewport to denote where it be
 					AddDashedLineRect( va, vb, ImColor( 1.f, 1.f, 1.f, 0.5f ) );
@@ -600,7 +639,7 @@ namespace Enjon
 
 	void EditorUIEditWindow::ElementOutliner( UIElement* element )
 	{ 
-		Utils::TempBuffer str = Utils::TransientBuffer( "%s##%zu", element->mLabel.c_str(), (u32)(usize)element );
+		Utils::TempBuffer str = Utils::TransientBuffer( "%s##%zu", element->mID.c_str(), (u32)(usize)element );
 		if ( ImGui::Selectable( str.buffer, ( element == mSelectedElement ) ) )
 		{
 			DeselectElement();
@@ -615,6 +654,24 @@ namespace Enjon
 
 	//=================================================================================
 
+	void DoYoga( YGNodeRef node )
+	{ 
+		ImDrawList* dl = ImGui::GetWindowDrawList();
+
+		// Display self? 
+		f32 l  = YGNodeLayoutGetLeft( node );
+		f32 t  = YGNodeLayoutGetTop( node );
+		f32 r  = YGNodeLayoutGetLeft( node ) + YGNodeLayoutGetWidth( node );
+		f32 b  = YGNodeLayoutGetTop( node ) + YGNodeLayoutGetHeight( node );
+
+		dl->AddRect( ImVec2( l, t ), ImVec2( r, b ), ImColor( 1.f, 1.f, 1.f, 1.f ) );
+		
+		for ( u32 i = 0; i < YGNodeGetChildCount( node ); ++i )
+		{ 
+			DoYoga( YGNodeGetChild( node, i ) );
+		}
+	}
+
 	void EditorUIEditWindow::ConstructScene()
 	{ 
 		GUIContext* guiContext = GetGUIContext( ); 
@@ -624,16 +681,7 @@ namespace Enjon
 
 		World* world = GetWorld( ); 
 
-		//// If I could create a signal/slot/property system via the UI subsystem...
-		//mProperty = new Property< Vec2& >( mUI->mRoot.mPosition );
-		////mProperty = new Property< Vec2& >( mUI->mRoot.mPosition );
-		//auto func = ( [ & ] ( Vec2& v ) 
-		//{ 
-		//	printf( "This seems to have workd!\n" );
-		//});
-		//mProperty->OnChange().Connect( func ); 
-
-		guiContext->RegisterWindow( "Canvas", [ & ] 
+			guiContext->RegisterWindow( "Canvas", [ & ] 
 		{
 			if ( ImGui::BeginDock( "Canvas" ) )
 			{ 
@@ -650,20 +698,20 @@ namespace Enjon
 				{
 					if ( mUI )
 					{ 
-						if ( ImGui::Selectable( "Text Button" ) )
+						if ( ImGui::Selectable( "Button" ) )
 						{
 							UIElementButton* button = (UIElementButton*)mUI->mRoot.AddChild( new UIElementButton() );
 							button->mPosition = Vec2( 20.f, 20.f );
-							button->mSize = Vec2( 20.f, 10.f );
-							button->mLabel = "Button";
+							button->SetSize( Vec2( 20.f, 10.f ) );
+							button->mID = "Button";
 						}
 
 						if ( ImGui::Selectable( "Text Box" ) )
 						{
 							UIElementText* text = (UIElementText*)mUI->mRoot.AddChild( new UIElementText() );
 							text->mPosition = Vec2( 20.f, 20.f );
-							text->mSize = Vec2( 20.f, 10.f );
-							text->mLabel = "Text";
+							text->SetSize( Vec2( 20.f, 10.f ) );
+							text->mID = "Text";
 							text->mText = "Text";
 						} 
 
@@ -671,8 +719,8 @@ namespace Enjon
 						{
 							UIElementImage* image = (UIElementImage*)mUI->mRoot.AddChild( new UIElementImage() );
 							image->mPosition = Vec2( 20.f, 20.f );
-							image->mSize = Vec2( 20.f, 10.f );
-							image->mLabel = "Image"; 
+							image->SetSize( Vec2( 20.f, 10.f ) );
+							image->mID = "Image"; 
 						}
 					} 
 				}
@@ -711,6 +759,13 @@ namespace Enjon
 						if ( mSelectedElement )
 						{
 							igm->InspectObject( mSelectedElement ); 
+
+							// Show inline styles
+							Utils::TempBuffer tmp = Utils::TransientBuffer( "Inline Styles##%d", (usize)(intptr_t)mSelectedElement );
+							if ( ImGui::CollapsingHeader( tmp.buffer ) )
+							{ 
+								igm->InspectObject( &mSelectedElement->mInlineStyles );
+							}
 						} 
 					} 
 				}
@@ -831,27 +886,69 @@ class Test
 
 		World* world = GetWorld( ); 
 
+		// Construct Yoga tree based on the ui tree structure (kinda redundant, but it is what it is right now)
+		//YGConfigRef config = YGConfigNew();
+		////mRootNode = YGNodeNewWithConfig(config);
+		//
+		//mRootNode = YGNodeNew();
+		//YGNodeStyleSetFlexDirection( mRootNode, YGFlexDirectionRow );
+		//YGNodeStyleSetPadding( mRootNode, YGEdgeAll, 0 );
+		//YGNodeStyleSetMargin( mRootNode, YGEdgeAll, 0 ); 
+
+		//YGNodeRef image = YGNodeNew();
+		//YGNodeStyleSetWidth( image, 80 );
+		//YGNodeStyleSetHeight( image, 80 );
+		//YGNodeStyleSetAlignSelf( image, YGAlignCenter );
+		//YGNodeStyleSetMargin( image, YGEdgeAll, 20 );
+		////YGNodeStyleSetPositionType( image, YGPositionTypeAbsolute );
+		////YGNodeStyleSetPosition( image, YGEdgeLeft, 100.f );
+
+		//YGNodeRef text = YGNodeNew();
+		//YGNodeStyleSetHeight( text, 25 );
+		////YGNodeStyleSetWidth( text, 100 );
+		//YGNodeStyleSetMargin( text, YGEdgeRight, 20 );
+		//YGNodeStyleSetAlignSelf( text, YGAlignCenter );
+		//YGNodeStyleSetFlexGrow( text, 1 );		// Grow to fill content of parent container
+
+		//YGNodeInsertChild( mRootNode, image, 0 );
+		//YGNodeInsertChild( mRootNode, text, 1 ); 
+
+		//YGNodeCalculateLayout( mRootNode, 640, 360, YGDirectionLTR ); 
 
 		// Do need to set up rendering pipelines. This isn't going to do what I want.
 		guiContext->RegisterWindow( "Canvas", [ & ] () { 
 
+			f32 w = GetScreenWidth();
+			f32 h = GetScreenHeight(); 
+
+			//ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
+			//ImGui::SetNextWindowSize( ImVec2( w, h ) );
+			//ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
+			//ImGui::Begin( "##yoga_demo", nullptr,
+			//	ImGuiWindowFlags_NoTitleBar |
+			//	ImGuiWindowFlags_NoResize |
+			//	ImGuiWindowFlags_NoFocusOnAppearing |
+			//	ImGuiWindowFlags_NoNav |
+			//	ImGuiWindowFlags_NoBringToFrontOnFocus
+			//);
+			//{
+			//	YGNodeCalculateLayout( mRootNode, w, h, YGDirectionLTR ); 
+			//	DoYoga( mRootNode ); 
+			//}
+			//ImGui::End();
+			//ImGui::PopStyleColor(); 
+
 			if ( mUI )
 			{
+				mUI->mRoot.SetSize( Vec2( w, h ) );
+				mUI->CalculateLayout( w, h );
 				mUI->OnUI();
 			} 
 		}); 
 
-		auto saveAssetOption = [ & ] ( )
-		{
-			if ( ImGui::MenuItem( "Save##save_asset_option", NULL ) ) 
-			{
-			}
-		}; 
-
 		// Register menu options
 		GUIContextParams ctxParams;
 		ctxParams.mUseRootDock = false;
-		guiContext->RegisterMenuOption( "File", "Save##save_asset_option", saveAssetOption ); 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Canvas", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
 		guiContext->SetActiveDock( "Canvas" );
 		guiContext->SetGUIContextParams( ctxParams );

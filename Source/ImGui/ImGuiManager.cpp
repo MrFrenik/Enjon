@@ -512,6 +512,8 @@ namespace Enjon
 		const MetaClass* cls = object->Class( );
 		String propName = prop->GetName( );
 
+		// If you hit a "plus" button, then want to add a new element
+
 		switch ( prop->GetKeyType( ) )
 		{
 			default: break;
@@ -551,6 +553,34 @@ namespace Enjon
 
 			case MetaPropertyType::String:
 			{
+				// Add a new element into the thing...with a unique key, of course
+				if ( ImGui::Button( "+ Add New Element" ) )
+				{ 
+					switch ( prop->GetValueType() )
+					{
+						default: break;
+						case MetaPropertyType::Object:
+						{ 
+							// Construct new function should be called for the map. That's all that should happen;
+							const MetaClass* cls = prop->GetValueMetaClass();
+							if ( cls )
+							{
+								Object* obj = cls->Construct();
+								String key = "New_" + cls->GetName();
+								u32 i = 0;
+								const MetaPropertyHashMap< String, Object* >* mapProp = prop->Cast< MetaPropertyHashMap< String, Object* > >( );
+								while ( true ) {
+									if ( !mapProp->KeyExists( object, key ) ) {
+										break;
+									}
+									key = "New_" + cls->GetName() + std::to_string( i++ );
+								}
+								mapProp->SetValueAt( object, key, obj );
+							}
+						}
+					}
+				}
+
 				switch ( prop->GetValueType( ) )
 				{
 					default: break;
@@ -1125,7 +1155,8 @@ namespace Enjon
 
 				s32 enumInt = *cls->GetValueAs<s32>( object, prop ); 
 
-				if ( ImGui::BeginCombo( "##enumProps", enumProp->GetEnumName().c_str() ) )
+				Utils::TempBuffer buffer = Utils::TransientBuffer( "##%s_enum_props_%d_%s", enumProp->GetEnumName().c_str(), (usize)(intptr_t)(object), prop->GetName().c_str() );
+				if ( ImGui::BeginCombo( buffer.buffer, enumProp->GetEnumName().c_str() ) )
 				{ 
 					// For each element in the enum
 					for ( auto& e : enumProp->GetElements( ) )
@@ -1288,15 +1319,14 @@ namespace Enjon
 				} break;
 
 				case Enjon::MetaPropertyType::HashMap: 
-				{
-
+				{ 
+					// Hate the way these are displayed now. Need a better way of handling this...
 					if ( ImGui::TreeNode( Enjon::String( prop->GetName() + "##" + std::to_string( (u32)(usize)object ) ).c_str() ) )
 					{
 						const MetaPropertyHashMapBase* mapProp = prop->Cast< MetaPropertyHashMapBase >();
 						DebugDumpHashMapProperty( object, mapProp );
 						ImGui::TreePop( );
-					}
-
+					} 
 				} break;
 
 				// Object type

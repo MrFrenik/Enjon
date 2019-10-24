@@ -27,6 +27,7 @@ enum MetaPropertyEnumDefines
 	HideInEditor,
 	NonSerializeable, 
 	Description,
+	DisplayName,
 	ReadOnly
 };
 

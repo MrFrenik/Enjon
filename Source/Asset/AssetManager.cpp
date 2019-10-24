@@ -72,7 +72,8 @@ namespace Enjon
 		RegisterAssetLoader< Skeleton, SkeletonAssetLoader >( ); 
 		RegisterAssetLoader< Archetype, ArchetypeAssetLoader >( );
 		RegisterAssetLoader< UIStyleConfig, UIStyleConfigAssetLoader >();
-		RegisterAssetLoader< UI, UIAssetLoader >();
+		RegisterAssetLoader< UIStyleSheet, UIStyleSheetAssetLoader >();
+		RegisterAssetLoader< UI, UIAssetLoader >(); 
 
 		// Create file extension map
 		mFileExtensionMap[ "png" ] = GetAssetTypeId< Texture >( );

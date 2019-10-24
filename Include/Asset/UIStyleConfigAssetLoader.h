@@ -9,6 +9,7 @@
 namespace Enjon
 {
 	class UIStyleConfigAssetLoader;
+	class UIStyleSheetAssetLoader;
 
 	ENJON_CLASS( Construct )
 	class UIStyleConfig : public Asset
@@ -256,6 +257,139 @@ namespace Enjon
 			*/
 			virtual Asset* LoadResourceFromFile( const String& filePath ) override; 
 	}; 
+
+	ENJON_ENUM()
+	enum class UIElementEdge
+	{
+		YGEdgeLeft,
+		YGEdgeTop,
+		YGEdgeRight,
+		YGEdgeBottom,
+		YGEdgeStart,
+		YGEdgeEnd,
+		YGEdgeHorizontal,
+		YGEdgeVertical,
+		YGEdgeAll 
+	};
+
+	ENJON_ENUM()
+	enum class UIElementDirection
+	{
+		DirectionInherit,
+		DirectionLTR,
+		DirectionRTL 
+	};
+
+	ENJON_ENUM()
+	enum class UIElementFlexDirection
+	{
+		FlexDirectionColumn,
+		FlexDirectionColumnReverse,
+		FlexDirectionRow,
+		FlexDirectionRowReverse
+	};
+
+	ENJON_ENUM()
+	enum class UIElementJustification
+	{ 
+		JustifyFlexStart,
+		JustifyCenter,
+		JustifyFlexEnd,
+		JustifySpaceBetween,
+		JustifySpaceAround,
+		JustifySpaceEvenly
+	};
+
+	ENJON_ENUM()
+	enum class UIElementAlignment
+	{ 
+		AlignAuto,
+		AlignFlexStart,
+		AlignCenter,
+		AlignFlexEnd,
+		AlignStretch,
+		AlignBaseline,
+		AlignSpaceBetween,
+		AlignSpaceAround
+	}; 
+
+	ENJON_CLASS( Construct )
+	class UIStyleSettings : public Object
+	{ 
+		ENJON_CLASS_BODY( UIStyleSettings )
+
+		public: 
+
+			ENJON_PROPERTY()
+			UIElementFlexDirection mFlexDirection = UIElementFlexDirection::FlexDirectionColumn;
+			
+			ENJON_PROPERTY()
+			UIElementJustification mJustification = UIElementJustification::JustifyFlexStart;
+
+			ENJON_PROPERTY()
+			UIElementAlignment mAlignContent = UIElementAlignment::AlignAuto;
+
+			ENJON_PROPERTY()
+			UIElementAlignment mAlignSelf = UIElementAlignment::AlignAuto;
+
+			ENJON_PROPERTY()
+			UIElementAlignment mAlignItems = UIElementAlignment::AlignAuto;
+
+			ENJON_PROPERTY()
+			UIElementDirection mDirection = UIElementDirection::DirectionInherit;
+
+			ENJON_PROPERTY( UIMin = 0.f, UIMax = 1.f )
+			f32 mFlexGrow = 0.f;
+
+			ENJON_PROPERTY( UIMin = 0.f, UIMax = 1.f )
+			f32 mFlexShrink = 0.f;
+	};
+
+	ENJON_CLASS( Construct )
+	class UIStyleSheet : public Asset
+	{ 
+		ENJON_CLASS_BODY( UIStyleSheet )
+
+		friend UIStyleSheetAssetLoader;
+
+		UIStyleSettings* GetStyleSettingRef( const String& str ) 
+		{
+			if ( mStyleSettings.find( str ) != mStyleSettings.end() ) {
+					return mStyleSettings[str];
+			}
+
+			return nullptr;
+		}
+
+		public: 
+			ENJON_PROPERTY()
+			HashMap< String, UIStyleSettings* > mStyleSettings;
+	}; 
+
+	ENJON_CLASS( Construct )
+	class UIStyleSheetAssetLoader : public AssetLoader
+	{
+		ENJON_CLASS_BODY( UIStyleSheetAssetLoader );
+
+		public: 
+
+			/**
+			* @brief
+			*/
+			virtual String GetAssetFileExtension( ) const override;
+			
+		protected:
+			/**
+			* @brief
+			*/
+			virtual void RegisterDefaultAsset( ) override; 
+
+		private: 
+			/**
+			* @brief
+			*/
+			virtual Asset* LoadResourceFromFile( const String& filePath ) override; 
+	};
 
 }
 

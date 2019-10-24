@@ -134,9 +134,10 @@ namespace Enjon
 			* @brief
 			*/
 			static Result RevertProperty( Object* object, MetaProperty* prop );
-			
-		protected:
 
+			// NOTE( John ): NOT RECOMMENDED TO CALL ANY OF THE BELOW FUNCTIONS WITHOUT FULLY UNDERSTANDING WHAT THEY'RE DOING FIRST. 
+			//				PREFERRED TO USE THE ABOVE FUNCTIONS FOR ANY SERIALIZATION MECHANISMS INSTEAD.
+			
 			/*
 			*@brief
 			*/ 

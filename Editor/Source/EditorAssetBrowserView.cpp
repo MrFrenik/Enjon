@@ -342,7 +342,10 @@ namespace Enjon
 										params.mData = ( void* )asset;
 										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 									}
-									else if ( assetCls->InstanceOf< UIStyleConfig >() )
+									else if ( 
+										assetCls->InstanceOf< UIStyleConfig >() || 
+										assetCls->InstanceOf< UIStyleSheet >() 
+									)
 									{
 										const Asset* asset = mSelectedAssetInfo->GetAsset();
 
@@ -715,7 +718,6 @@ namespace Enjon
 		{ 
 			// Construct asset with current directory
 			AssetHandle< Material > mat = am->ConstructAsset< Material >( "NewMaterial", mCurrentDirectory );
-
 			FinishAssetConstruction( mat.Get( ) ); 
 		} 
 
@@ -730,8 +732,14 @@ namespace Enjon
 		{
 			// Construct asset with current directory
 			AssetHandle< UIStyleConfig > ui = am->ConstructAsset< UIStyleConfig >( "NewUIStyleConfig", mCurrentDirectory );
-
 			FinishAssetConstruction( ui.Get( ) ); 
+		}
+
+		if ( ImGui::Selectable( "\t+ UI Style Sheet" ) )
+		{
+			// Construct asset with current directory
+			AssetHandle< UIStyleSheet > ss = am->ConstructAsset< UIStyleSheet >( "NewUIStyleSheet", mCurrentDirectory ); 
+			FinishAssetConstruction( ss.Get( ) ); 
 		}
 
 		// Construct scene option
@@ -739,7 +747,6 @@ namespace Enjon
 		{ 
 			// Construct asset with current directory
 			AssetHandle< Scene > scene = am->ConstructAsset< Scene >( "NewScene", mCurrentDirectory );
-
 			FinishAssetConstruction( scene.Get( ) );
 		} 
 
@@ -748,7 +755,6 @@ namespace Enjon
 		{ 
 			// Construct asset with current directory
 			AssetHandle< Archetype > archetype = am->ConstructAsset< Archetype >( "NewArchetype", mCurrentDirectory );
-
 			FinishAssetConstruction( archetype.Get( ) );
 		} 
 

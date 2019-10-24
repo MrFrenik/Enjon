@@ -26,4 +26,9 @@ namespace Enjon
 			case MetaPropertyType::F64: __MetaClassSetValueInternal( f64, objA, propA, objB, propB ); break;
 		}
 	} 
+
+	const MetaClass* MetaPropertyHashMapBase::GetValueMetaClass() const
+	{
+		return Object::GetClass( mValueMetaClassName );
+	}
 }

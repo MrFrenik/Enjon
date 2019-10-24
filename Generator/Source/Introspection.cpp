@@ -1937,9 +1937,11 @@ void Introspection::Compile( const ReflectionConfig& config )
 								valProxyString += "new Enjon::MetaProperty( MetaPropertyType::" + valPropStr + ", \"ValueProxy\", 0, 0, MetaPropertyTraits(false, 0, 0) )"; 
 							}
 
+							auto vCls = FindReplaceAll( mp->mValuePropertyTypeRaw, "*", "" );
+
 							code += OutputTabbedLine( "cls->mProperties[ " + pi + " ] = new Enjon::MetaPropertyHashMap< " + mp->mKeyPropertyTypeRaw + ", " + mp->mValuePropertyTypeRaw + " >( MetaPropertyType::" + metaPropStr + ", \"" 
 															+ pn + "\", ( u32 )( usize )&( ( " + cn + "* )0 )->" + pn + ", " + pi + ", " + traits + ", MetaPropertyType::" + keyPropStr + ", MetaPropertyType::" + valPropStr + ", " + keyProxyString + ", "   
-															+ valProxyString + " );" ); 
+															+ valProxyString + ", \"" + vCls + "\" );" ); 
 
 						} break;
 
