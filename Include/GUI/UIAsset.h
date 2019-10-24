@@ -196,13 +196,6 @@ namespace Enjon
 			ENJON_PROPERTY( DisplayName = "ID" )
 			String mID = ""; 
 
-			// This needs to be a vec4 for anchor positioning instead
-			ENJON_PROPERTY()
-			Vec2 mPosition = Vec2( 0.f );
-
-			ENJON_PROPERTY(  Delegates[ Mutator = SetSize ] )
-			Vec2 mSize = Vec2( 10.f, 10.f );
-
 			ENJON_PROPERTY( HideInEditor, NonSerializeable )
 			Vector< UIElement* > mChildren;
 

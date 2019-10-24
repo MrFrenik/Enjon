@@ -182,20 +182,33 @@ namespace Enjon
 		YGNodeStyleSetAlignItems( mYogaNode, (YGAlign)mInlineStyles.mAlignItems );
 		YGNodeStyleSetAlignSelf( mYogaNode, (YGAlign)mInlineStyles.mAlignSelf ); 
 
-		if ( mInlineStyles.mFlexGrow || mInlineStyles.mFlexShrink ) {
-			YGNodeStyleSetHeightAuto( mYogaNode );
-		}
+		YGNodeStyleSetPadding( mYogaNode, YGEdgeLeft, mInlineStyles.mPadding.x );
+		YGNodeStyleSetPadding( mYogaNode, YGEdgeTop, mInlineStyles.mPadding.y );
+		YGNodeStyleSetPadding( mYogaNode, YGEdgeRight, mInlineStyles.mPadding.z );
+		YGNodeStyleSetPadding( mYogaNode, YGEdgeBottom, mInlineStyles.mPadding.w );
+
+		YGNodeStyleSetMargin( mYogaNode, YGEdgeLeft, mInlineStyles.mMargin.x );
+		YGNodeStyleSetMargin( mYogaNode, YGEdgeTop, mInlineStyles.mMargin.y );
+		YGNodeStyleSetMargin( mYogaNode, YGEdgeRight, mInlineStyles.mMargin.z );
+		YGNodeStyleSetMargin( mYogaNode, YGEdgeBottom, mInlineStyles.mMargin.w );
+
+		YGNodeStyleSetWidth( mYogaNode, mInlineStyles.mSize.x );
+		YGNodeStyleSetHeight( mYogaNode, mInlineStyles.mSize.y ); 
+
+		YGNodeStyleSetPositionType( mYogaNode, (YGPositionType)mInlineStyles.mPositionType );
+		YGNodeStyleSetPosition( mYogaNode, YGEdgeLeft, mInlineStyles.mPosition.x );
+		YGNodeStyleSetPosition( mYogaNode, YGEdgeTop, mInlineStyles.mPosition.y );
+		YGNodeStyleSetPosition( mYogaNode, YGEdgeRight, mInlineStyles.mPosition.z );
+		YGNodeStyleSetPosition( mYogaNode, YGEdgeBottom, mInlineStyles.mPosition.w ); 
 	}
 
 	//=================================================================================
 
 	void UIElement::SetSize( const Vec2& size )
 	{
-		if ( mInlineStyles.mFlexGrow || mInlineStyles.mFlexShrink ) {
-			mSize = size;
-			YGNodeStyleSetWidth( mYogaNode, mSize.x );
-			YGNodeStyleSetHeight( mYogaNode, mSize.y ); 
-		}
+		mInlineStyles.mSize = size; 
+		YGNodeStyleSetWidth( mYogaNode, mInlineStyles.mSize.x );
+		YGNodeStyleSetHeight( mYogaNode, mInlineStyles.mSize.y ); 
 	}
 
 	//=================================================================================
@@ -237,8 +250,8 @@ namespace Enjon
 		//YGNodeStyleSetPadding( mYogaNode, YGEdgeAll, 0 );
 		//YGNodeStyleSetMargin( mYogaNode, YGEdgeAll, 0 );
 
-		YGNodeStyleSetWidth( mYogaNode, mSize.x );
-		YGNodeStyleSetHeight( mYogaNode, mSize.y );
+		//YGNodeStyleSetWidth( mYogaNode, mSize.x );
+		//YGNodeStyleSetHeight( mYogaNode, mSize.y );
 
 		// Read in child count
 		u32 childCount = buffer->Read< u32 >(); 

@@ -1670,6 +1670,21 @@ static f32 dts = 72.f;
 		guiContext->RegisterMenuOption( "Create", "Create", createViewOption );
 		guiContext->RegisterMenuOption( "Build", "Build Configuration", buildMenuOption );
 
+		static bool mApplicationPropertiesEnabled = true;
+		auto appPropView = [ & ] () 
+		{
+			Application* app = mProject.GetApplication();
+			if ( app != nullptr )
+			{
+				if ( ImGui::BeginDock( "Application Properties", &mApplicationPropertiesEnabled ) )
+				{
+					ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+					igm->DebugDumpObject( app );
+				}
+				ImGui::EndDock();
+			}
+		};
+
 		static bool mShowStyles = false;
 		auto stylesMenuOption = [&]()
 		{
@@ -1685,12 +1700,16 @@ static f32 dts = 72.f;
 				ImGui::Text( "SDF Parameters:" );
 				ImGui::DragFloat( "Gamma", &EngineSubsystem( ImGuiManager )->mGamma, 0.001f, 0.f, 1.f );
 				ImGui::DragFloat( "Buffer", &EngineSubsystem( ImGuiManager )->mBuffer, 0.001f, 0.f, 1.f );
+				ImGui::EndDock();
 			}
-			ImGui::EndDock();
 	 	}; 
  
 		guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
+		guiContext->RegisterMenuOption( "View", "Application Properties##Options", [ & ] () { 
+			ImGui::MenuItem( "Application Properties##options", NULL, &mApplicationPropertiesEnabled ); 
+		});
 		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
+		guiContext->RegisterWindow( "Application Properties", appPropView );
 
 		// Register docking layouts 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
@@ -1700,6 +1719,7 @@ static f32 dts = 72.f;
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.6f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Bottom, 0.3f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Documentation", "Viewport", GUIDockSlotType::Slot_Tab, 1.f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Application Properties", "Inspector", GUIDockSlotType::Slot_Tab, 1.f ) );
 
 		guiContext->SetActiveDock( "Viewport" );
 

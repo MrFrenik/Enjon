@@ -1154,9 +1154,10 @@ namespace Enjon
 				const MetaPropertyEnum* enumProp = prop->Cast< MetaPropertyEnum >( ); 
 
 				s32 enumInt = *cls->GetValueAs<s32>( object, prop ); 
+				MetaPropertyEnumElement elem = enumProp->GetElements().at( enumInt );
 
 				Utils::TempBuffer buffer = Utils::TransientBuffer( "##%s_enum_props_%d_%s", enumProp->GetEnumName().c_str(), (usize)(intptr_t)(object), prop->GetName().c_str() );
-				if ( ImGui::BeginCombo( buffer.buffer, enumProp->GetEnumName().c_str() ) )
+				if ( ImGui::BeginCombo( buffer.buffer, elem.Identifier().c_str() ) )
 				{ 
 					// For each element in the enum
 					for ( auto& e : enumProp->GetElements( ) )

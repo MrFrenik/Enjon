@@ -29,54 +29,58 @@ namespace Enjon
 
 	void EditorDocumentationView::ViewClass( const MetaClass* cls )
 	{
-		if ( ImGui::Button( "Back" ) )
-		{
-			DeselectInspectedCls( );
-			return;
-		}
-
 		// How to view? Let's just show the class name for now
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 		if ( cls )
 		{ 
-			igm->PushFont( "WeblySleek_24" );
+			ImGui::ListBoxHeader( "##cls", ImVec2( ImGui::GetWindowWidth() * 0.975f, ImGui::GetWindowHeight() * 0.965f ) );
 			{
-				ImGui::Text( "%s", cls->GetName().c_str() );
+				if ( ImGui::Button( "Back" ) )
+				{
+					DeselectInspectedCls( );
+					//return;
+				}
+
+				igm->PushFont( "WeblySleek_24" );
+				{
+					ImGui::Text( "%s", cls->GetName().c_str() );
+				}
+
+				igm->PopFont( );
+
+				// Formatting
+				ImGui::NewLine( ); 
+				ImGui::SetCursorPosX( 40.f );
+				ImGui::Text( "Description: " );
+
+				// Formatting
+				ImGui::NewLine( ); 
+
+				ImGui::SetCursorPosX( 40.f );
+				ImGui::Text( "Properties: " );
+				ImGui::SetCursorPosY( ImGui::GetCursorPosY() + 10.f );
+				for ( auto& prop : cls->GetProperties( ) )
+				{
+					ImGui::SetCursorPosX( 80.f );
+					ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.1f, 0.2f, 1.f ) );
+					ImGui::Text( "%s", prop->GetTypeStr() );
+					ImGui::SameLine( );
+					ImGui::PopStyleColor( );
+					ImGui::SetCursorPosX( 180.f );
+					ImGui::Text( "%s", prop->GetName().c_str() );
+				}
+
+				// Formatting
+				ImGui::NewLine( ); 
+				ImGui::SetCursorPosX( 40.f );
+				ImGui::Text( "Functions: " );
+				for ( auto& f : cls->GetFunctions( ) )
+				{
+					ImGui::SetCursorPosX( 80.f );
+					ImGui::Text( "%s", f.second->GetName( ).c_str() );
+				} 
 			}
-
-			igm->PopFont( );
-
-			// Formatting
-			ImGui::NewLine( ); 
-			ImGui::SetCursorPosX( 40.f );
-			ImGui::Text( "Description: " );
-
-			// Formatting
-			ImGui::NewLine( ); 
-
-			ImGui::SetCursorPosX( 40.f );
-			ImGui::Text( "Properties: " );
-			ImGui::SetCursorPosY( ImGui::GetCursorPosY() + 10.f );
-			for ( auto& prop : cls->GetProperties( ) )
-			{
-				ImGui::SetCursorPosX( 80.f );
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 0.8f, 0.1f, 0.2f, 1.f ) );
-				ImGui::Text( "%s", prop->GetTypeStr() );
-				ImGui::SameLine( );
-				ImGui::PopStyleColor( );
-				ImGui::SetCursorPosX( 180.f );
-				ImGui::Text( "%s", prop->GetName().c_str() );
-			}
-
-			// Formatting
-			ImGui::NewLine( ); 
-			ImGui::SetCursorPosX( 40.f );
-			ImGui::Text( "Functions: " );
-			for ( auto& f : cls->GetFunctions( ) )
-			{
-				ImGui::SetCursorPosX( 80.f );
-				ImGui::Text( "%s", f.second->GetName( ).c_str() );
-			}
+			ImGui::ListBoxFooter();
 		}
 	}
 

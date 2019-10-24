@@ -313,6 +313,13 @@ namespace Enjon
 		AlignSpaceAround
 	}; 
 
+	ENJON_ENUM()
+	enum class UIElementPositionType
+	{
+		Relative,
+		Absolute
+	};
+
 	ENJON_CLASS( Construct )
 	class UIStyleSettings : public Object
 	{ 
@@ -338,11 +345,26 @@ namespace Enjon
 			ENJON_PROPERTY()
 			UIElementDirection mDirection = UIElementDirection::DirectionInherit;
 
+			ENJON_PROPERTY()
+			UIElementPositionType mPositionType = UIElementPositionType::Relative;
+
 			ENJON_PROPERTY( UIMin = 0.f, UIMax = 1.f )
 			f32 mFlexGrow = 0.f;
 
 			ENJON_PROPERTY( UIMin = 0.f, UIMax = 1.f )
 			f32 mFlexShrink = 0.f;
+
+			ENJON_PROPERTY( UIMin = 0.f )
+			Vec4 mMargin = Vec4( 0.f );
+
+			ENJON_PROPERTY( UIMin = 0.f )
+			Vec4 mPadding = Vec4( 0.f );
+
+			ENJON_PROPERTY()
+			Vec4 mPosition = Vec4( 0.f );
+
+			ENJON_PROPERTY()
+			Vec2 mSize = Vec2( 0.f );
 	};
 
 	ENJON_CLASS( Construct )

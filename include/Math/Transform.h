@@ -133,6 +133,7 @@ namespace Enjon
 			* @param
 			* @return
 			*/
+			ENJON_FUNCTION( )
 			void SetRotation(const Quaternion& rotation);
 
 			/**

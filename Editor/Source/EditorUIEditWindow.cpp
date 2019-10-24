@@ -150,7 +150,7 @@ namespace Enjon
 				} 
 
 				if ( refreshSize ) {
-					printf( "Size: <%.2f, %.2f>\n", w, h ); 
+					//printf( "Size: <%.2f, %.2f>\n", w, h ); 
 					wi->SetSize( iVec2( w, h ) );
 				}
 				break;
@@ -340,7 +340,7 @@ namespace Enjon
 		Vec3 fp2 = Mat4x4::Inverse( camera.GetViewProjectionMatrix( ) ) * Vec3( (fb), 0.f );\
 		if ( (fp2.x - fp.x) > 1.f && ((fp2.y - fp.y) * camera.GetAspectRatio()) > 1.f )\
 		{\
-			element->mPosition = Vec2( fp.x, fp.y * camera.GetAspectRatio() );\
+			/*element->mPosition = Vec2( fp.x, fp.y * camera.GetAspectRatio() );\*/\
 			element->SetSize( Vec2( (fp2.x - fp.x), (fp2.y - fp.y) * camera.GetAspectRatio() ) );\
 		}\
 		usedHandle = true;\
@@ -450,7 +450,7 @@ namespace Enjon
 			Vec2 fa = Vec2( a.x, a.y );
 			fa += Vec2( delta.x, delta.y );
 			Vec3 fp = Mat4x4::Inverse( mCamera.GetViewProjectionMatrix( ) ) * Vec3( fa, 0.f ); 
-			element->mPosition = Vec2( fp.x, fp.y * mCamera.GetAspectRatio() ); 
+			//element->mPosition = Vec2( fp.x, fp.y * mCamera.GetAspectRatio() ); 
 		} 
 
 		// Moving element via keyboard commands
@@ -459,19 +459,19 @@ namespace Enjon
 			Input* input = EngineSubsystem( Input );
 			if ( input->IsKeyPressed( KeyCode::Up ) )
 			{
-				element->mPosition.y -= 1.f;
+				//element->mPosition.y -= 1.f;
 			}
 			if ( input->IsKeyPressed( KeyCode::Down ) )
 			{
-				element->mPosition.y += 1.f;
+				//element->mPosition.y += 1.f;
 			}
 			if ( input->IsKeyPressed( KeyCode::Right ) )
 			{
-				element->mPosition.x += 1.f;
+				//element->mPosition.x += 1.f;
 			}
 			if ( input->IsKeyPressed( KeyCode::Left ) )
 			{
-				element->mPosition.x -= 1.f;
+				//element->mPosition.x -= 1.f;
 			} 
 		}
 
@@ -602,9 +602,7 @@ namespace Enjon
 
 					// Viewport dimensions transformed to camera space
 					ImVec2 va = Vec2ToImVec2( mCamera.TransformPoint( Vec3( 0.f, 0.f, 0.f ) ) );
-					ImVec2 vb = Vec2ToImVec2( mCamera.TransformPoint( Vec3( sw, sh ) ) ) ;
-
-					printf( "VA: <%.2f, %.2f>, VB: <%.2f, %.2f>\n", va.x, va.y, vb.x, vb.y );
+					ImVec2 vb = Vec2ToImVec2( mCamera.TransformPoint( Vec3( sw, sh ) ) ) ; 
 
 					// Add border around viewport to denote where it be
 					AddDashedLineRect( va, vb, ImColor( 1.f, 1.f, 1.f, 0.5f ) );
@@ -701,7 +699,8 @@ namespace Enjon
 						if ( ImGui::Selectable( "Button" ) )
 						{
 							UIElementButton* button = (UIElementButton*)mUI->mRoot.AddChild( new UIElementButton() );
-							button->mPosition = Vec2( 20.f, 20.f );
+							//button->SetPosition( )
+							//button->mPosition = Vec2( 20.f, 20.f );
 							button->SetSize( Vec2( 20.f, 10.f ) );
 							button->mID = "Button";
 						}
@@ -709,7 +708,7 @@ namespace Enjon
 						if ( ImGui::Selectable( "Text Box" ) )
 						{
 							UIElementText* text = (UIElementText*)mUI->mRoot.AddChild( new UIElementText() );
-							text->mPosition = Vec2( 20.f, 20.f );
+							//text->mPosition = Vec2( 20.f, 20.f );
 							text->SetSize( Vec2( 20.f, 10.f ) );
 							text->mID = "Text";
 							text->mText = "Text";
@@ -718,7 +717,7 @@ namespace Enjon
 						if ( ImGui::Selectable( "Image" ) )
 						{
 							UIElementImage* image = (UIElementImage*)mUI->mRoot.AddChild( new UIElementImage() );
-							image->mPosition = Vec2( 20.f, 20.f );
+							//image->mPosition = Vec2( 20.f, 20.f );
 							image->SetSize( Vec2( 20.f, 10.f ) );
 							image->mID = "Image"; 
 						}
