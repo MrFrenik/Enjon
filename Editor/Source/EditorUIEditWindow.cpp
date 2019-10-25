@@ -652,24 +652,6 @@ namespace Enjon
 
 	//=================================================================================
 
-	void DoYoga( YGNodeRef node )
-	{ 
-		ImDrawList* dl = ImGui::GetWindowDrawList();
-
-		// Display self? 
-		f32 l  = YGNodeLayoutGetLeft( node );
-		f32 t  = YGNodeLayoutGetTop( node );
-		f32 r  = YGNodeLayoutGetLeft( node ) + YGNodeLayoutGetWidth( node );
-		f32 b  = YGNodeLayoutGetTop( node ) + YGNodeLayoutGetHeight( node );
-
-		dl->AddRect( ImVec2( l, t ), ImVec2( r, b ), ImColor( 1.f, 1.f, 1.f, 1.f ) );
-		
-		for ( u32 i = 0; i < YGNodeGetChildCount( node ); ++i )
-		{ 
-			DoYoga( YGNodeGetChild( node, i ) );
-		}
-	}
-
 	void EditorUIEditWindow::ConstructScene()
 	{ 
 		GUIContext* guiContext = GetGUIContext( ); 
@@ -885,57 +867,11 @@ class Test
 
 		World* world = GetWorld( ); 
 
-		// Construct Yoga tree based on the ui tree structure (kinda redundant, but it is what it is right now)
-		//YGConfigRef config = YGConfigNew();
-		////mRootNode = YGNodeNewWithConfig(config);
-		//
-		//mRootNode = YGNodeNew();
-		//YGNodeStyleSetFlexDirection( mRootNode, YGFlexDirectionRow );
-		//YGNodeStyleSetPadding( mRootNode, YGEdgeAll, 0 );
-		//YGNodeStyleSetMargin( mRootNode, YGEdgeAll, 0 ); 
-
-		//YGNodeRef image = YGNodeNew();
-		//YGNodeStyleSetWidth( image, 80 );
-		//YGNodeStyleSetHeight( image, 80 );
-		//YGNodeStyleSetAlignSelf( image, YGAlignCenter );
-		//YGNodeStyleSetMargin( image, YGEdgeAll, 20 );
-		////YGNodeStyleSetPositionType( image, YGPositionTypeAbsolute );
-		////YGNodeStyleSetPosition( image, YGEdgeLeft, 100.f );
-
-		//YGNodeRef text = YGNodeNew();
-		//YGNodeStyleSetHeight( text, 25 );
-		////YGNodeStyleSetWidth( text, 100 );
-		//YGNodeStyleSetMargin( text, YGEdgeRight, 20 );
-		//YGNodeStyleSetAlignSelf( text, YGAlignCenter );
-		//YGNodeStyleSetFlexGrow( text, 1 );		// Grow to fill content of parent container
-
-		//YGNodeInsertChild( mRootNode, image, 0 );
-		//YGNodeInsertChild( mRootNode, text, 1 ); 
-
-		//YGNodeCalculateLayout( mRootNode, 640, 360, YGDirectionLTR ); 
-
 		// Do need to set up rendering pipelines. This isn't going to do what I want.
 		guiContext->RegisterWindow( "Canvas", [ & ] () { 
 
 			f32 w = GetScreenWidth();
 			f32 h = GetScreenHeight(); 
-
-			//ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
-			//ImGui::SetNextWindowSize( ImVec2( w, h ) );
-			//ImGui::PushStyleColor( ImGuiCol_WindowBg, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
-			//ImGui::Begin( "##yoga_demo", nullptr,
-			//	ImGuiWindowFlags_NoTitleBar |
-			//	ImGuiWindowFlags_NoResize |
-			//	ImGuiWindowFlags_NoFocusOnAppearing |
-			//	ImGuiWindowFlags_NoNav |
-			//	ImGuiWindowFlags_NoBringToFrontOnFocus
-			//);
-			//{
-			//	YGNodeCalculateLayout( mRootNode, w, h, YGDirectionLTR ); 
-			//	DoYoga( mRootNode ); 
-			//}
-			//ImGui::End();
-			//ImGui::PopStyleColor(); 
 
 			if ( mUI )
 			{

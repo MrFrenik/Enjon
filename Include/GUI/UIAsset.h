@@ -6,10 +6,7 @@
 #include "Math/Maths.h"
 #include "Asset/Asset.h"
 #include "Graphics/Texture.h"
-#include "Asset/UIStyleConfigAssetLoader.h"
-
-#include <yoga/Yoga.h>
-#include <yoga/YGNode.h>
+#include "Asset/UIStyleConfigAssetLoader.h" 
 
 namespace Enjon
 { 
@@ -203,10 +200,7 @@ namespace Enjon
 			UIElement* mParent = nullptr; 
 
 			ENJON_PROPERTY( HideInEditor, Delegates[ Mutator = SetInlineStyles ] )
-			UIStyleSettings mInlineStyles;
-
-			// Non-serializable asset
-			YGNodeRef mYogaNode = nullptr;
+			UIStyleSettings mInlineStyles; 
 	}; 
 
 	// Not sure if I like this here...need a way to be able to view this in the editor and set the function

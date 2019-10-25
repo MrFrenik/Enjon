@@ -157,7 +157,7 @@ namespace Enjon
 
 	void UIElement::ExplicitConstructor()
 	{
-		mYogaNode = YGNodeNew();
+		//mYogaNode = YGNodeNew();
 	}
 
 	//=================================================================================
@@ -173,33 +173,33 @@ namespace Enjon
 		mInlineStyles = styles;
 
 		// Need to update sll yoga styles based on these
-		YGNodeStyleSetFlexGrow( mYogaNode, mInlineStyles.mFlexGrow );
-		YGNodeStyleSetFlexShrink( mYogaNode, mInlineStyles.mFlexShrink );
-		YGNodeStyleSetFlexDirection( mYogaNode, (YGFlexDirection)mInlineStyles.mFlexDirection ); 
+		//YGNodeStyleSetFlexGrow( mYogaNode, mInlineStyles.mFlexGrow );
+		//YGNodeStyleSetFlexShrink( mYogaNode, mInlineStyles.mFlexShrink );
+		//YGNodeStyleSetFlexDirection( mYogaNode, (YGFlexDirection)mInlineStyles.mFlexDirection ); 
 
-		YGNodeStyleSetJustifyContent( mYogaNode, (YGJustify)mInlineStyles.mJustification );
-		YGNodeStyleSetAlignContent( mYogaNode, (YGAlign)mInlineStyles.mAlignContent );
-		YGNodeStyleSetAlignItems( mYogaNode, (YGAlign)mInlineStyles.mAlignItems );
-		YGNodeStyleSetAlignSelf( mYogaNode, (YGAlign)mInlineStyles.mAlignSelf ); 
+		//YGNodeStyleSetJustifyContent( mYogaNode, (YGJustify)mInlineStyles.mJustification );
+		//YGNodeStyleSetAlignContent( mYogaNode, (YGAlign)mInlineStyles.mAlignContent );
+		//YGNodeStyleSetAlignItems( mYogaNode, (YGAlign)mInlineStyles.mAlignItems );
+		//YGNodeStyleSetAlignSelf( mYogaNode, (YGAlign)mInlineStyles.mAlignSelf ); 
 
-		YGNodeStyleSetPadding( mYogaNode, YGEdgeLeft, mInlineStyles.mPadding.x );
-		YGNodeStyleSetPadding( mYogaNode, YGEdgeTop, mInlineStyles.mPadding.y );
-		YGNodeStyleSetPadding( mYogaNode, YGEdgeRight, mInlineStyles.mPadding.z );
-		YGNodeStyleSetPadding( mYogaNode, YGEdgeBottom, mInlineStyles.mPadding.w );
+		//YGNodeStyleSetPadding( mYogaNode, YGEdgeLeft, mInlineStyles.mPadding.x );
+		//YGNodeStyleSetPadding( mYogaNode, YGEdgeTop, mInlineStyles.mPadding.y );
+		//YGNodeStyleSetPadding( mYogaNode, YGEdgeRight, mInlineStyles.mPadding.z );
+		//YGNodeStyleSetPadding( mYogaNode, YGEdgeBottom, mInlineStyles.mPadding.w );
 
-		YGNodeStyleSetMargin( mYogaNode, YGEdgeLeft, mInlineStyles.mMargin.x );
-		YGNodeStyleSetMargin( mYogaNode, YGEdgeTop, mInlineStyles.mMargin.y );
-		YGNodeStyleSetMargin( mYogaNode, YGEdgeRight, mInlineStyles.mMargin.z );
-		YGNodeStyleSetMargin( mYogaNode, YGEdgeBottom, mInlineStyles.mMargin.w );
+		//YGNodeStyleSetMargin( mYogaNode, YGEdgeLeft, mInlineStyles.mMargin.x );
+		//YGNodeStyleSetMargin( mYogaNode, YGEdgeTop, mInlineStyles.mMargin.y );
+		//YGNodeStyleSetMargin( mYogaNode, YGEdgeRight, mInlineStyles.mMargin.z );
+		//YGNodeStyleSetMargin( mYogaNode, YGEdgeBottom, mInlineStyles.mMargin.w );
 
-		YGNodeStyleSetWidth( mYogaNode, mInlineStyles.mSize.x );
-		YGNodeStyleSetHeight( mYogaNode, mInlineStyles.mSize.y ); 
+		//YGNodeStyleSetWidth( mYogaNode, mInlineStyles.mSize.x );
+		//YGNodeStyleSetHeight( mYogaNode, mInlineStyles.mSize.y ); 
 
-		YGNodeStyleSetPositionType( mYogaNode, (YGPositionType)mInlineStyles.mPositionType );
-		YGNodeStyleSetPosition( mYogaNode, YGEdgeLeft, mInlineStyles.mPosition.x );
-		YGNodeStyleSetPosition( mYogaNode, YGEdgeTop, mInlineStyles.mPosition.y );
-		YGNodeStyleSetPosition( mYogaNode, YGEdgeRight, mInlineStyles.mPosition.z );
-		YGNodeStyleSetPosition( mYogaNode, YGEdgeBottom, mInlineStyles.mPosition.w ); 
+		//YGNodeStyleSetPositionType( mYogaNode, (YGPositionType)mInlineStyles.mPositionType );
+		//YGNodeStyleSetPosition( mYogaNode, YGEdgeLeft, mInlineStyles.mPosition.x );
+		//YGNodeStyleSetPosition( mYogaNode, YGEdgeTop, mInlineStyles.mPosition.y );
+		//YGNodeStyleSetPosition( mYogaNode, YGEdgeRight, mInlineStyles.mPosition.z );
+		//YGNodeStyleSetPosition( mYogaNode, YGEdgeBottom, mInlineStyles.mPosition.w ); 
 	}
 
 	//=================================================================================
@@ -207,8 +207,8 @@ namespace Enjon
 	void UIElement::SetSize( const Vec2& size )
 	{
 		mInlineStyles.mSize = size; 
-		YGNodeStyleSetWidth( mYogaNode, mInlineStyles.mSize.x );
-		YGNodeStyleSetHeight( mYogaNode, mInlineStyles.mSize.y ); 
+		//YGNodeStyleSetWidth( mYogaNode, mInlineStyles.mSize.x );
+		//YGNodeStyleSetHeight( mYogaNode, mInlineStyles.mSize.y ); 
 	}
 
 	//=================================================================================
@@ -243,7 +243,7 @@ namespace Enjon
 		ObjectArchiver::DeserializeObjectDataDefault( this, this->Class(), buffer ); 
 
 		// Construct yoga node
-		mYogaNode = YGNodeNew();
+		//mYogaNode = YGNodeNew();
 
 		// Set up random style stuff
 		//YGNodeStyleSetFlexDirection( mYogaNode, YGFlexDirectionColumn );
@@ -267,7 +267,7 @@ namespace Enjon
 			mChildren.at( i ) = child; 
 
 			// Set up child's yoga parent 
-			YGNodeInsertChild( mYogaNode, child->mYogaNode, i );
+			//YGNodeInsertChild( mYogaNode, child->mYogaNode, i );
 		} 
 
 		if ( !childCount )
@@ -289,7 +289,7 @@ namespace Enjon
 		mChildren.push_back( element );
 
 		// Push back child into yoga node tree
-		YGNodeInsertChild( mYogaNode, element->mYogaNode, YGNodeGetChildCount( mYogaNode ) );
+		//YGNodeInsertChild( mYogaNode, element->mYogaNode, YGNodeGetChildCount( mYogaNode ) );
 
 		return element;
 	}
@@ -310,29 +310,34 @@ namespace Enjon
 
 	Vec2 UIElement::GetCalculatedLayoutPosition()
 	{
-		f32 l  = YGNodeLayoutGetLeft( mYogaNode );
-		f32 t  = YGNodeLayoutGetTop( mYogaNode ); 
-		return Vec2( l, t );
+		return Vec2( mInlineStyles.mPosition.x, mInlineStyles.mPosition.y );
+		//f32 l  = YGNodeLayoutGetLeft( mYogaNode );
+		//f32 t  = YGNodeLayoutGetTop( mYogaNode ); 
+		//return Vec2( l, t );
 	}
 
 	//=================================================================================
 
 	Vec2 UIElement::GetCalculatedLayoutSize()
 	{
-		f32 w  = YGNodeLayoutGetWidth( mYogaNode );
-		f32 h  = YGNodeLayoutGetHeight( mYogaNode ); 
-		return Vec2( w, h );
+		return Vec2( mInlineStyles.mSize.x, mInlineStyles.mSize.y );
+		//f32 w  = YGNodeLayoutGetWidth( mYogaNode );
+		//f32 h  = YGNodeLayoutGetHeight( mYogaNode ); 
+		//return Vec2( w, h );
 	}
 
 	//=================================================================================
 
 	Vec4 UIElement::GetCalculatedLayoutRect()
 	{ 
-		f32 l  = YGNodeLayoutGetLeft( mYogaNode );
-		f32 t  = YGNodeLayoutGetTop( mYogaNode );
-		f32 r  = YGNodeLayoutGetLeft( mYogaNode ) + YGNodeLayoutGetWidth( mYogaNode );
-		f32 b  = YGNodeLayoutGetTop( mYogaNode ) + YGNodeLayoutGetHeight( mYogaNode ); 
-		return Vec4( l, t, r, b );
+		//f32 l  = YGNodeLayoutGetLeft( mYogaNode );
+		//f32 t  = YGNodeLayoutGetTop( mYogaNode );
+		//f32 r  = YGNodeLayoutGetLeft( mYogaNode ) + YGNodeLayoutGetWidth( mYogaNode );
+		//f32 b  = YGNodeLayoutGetTop( mYogaNode ) + YGNodeLayoutGetHeight( mYogaNode ); 
+		//return Vec4( l, t, r, b );
+		Vec2 pos = GetCalculatedLayoutPosition( );
+		Vec2 sz = GetCalculatedLayoutSize( );
+		return Vec4( pos, pos + sz );
 	}
 
 	//=================================================================================
@@ -364,7 +369,7 @@ namespace Enjon
 	void UI::CalculateLayout( const u32& width, const u32& height )
 	{
 		// Just set direction for now of canvas ( need to serialize out styles eventually, but just want something up and running for now )
-		YGNodeCalculateLayout( mRoot.mYogaNode, width, height, YGDirectionLTR );
+		//YGNodeCalculateLayout( mRoot.mYogaNode, width, height, YGDirectionLTR );
 	}
 
 	//=================================================================================
