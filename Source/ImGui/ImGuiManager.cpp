@@ -859,8 +859,18 @@ namespace Enjon
 			}
 
 			ImGui::SetCursorPosX( startCursorX + buttonSize + padding.x );
+ 
+			ImVec2 ts = ImGui::CalcTextSize( name.c_str( ) );
+			String b = name;
 
-			ImGui::Text( "%s", name.c_str( ) ); 
+			if ( ts.x >= windowWidth * 0.35f - 20.f ) {
+				u32 len = 9;
+				bool gtl = name.length() >= len;
+				b = name.substr( 0, gtl ? len - 3 : name.length() );
+				b += gtl ? "..." : "";
+			}
+
+			ImGui::Text( "%s", b.c_str( ) ); 
 			ImGui::SameLine( ); 
 
 			ImGui::SetCursorPosX( windowWidth * 0.4f );

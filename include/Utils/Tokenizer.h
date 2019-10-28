@@ -104,11 +104,19 @@ namespace Enjon { namespace Utils {
 			return false;
 		} 
 
+		// If first character is numeric 
+		if ( IsNumeric( name.at( 0 ) || ( IsSpecialCharacter( name.at( 0 ) ) && name.at( 0 ) != '_' ) ) )
+		{
+			printf( "Failed here at: %c\n", name.at( 0 ) );
+			return false;
+		}
+
 		// Make sure no white space or non-alpha tokens in name
 		for ( auto& c : name )
 		{
-			if ( !IsAlphabetical( c ) )
+			if ( IsWhiteSpace( c ) || ( IsSpecialCharacter( c ) && c != '_' && !IsNumeric( c ) ) )
 			{
+				printf( "Failed here at: %c\n", c );
 				return false;
 			}
 		}
