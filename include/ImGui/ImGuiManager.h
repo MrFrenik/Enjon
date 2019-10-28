@@ -363,6 +363,11 @@ namespace Enjon
 			*/
 			void Render( ); 
 
+			/** 
+			* @brief
+			*/
+			s32 MainMenu( ); 
+
 		protected:
 
 			void CreateMainMenu( const String& menuName );
@@ -371,11 +376,6 @@ namespace Enjon
 			* @brief
 			*/
 			void LateInit( );
-
-			/** 
-			* @brief
-			*/
-			s32 MainMenu( ); 
 
 		private: 
 			Vector<GUICallbackFunc> mGuiFuncs;
