@@ -57,7 +57,7 @@ namespace Enjon
 			*/
 			void Add( const VertexAttributeFormat& format ); 
 
-		protected:
+		//protected:
 
 			/*
 			* @brief
@@ -69,11 +69,11 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override;
 
-		private: 
+		//private: 
 
 			void CalculateSizeInBytes( );
 
-		protected: 
+		//protected: 
 			usize mSizeInBytes = 0;
 			Vector< VertexAttributeFormat > mDecl; 
 	};
@@ -148,7 +148,7 @@ namespace Enjon
 			*/
 			u32 GetIBO( ) const;
 
-		protected: 
+		//protected: 
 
 			/*
 			* @brief
@@ -166,7 +166,7 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
-		protected: 
+		public:
 			Vector< Vert > mVerticies; 
 			Vector< u32 > mIndicies;	
 
@@ -211,7 +211,7 @@ namespace Enjon
 			*/
 			const VertexDataDeclaration& GetVertexDeclaration( );
 
-		protected:
+		//protected:
 
 			/*
 			* @brief
@@ -239,7 +239,7 @@ namespace Enjon
 			*/
 			virtual Result DeserializeData( ByteBuffer* buffer ) override; 
 
-		protected:
+		//protected:
 
 			/*
 			* @brief

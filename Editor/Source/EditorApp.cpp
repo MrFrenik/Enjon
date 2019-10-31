@@ -1633,6 +1633,11 @@ static f32 dts = 72.f;
 				EngineSubsystem( WindowSubsystem )->DestroyWindow( 0 );
 			}
 			ImGui::PopStyleColor();
+
+			if ( ImGui::MenuItem( "Open Project Folder##options", NULL ) )
+			{ 
+				mProject.OpenProjectFolder();
+			} 
 		};
 
 		auto buildMenuOption = [&]() 

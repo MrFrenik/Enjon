@@ -913,10 +913,11 @@ namespace Enjon
 
 		// Grab graphics scene from context
 		GraphicsScene* scene = ctx->GetGraphicsScene( );
- 
+
 		// Get sorted renderables by material
 		const Vector< StaticMeshRenderable* >& sortedStaticMeshRenderables = scene->GetStaticMeshRenderables();
 		const Vector< SkeletalMeshRenderable* >& sortedSkeletalMeshRenderables = scene->GetSkeletalMeshRenderables( );
+		const Vector< Renderable* >& sortedCustomRenderables = scene->GetCustomRenderables();
 		const HashSet< QuadBatch* >& sortedQuadBatches = scene->GetQuadBatches(); 
 
 		Camera* camera = scene->GetActiveCamera( );
@@ -1025,6 +1026,51 @@ namespace Enjon
 							}
 							// Unbind submesh
 							subMeshes.at( i )->Unbind( ); 
+						}
+					} 
+				}
+				renderable->Unbind( );
+			}
+		}
+
+		// Custom renderables
+		if ( !sortedCustomRenderables.empty() )
+		{ 
+			// Shader graph to be used
+			Enjon::AssetHandle< Enjon::ShaderGraph > sg; 
+			const Material* material = nullptr;
+
+			for (auto& renderable : sortedCustomRenderables)
+			{ 
+				renderable->Bind( );
+				{
+					// For each submesh
+					const Vector< SubMesh* >& subMeshes = renderable->GetMesh( )->GetSubmeshes( );
+					for ( u32 i = 0; i < subMeshes.size(); ++i )
+					{
+						const Material* curMaterial = renderable->GetMaterial( i ).Get( );
+						sg = curMaterial->GetShaderGraph( );
+						assert( curMaterial != nullptr );
+
+						if ( sg )
+						{
+							Enjon::Shader* sgShader = const_cast< Shader * >( sg->GetShader( ShaderPassType::Deferred_StaticGeom ) );
+							if ( material != curMaterial )
+							{
+								// Set material
+								material = curMaterial;
+
+								// Bind uniforms
+								sgShader->Use( );
+								sgShader->SetUniform( "uViewProjection", camera->GetViewProjection( ) );
+								sgShader->SetUniform( "uWorldTime", wt );
+								sgShader->SetUniform( "uViewPositionWorldSpace", camera->GetPosition( ) );
+								sgShader->SetUniform( "uPreviousViewProjection", ctx->mPreviousViewProjectionMatrix );
+								material->Bind( sgShader );
+							}
+
+							//sgShader->SetUniform( "uObjectID", Renderable::IdToColor( renderable->GetRenderableID( ) ) ); 
+							renderable->Submit( sg->GetShader( ShaderPassType::Deferred_StaticGeom ), subMeshes.at( i ), i ); 
 						}
 					} 
 				}

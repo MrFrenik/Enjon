@@ -82,12 +82,22 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			void AddCustomRenderable( Renderable* renderable );
+
+			/*
+			* @brief
+			*/
 			void RemoveStaticMeshRenderable( StaticMeshRenderable* renderable );
 
 			/*
 			* @brief
 			*/
 			void RemoveNonDepthTestedStaticMeshRenderable( StaticMeshRenderable* renderable );
+
+			/*
+			* @brief
+			*/
+			void RemoveCustomRenderable( Renderable* renderable );
 
 			/*
 			* @brief
@@ -172,6 +182,11 @@ namespace Enjon
 			/*
 			* @brief
 			*/
+			const Vector<Renderable*>& GetCustomRenderables() const;
+
+			/*
+			* @brief
+			*/
 			const HashSet<QuadBatch*>& GetQuadBatches() const { return mQuadBatches; }
 
 			/*
@@ -229,7 +244,12 @@ namespace Enjon
 			ENJON_PROPERTY( )
 			Vector< StaticMeshRenderable* > mNonDepthTestedStaticMeshRenderables;
 
+			// Default list of any assortment of custom user renderable types? Not sure about this...
+			ENJON_PROPERTY()
+			Vector< Renderable* > mSortedCustomRenderables;
+
 			HashSet<Camera*> mCameras;
+			HashSet<Renderable*> mCustomRenderables;
 			HashSet<StaticMeshRenderable*> mStaticMeshRenderables;
 			HashSet<SkeletalMeshRenderable*> mSkeletalMeshRenderables;
 			HashSet<QuadBatch*> mQuadBatches;

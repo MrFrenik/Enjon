@@ -132,6 +132,13 @@ namespace Enjon
 
 	//====================================================================================================
 
+	const Vector<Renderable*>& GraphicsScene::GetCustomRenderables() const
+	{
+		return mSortedCustomRenderables;
+	}
+
+	//====================================================================================================
+
 	void GraphicsScene::AddSkeletalMeshRenderable( SkeletalMeshRenderable* renderable )
 	{
 		auto query = mSkeletalMeshRenderables.find(renderable);
@@ -212,6 +219,42 @@ namespace Enjon
 			mNonDepthTestedStaticMeshRenderables.push_back( renderable );
 			renderable->SetGraphicsScene( this );
 		}
+	}
+
+	//====================================================================================================
+
+	void GraphicsScene::AddCustomRenderable( Renderable* renderable )
+	{
+		auto query = mCustomRenderables.find(renderable);
+		if (query == mCustomRenderables.end())
+		{
+			mCustomRenderables.insert(renderable);
+			renderable->SetGraphicsScene(this);
+
+			// Add to sorted renderables
+			mSortedCustomRenderables.push_back( renderable );
+
+			// Sort renderables
+			//SortRenderables( );
+		}
+	}
+	
+	//====================================================================================================
+
+	void GraphicsScene::RemoveCustomRenderable( Renderable* renderable )
+	{
+		auto query = mCustomRenderables.find(renderable);
+		if (query != mCustomRenderables.end())
+		{
+		renderable->SetGraphicsScene(nullptr);
+		mCustomRenderables.erase(renderable);
+		
+		// Remove renderable from sorted list
+		mSortedCustomRenderables.erase( std::remove( mSortedCustomRenderables.begin( ), mSortedCustomRenderables.end( ), renderable ), mSortedCustomRenderables.end( ) );
+		
+		// Sort renderables
+		//SortRenderables( );
+		} 
 	}
 
 	//====================================================================================================
