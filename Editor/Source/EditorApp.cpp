@@ -1710,11 +1710,11 @@ static f32 dts = 72.f;
 	 	}; 
  
 		guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
-		guiContext->RegisterMenuOption( "View", "Application Properties##Options", [ & ] () { 
-			ImGui::MenuItem( "Application Properties##options", NULL, &mApplicationPropertiesEnabled ); 
-		});
+		//guiContext->RegisterMenuOption( "View", "Application Properties##Options", [ & ] () { 
+		//	ImGui::MenuItem( "Application Properties##options", NULL, &mApplicationPropertiesEnabled ); 
+		//});
 		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
-		guiContext->RegisterWindow( "Application Properties", appPropView );
+		//guiContext->RegisterWindow( "Application Properties", appPropView );
 
 		// Register docking layouts 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
@@ -1724,9 +1724,10 @@ static f32 dts = 72.f;
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Inspector", "World Outliner", GUIDockSlotType::Slot_Bottom, 0.6f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Asset Browser", "Viewport", GUIDockSlotType::Slot_Bottom, 0.3f ) );
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Documentation", "Viewport", GUIDockSlotType::Slot_Tab, 1.f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Application Properties", "Inspector", GUIDockSlotType::Slot_Tab, 1.f ) );
+		//guiContext->RegisterDockingLayout( GUIDockingLayout( "Application Properties", "Inspector", GUIDockSlotType::Slot_Tab, 1.f ) );
 
 		guiContext->SetActiveDock( "Viewport" );
+		//guiContext->SetActiveDock( "Inspector" );
 
 		guiContext->Finalize( );
 	}
@@ -1904,7 +1905,7 @@ static f32 dts = 72.f;
 		vsMSBuild2015.mCommand									= "\"${PROJ_COMPILER_PATH}\"";
 		vsMSBuild2015.mArgs[(u32)ConfigurationType::Release]	= "\"${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln\" /t:Build /p:Configuration=Release";
 		vsMSBuild2015.mArgs[(u32)ConfigurationType::Debug]		= "\"${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln\" /t:Build /p:Configuration=Debug";
-		vsMSBuild2015.mAfterBuildEvent							= "start ${PROJ_NAME}.sln";
+		//vsMSBuild2015.mAfterBuildEvent							= "start ${PROJ_NAME}.sln";
 		vsMSBuild2015.mOutputDir								= "\"${PROJ_DIR}/Build\"";
 		vsMSBuild2015.mIncludeDirectories						= { "\"${PROJ_DIR}/Source\"", "${ENJON_INCLUDES}" };
 		vsMSBuild2015.mSources									= { "\"${PROJ_DIR}/Source/*.cpp\"" };
@@ -1918,7 +1919,7 @@ static f32 dts = 72.f;
 		vsMSBuild2017.mCommand									= "\"${PROJ_COMPILER_PATH}\"";
 		vsMSBuild2017.mArgs[(u32)ConfigurationType::Release]	= "\"${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln\" /t:Build /p:Configuration=Release";
 		vsMSBuild2017.mArgs[(u32)ConfigurationType::Debug]		= "\"${PROJ_OUTPUT_DIR}/${PROJ_NAME}.sln\" /t:Build /p:Configuration=Debug";
-		vsMSBuild2017.mAfterBuildEvent							= "start ${PROJ_NAME}.sln";
+		//vsMSBuild2017.mAfterBuildEvent							= "start ${PROJ_NAME}.sln";
 		vsMSBuild2017.mOutputDir								= "\"${PROJ_DIR}/Build\"";
 		vsMSBuild2017.mIncludeDirectories						= { "\"${PROJ_DIR}/Source\"", "${ENJON_INCLUDES}" };
 		vsMSBuild2017.mSources									= { "\"${PROJ_DIR}/Source/*.cpp\"" };

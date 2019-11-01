@@ -278,13 +278,14 @@ namespace Enjon
 						proj.SetProjectPath( String( outPath ) + "/" );
 						proj.SetProjectName( projName );					// This isn't correct, yeah, not at all...
 						proj.SetEditor( mApp );
-						mApp->PreloadProject( proj );
+						//mApp->PreloadProject( proj );
 						mApp->GetConfigSettings()->mProjectList.push_back(proj);
-						WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-						ws->DestroyWindow( GetWindowID() );
+						//WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+						//ws->DestroyWindow( GetWindowID() );
 
 						// Serialize editor settings after loading project
 						mApp->SerializeEditorConfigSettings();
+						mScreenType = EditorLauncherScreenType::Main;
 					}
 				}
 			} 
