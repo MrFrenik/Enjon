@@ -57,4 +57,6 @@ void main( void ) {
     }else{
         Color.xyz=rgbB;
     }
+
+	Color.xyz = texture(tex, fs_in.TexCoords).rgb;
 }

@@ -229,7 +229,7 @@ namespace Enjon
 			/**
 			*@brief
 			*/
-			void ShowGraphicsWindow(bool* p_open);
+			void ShowGraphicsWindow();
 
 			/**
 			*@brief

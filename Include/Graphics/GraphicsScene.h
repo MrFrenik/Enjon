@@ -214,6 +214,11 @@ namespace Enjon
 			*/
 			void SetActiveCamera( Camera* camera );
 
+			const HashSet< Camera* >& GetCameras( ) const 
+			{
+				return mCameras;
+			}
+
 		private: 
 
 			/*

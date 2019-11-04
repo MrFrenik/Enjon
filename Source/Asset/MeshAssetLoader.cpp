@@ -73,10 +73,10 @@ namespace Enjon
 		Enjon::Vec3 N( 0.0f, 0.0f, 1.0f );
 		Enjon::Vec3 T( 0.0f, 1.0f, 0.0f );
 
-		CREATE_QUAD_VERTEX( TL, 0.0f, 0.0f, 0.0f, 0.0f )
-		CREATE_QUAD_VERTEX( TR, 1.0f, 0.0f, 1.0f, 0.0f )
-		CREATE_QUAD_VERTEX( BR, 1.0f, 1.0f, 1.0f, 1.0f )
-		CREATE_QUAD_VERTEX( BL, 0.0f, 1.0f, 0.0f, 1.0f )
+		CREATE_QUAD_VERTEX( TL, 0.0f, 1.0f, 0.0f, 1.0f )
+		CREATE_QUAD_VERTEX( TR, 1.0f, 1.0f, 1.0f, 1.0f )
+		CREATE_QUAD_VERTEX( BR, 1.0f, 0.0f, 1.0f, 0.0f )
+		CREATE_QUAD_VERTEX( BL, 0.0f, 0.0f, 0.0f, 0.0f )
 
 		// Construct new submesh
 		SubMesh* sm = mesh->ConstructSubmesh( );

@@ -125,6 +125,12 @@ namespace Enjon
 	{
 		m_screenWidth = width;
 		m_screenHeight = height;	
+
+		if ( mWorld )
+		{
+			GraphicsSubsystemContext* ctx = mWorld->GetContext< GraphicsSubsystemContext >( );
+			ctx->ReinitializeFrameBuffers( GetViewport( ) );
+		}
 	}
 
 	void Window::SetViewport( const iVec2& dimensions )
@@ -261,19 +267,27 @@ namespace Enjon
 			{
 				switch ( event.window.event )
 				{
+					case SDL_WINDOWEVENT_SIZE_CHANGED:
+					case SDL_WINDOWEVENT_MAXIMIZED:
 					case SDL_WINDOWEVENT_RESIZED: 
-					{
-						// For now only reinitialize the frame buffers for main window
-						if ( event.window.windowID == SDL_GetWindowID( EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetSDLWindow() ) )
-						{
-							gs->ReinitializeFrameBuffers( );
-						}
+					{ 
+						u32 w = ( u32 )event.window.data1;
+						u32 h = ( u32 )event.window.data2;
 
-						if ( event.window.windowID == SDL_GetWindowID( GetSDLWindow() ) )
+						if ( (w != m_screenWidth || h != m_screenHeight) && (w != 0 && h != 0) )
 						{ 
-							// Resize viewport
-							SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
-						} 
+							if ( event.window.windowID == SDL_GetWindowID( GetSDLWindow() ) )
+							{ 
+								// Resize viewport
+								SetViewport( iVec2( (u32)event.window.data1, (u32)event.window.data2 ) ); 
+							} 
+							
+							// For now only reinitialize the frame buffers for main window
+							if ( event.window.windowID == SDL_GetWindowID( EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetSDLWindow() ) )
+							{
+								gs->ReinitializeFrameBuffers( );
+							}
+						}
 					}
 					break; 
 

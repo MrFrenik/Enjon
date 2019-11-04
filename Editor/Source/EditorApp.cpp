@@ -1708,13 +1708,47 @@ static f32 dts = 72.f;
 				ImGui::EndDock();
 			}
 	 	}; 
+
+		static bool mShowGraphicsOptions = false;
+		auto graphicsOptionsMenu = [&]()
+		{
+        	ImGui::MenuItem("Graphics Settings##options", NULL, &mShowGraphicsOptions);
+		};
+	 	auto showGfxOptionsMenu = [&]()
+	 	{
+			if (ImGui::BeginDock("Graphics Settings##options", &mShowGraphicsOptions))
+			{
+				EngineSubsystem( GraphicsSubsystem )->ShowGraphicsWindow( );
+			}
+			ImGui::EndDock();
+	 	}; 
  
 		guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
+		guiContext->RegisterMenuOption("View", "Graphics Settings##options", graphicsOptionsMenu);
 		//guiContext->RegisterMenuOption( "View", "Application Properties##Options", [ & ] () { 
 		//	ImGui::MenuItem( "Application Properties##options", NULL, &mApplicationPropertiesEnabled ); 
 		//});
 		guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
+		guiContext->RegisterWindow( "Graphics Settings", showGfxOptionsMenu );
 		//guiContext->RegisterWindow( "Application Properties", appPropView );
+
+		guiContext->RegisterWindow( "Cameras", [ & ] ( )
+		{
+			if ( ImGui::BeginDock( "Cameras##select" ) )
+			{
+				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem ); 
+				GraphicsScene* gfxScene = gfx->GetGraphicsScene( );
+				auto cams = gfxScene->GetCameras( );
+				for ( auto& c : cams )
+				{ 
+					if ( ImGui::Button( Utils::format( "%d", (u32)(usize)(c) ).c_str( ) ) )
+					{
+						gfxScene->SetActiveCamera( c );
+					}
+				} 
+			}
+			ImGui::EndDock( );
+		});
 
 		// Register docking layouts 
 		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );

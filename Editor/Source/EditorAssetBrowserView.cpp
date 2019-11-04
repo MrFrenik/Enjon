@@ -332,6 +332,8 @@ namespace Enjon
 									{
 										const Asset* asset = mSelectedAssetInfo->GetAsset( );
 
+										printf( "Opening texture window...\n" );
+
 										// Open new params
 										WindowParams params;
 										params.mMetaClassFunc = [&]() -> const MetaClass * { return Object::GetClass< EditorTextureEditWindow >(); };

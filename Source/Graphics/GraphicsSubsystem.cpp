@@ -249,7 +249,7 @@ namespace Enjon
 			if (ImGui::BeginDock("Graphics", &mShowGraphicsOptionsWindow))
 			{
 				// Print docking information
-				ShowGraphicsWindow(&mShowGraphicsOptionsWindow);
+				ShowGraphicsWindow();
 			}
 			ImGui::EndDock();
 		};
@@ -270,8 +270,8 @@ namespace Enjon
 		assert( guiContext->GetContext( ) != nullptr );
 
 		// Register graphics options with main window menus ( still hate the way this looks, but it's better than before )
-		//guiContext->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
-		//guiContext->RegisterWindow("Graphics", showGraphicsViewportFunc);
+		guiContext->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
+		guiContext->RegisterWindow("Graphics", showGraphicsViewportFunc);
 		//guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
 		//guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
 
@@ -694,6 +694,7 @@ namespace Enjon
 				// Grab graphics context
 				//gfxCtx = world->GetContext< GraphicsSubsystemContext >( );
 
+				// This needs to be much more flexible than it currently is...
 				if ( gfxCtx->GetEnableRenderWorld() )
 				{
 					// Gbuffer pass
@@ -705,7 +706,7 @@ namespace Enjon
 					// Luminance Pass
 					LuminancePass( gfxCtx );
 					// Bloom pass
-					BloomPass( gfxCtx);
+					BloomPass( gfxCtx );
 					// Composite Pass
 					CompositePass( mLightingBuffer, gfxCtx );
 					// Motion Blur Pass
@@ -2125,7 +2126,7 @@ namespace Enjon
 
 	//======================================================================================================
 
-	void GraphicsSubsystem::ShowGraphicsWindow(bool* p_open)
+	void GraphicsSubsystem::ShowGraphicsWindow()
 	{
 	    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.65f);                                 // Right align, keep 140 pixels for labels
 

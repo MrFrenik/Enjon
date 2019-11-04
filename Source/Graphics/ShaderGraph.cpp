@@ -1726,6 +1726,13 @@ namespace Enjon
 					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
 				}
 
+				NodeLink* opacityLink = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Opacity" ) );
+				if ( opacityLink )
+				{
+					NodeLink* l = opacityLink;
+					code += const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDeclaration( );
+				}
+
 			} break;
 		}
 
@@ -1805,13 +1812,47 @@ namespace Enjon
 					{
 						code += OutputErrorBlock( "INVALID: BaseColor: Incorrect Link: " + l->mConnectingNode->mName + ";" );
 					}
-
 				}
 				// Default base color
 				else
 				{
 					Enjon::String baseColor = const_cast<ShaderGraphNodeTemplate*> ( mMainSurfaceNode.mTemplate )->GetInput( "BaseColor" )->mDefaultValue;
 					code += OutputTabbedLine( "AlbedoOut = " + baseColor + ";\n" );
+				}
+
+				// Opacity
+				code += OutputTabbedLine( "// Opacity" );
+				link = const_cast< NodeLink* >( mMainSurfaceNode.GetLink( "Opacity" ) );
+				if ( link )
+				{
+					NodeLink* l = link;
+					if ( !l->mConnectingNode->IsDefined( ) )
+					{
+						code += OutputTabbedLine( const_cast< ShaderGraphNode* >( l->mConnectingNode )->EvaluateVariableDefinition( ) );
+					}
+
+					if ( l->mFrom )
+					{
+						// Get code evaluation at link output
+						Enjon::String linkEval = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputCodeAt( l->mFrom->mName );
+
+						// Get output type so we can transform correctly
+						Enjon::String fromOutputType = const_cast<ShaderGraphNode*>( l->mConnectingNode )->EvaluateOutputTypeAt( l->mFrom->mName );
+
+						// Transform this type to required type for output ( could make this more specific to get away from branches )
+						linkEval = ShaderGraph::TransformOutputType( linkEval, fromOutputType, "float" ); 
+
+						code += OutputTabbedLine( "if ( " + linkEval + " < 0.5 ) discard;" );
+					}
+					else
+					{
+						code += OutputErrorBlock( "INVALID: Opacity: Incorrect Link: " + l->mConnectingNode->mName + ";" );
+					}
+				}
+				// Default base color
+				else
+				{
+					// Nothing for default opacity
 				}
 
 				// Normals

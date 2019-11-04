@@ -37,6 +37,7 @@ void main()
 	// Base Color
 	AlbedoOut = vec4( 1.0, 1.0, 1.0, 1.0 );
 
+	// Opacity
 	// Normal
 	NormalsOut = vec4( fs_in.TBN[2], 1.0 );
 

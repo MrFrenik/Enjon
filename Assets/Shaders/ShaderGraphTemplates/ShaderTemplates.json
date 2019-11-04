@@ -1002,6 +1002,10 @@
 				"WorldPositionOffset": {
 					"PrimitiveType": "vec3",
 					"Default": "vec3( 0.0, 0.0, 0.0 )"
+				},
+				"Opacity": {
+					"PrimitiveType": "float",
+					"Default": "1.0"
 				}
 			},
 			"Outputs": {

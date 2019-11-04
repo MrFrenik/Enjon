@@ -24,7 +24,8 @@ void main()
 	// Calculate luminance of scene
 	float brightness = dot(FragColor, vec3(0.2126, 0.7152, 0.0722));
 
-	if (brightness > u_threshold || length(EmissiveColor) != 0)
+	//if (brightness > u_threshold || length(EmissiveColor) > u_threshold)
+	if (brightness > u_threshold)
 	{
 		vec3 op = clamp(FragColor, vec3(0), vec3(256));
 		color = vec4(op * 0.1, 1.0) + vec4( max( vec3( 0.0 ), EmissiveColor ), 1.0);
