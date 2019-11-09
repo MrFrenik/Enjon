@@ -56,7 +56,5 @@ void main( void ) {
       Color = vec4(rgbA, 1.0);
     }else{
         Color.xyz=rgbB;
-    }
-
-	Color.xyz = texture(tex, fs_in.TexCoords).rgb;
+    } 
 }
