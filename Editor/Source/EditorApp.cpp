@@ -626,10 +626,10 @@ namespace Enjon
 					ShutdownProjectApp( nullptr );
 				}
 
-				GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-				auto cam = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >();
-				cam->SetPosition( mPreviousCameraTransform.GetPosition() );
-				cam->SetRotation( mPreviousCameraTransform.GetRotation() ); 
+				//GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+				//auto cam = gfx->GetGraphicsSceneCamera( )->ConstCast< Camera >();
+				//cam->SetPosition( mPreviousCameraTransform.GetPosition() );
+				//cam->SetRotation( mPreviousCameraTransform.GetRotation() ); 
 
 				mProject.KillSandbox();
 
@@ -643,8 +643,8 @@ namespace Enjon
 				{
 					// Want to send a serialized message to the sandbox
 					SetApplicationState( ApplicationState::Paused );
-					PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
-					physx->PauseSystem( true );
+					//PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
+					//physx->PauseSystem( true );
 				} 
 			} 
 			else
@@ -653,8 +653,8 @@ namespace Enjon
 				if ( ImGui::Button( "Resume" ) )
 				{
 					SetApplicationState( ApplicationState::Running );
-					PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
-					physx->PauseSystem( false );
+					//PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
+					//physx->PauseSystem( false );
 				} 
 			}
 		}
@@ -675,9 +675,9 @@ namespace Enjon
 					mPlaying = true;
 					//mMoveCamera = true; 
 
-					GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
-					auto cam = gfx->GetGraphicsSceneCamera( );
-					mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) ); 
+					//GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
+					//auto cam = gfx->GetGraphicsSceneCamera( );
+					//mPreviousCameraTransform = Enjon::Transform( cam->GetPosition(), cam->GetRotation(), Enjon::Vec3( cam->GetOrthographicScale() ) ); 
 
 					//// Call start up function for game
 					//if ( mProject.GetApplication() )
@@ -1144,7 +1144,7 @@ namespace Enjon
 		if ( app && scene )
 		{
 			// Set application state to running
-			SetApplicationState( ApplicationState::Running );
+			//SetApplicationState( ApplicationState::Running );
 
 			// Cache off all entity handles in scene before app starts
 			EntityManager* em = EngineSubsystem( EntityManager );
@@ -1158,8 +1158,8 @@ namespace Enjon
 			app->Initialize( );
 
 			// Turn on the physics simulation
-			PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
-			physx->PauseSystem( false ); 
+			//PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
+			//physx->PauseSystem( false ); 
 
 			// Turn off the selection widget
 			mTransformWidget.Enable( false );
@@ -2506,8 +2506,8 @@ static f32 dts = 72.f;
 					ShutdownProjectApp( nullptr );
 				}
 
-				camera->SetPosition( mPreviousCameraTransform.GetPosition() );
-				camera->SetRotation( mPreviousCameraTransform.GetRotation() );
+				//camera->SetPosition( mPreviousCameraTransform.GetPosition() );
+				//camera->SetRotation( mPreviousCameraTransform.GetRotation() );
 			}
 		} 
 
