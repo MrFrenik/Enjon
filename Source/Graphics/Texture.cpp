@@ -416,13 +416,13 @@ namespace Enjon
 					} break;
 				}
 
-				s32 MAG_PARAM = GL_LINEAR;
-				s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
-				b8 genMips = true;
+				//s32 MAG_PARAM = GL_LINEAR;
+				//s32 MIN_PARAM = GL_LINEAR_MIPMAP_LINEAR;
+				//b8 genMips = true;
 				
-				//s32 MAG_PARAM = GL_NEAREST;
-				//s32 MIN_PARAM = GL_NEAREST;
-				//b8 genMips = false;
+				s32 MAG_PARAM = GL_NEAREST;
+				s32 MIN_PARAM = GL_NEAREST;
+				b8 genMips = false;
 
 				// Anisotropic filtering
 				float aniso = 0.0f;

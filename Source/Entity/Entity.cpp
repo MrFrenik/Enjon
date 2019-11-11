@@ -42,6 +42,7 @@ namespace Enjon
 
 			for ( auto& c : GetComponents( ) )
 			{
+				bool removed = false;
 				if ( ImGui::CollapsingHeader( c->Class( )->GetName( ).c_str( ) ) )
 				{
 					ImGui::PushFont( igm->GetFont( "WeblySleek_14" ) );
@@ -51,10 +52,14 @@ namespace Enjon
 					if ( ImGui::Button( Utils::format( "Remove##%zu", (u32)(usize)c ).c_str() ) )
 					{
 						RemoveComponent( c->Class( ) );
+						removed = true;
 					}
 				}
 
-				c->OnViewportDebugDraw(); 
+				if ( !removed )
+				{
+					c->OnViewportDebugDraw(); 
+				} 
 			} 
 
 			/*

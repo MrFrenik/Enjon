@@ -251,7 +251,8 @@ namespace Enjon
 										EngineSubsystem( AssetManager )->RenameAssetFilePath( mSelectedAssetInfo->GetAsset(), finalPath ); 
 
 										// Rename the filepath
-										FS::rename( p, finalPath ); 
+										FS::remove( p ); 
+
 									}
 								}
 								else

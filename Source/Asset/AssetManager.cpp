@@ -1032,6 +1032,8 @@ namespace Enjon
 
 			// Update in the loader
 			a->GetLoader( )->ConstCast< AssetLoader >( )->RenameAssetFilePath( a, path ); 
+
+			a->Save( );
 		}
 	}
 

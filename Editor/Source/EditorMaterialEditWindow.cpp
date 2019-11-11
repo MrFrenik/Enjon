@@ -463,7 +463,7 @@ namespace Enjon
 		guiContext->RegisterMainMenu( "View" );
 
 		// Create viewport
-		mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
+		//mViewport = new EditorViewport( Engine::GetInstance( )->GetApplication( )->ConstCast< EditorApp >( ), this );
 
 		//guiContext->RegisterDockingLayout( GUIDockingLayout( mViewport->GetViewName( ).c_str( ), nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
 
@@ -472,32 +472,48 @@ namespace Enjon
 		//GraphicsSubsystem* gfx = EngineSubsystem( GraphicsSubsystem );
 		//gfx->AddWindow( this );
 
-		World* world = GetWorld( );
-		GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+		//World* world = GetWorld( );
+		//GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
 
 		// Need to create an external scene camera held in the viewport that can manipulate the scene view
-		Camera* cam = scene->GetActiveCamera( );
-		cam->SetNearFar( 0.1f, 1000.0f );
-		cam->SetProjection( ProjectionType::Perspective );
-		cam->SetRotation( Vec3( 180.f, 0.f, 180.f ) );
-		cam->SetPosition( Vec3( 1.0f, 1.0f, -2.5f ) );
+		//Camera* cam = scene->GetActiveCamera( );
+		//cam->SetNearFar( 0.1f, 1000.0f );
+		//cam->SetProjection( ProjectionType::Perspective );
+		//cam->SetRotation( Vec3( 180.f, 0.f, 180.f ) );
+		//cam->SetPosition( Vec3( 1.0f, 1.0f, -2.5f ) );
 
-		mMaterial = new Material( ); 
-		mMaterial->SetShaderGraph( EngineSubsystem( AssetManager )->GetAsset< ShaderGraph >( "shaders.shadergraphs.defaultstaticgeom" ) );
-		mMaterial->SetUniform( "albedoMap", mTexture );
-		mMaterial->SetUniform( "metallicMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.black" ) );
-		mMaterial->SetUniform( "roughMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.white" ) );
-		mMaterial->SetUniform( "emissiveMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.black" ) );
-		mMaterial->SetUniform( "aoMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.white" ) );
-		mMaterial->SetUniform( "normalMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.blue" ) );
+		//mMaterial = new Material( ); 
+		//mMaterial->SetShaderGraph( EngineSubsystem( AssetManager )->GetAsset< ShaderGraph >( "shaders.shadergraphs.defaultstaticgeom" ) );
+		//mMaterial->SetUniform( "albedoMap", mTexture );
+		//mMaterial->SetUniform( "metallicMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.black" ) );
+		//mMaterial->SetUniform( "roughMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.white" ) );
+		//mMaterial->SetUniform( "emissiveMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.black" ) );
+		//mMaterial->SetUniform( "aoMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.white" ) );
+		//mMaterial->SetUniform( "normalMap", EngineSubsystem( AssetManager )->GetAsset< Texture >( "textures.blue" ) );
 
 		// Set as quad
 		// Need to set material of it
-		mRenderable.SetMesh( EngineSubsystem( AssetManager )->GetDefaultAsset< Mesh >( ) );
-		//mRenderable.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
-		mRenderable.SetScale( 2.0f );
-		mRenderable.SetMaterial( mMaterial );
-		scene->AddStaticMeshRenderable( &mRenderable );
+		//mRenderable.SetMesh( EngineSubsystem( AssetManager )->GetDefaultAsset< Mesh >( ) );
+		////mRenderable.SetPosition( cam->GetPosition( ) + cam->Forward( ) * 5.0f );
+		//mRenderable.SetScale( 2.0f );
+		//mRenderable.SetMaterial( mMaterial );
+		//scene->AddStaticMeshRenderable( &mRenderable );
+
+		guiContext->RegisterWindow( "Texture", [ & ] ( )
+		{
+			if ( ImGui::BeginDock( "Texture" ) )
+			{
+				if ( mTexture )
+				{
+					ImTextureID texId = Int2VoidP( mTexture->GetTextureId( ) );
+					ImVec2 a = ImVec2( ImGui::GetWindowPos() + ImGui::GetWindowSize() / 2.f );
+					ImVec2 b = a + Vec2( mTexture->GetWidth(), mTexture->GetHeight() );
+					ImDrawList* dl = ImGui::GetWindowDrawList( );
+					dl->AddImage( texId, a, b );
+				}
+			}
+			ImGui::EndDock( );
+		});
 
 		guiContext->RegisterWindow( "Properties", [ & ]
 		{
@@ -506,18 +522,17 @@ namespace Enjon
 				if ( mTexture )
 				{
 
-					World* world = GetWorld( );
-					GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
+					//World* world = GetWorld( );
+					//GraphicsScene* scene = world->GetContext< GraphicsSubsystemContext >( )->GetGraphicsScene( );
 					ImGui::Text( "%s", Utils::format( "Texture: %s", mTexture.Get( )->GetName().c_str() ).c_str( ) );
 					ImGuiManager* igm = EngineSubsystem( ImGuiManager );
 					igm->InspectObject( mTexture.Get() ); 
-					igm->InspectObject( mMaterial );
+					//igm->InspectObject( mMaterial );
 					//igm->InspectObject( &mRenderable );
 					//igm->InspectObject( scene->GetActiveCamera() ); 
 				} 
-
-				ImGui::EndDock( );
-			}
+			} 
+			ImGui::EndDock( );
 		} );
 
 		auto saveTextureOption = [ & ] ( )
@@ -534,9 +549,9 @@ namespace Enjon
 		// Register menu options
 		guiContext->RegisterMenuOption( "File", "Save##save_tex_options", saveTextureOption );
 
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Viewport", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
-		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Viewport", GUIDockSlotType::Slot_Left, 0.45f ) );
-		guiContext->SetActiveDock( "Viewport" );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Texture", nullptr, GUIDockSlotType::Slot_Tab, 1.0f ) );
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Properties", "Texture", GUIDockSlotType::Slot_Left, 0.45f ) );
+		guiContext->SetActiveDock( "Texture" );
 		guiContext->Finalize( );
 	}
 

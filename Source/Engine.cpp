@@ -89,7 +89,7 @@ namespace Enjon
 		SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE,    8);
 
 		// Set on vsync by default
-		SDL_GL_SetSwapInterval( 1 );
+		SDL_GL_SetSwapInterval( 0 );
 
 	#endif
 
@@ -345,7 +345,7 @@ namespace Enjon
 			mWorldTime.CalculateAverageDeltaTime( );
 
 			// TODO(John): This is still incorrect. Need to fix.
-			mWorldTime.mFPS = 1.f / mWorldTime.mAverageDT;
+			mWorldTime.mFPS = 1.f / mWorldTime.mAverageDT; 
 			
 			// Clamp frame rate to ease up on CPU usage
 			static f32 t = 0.0f;

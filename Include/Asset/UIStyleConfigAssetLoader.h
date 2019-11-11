@@ -261,15 +261,15 @@ namespace Enjon
 	ENJON_ENUM()
 	enum class UIElementEdge
 	{
-		YGEdgeLeft,
-		YGEdgeTop,
-		YGEdgeRight,
-		YGEdgeBottom,
-		YGEdgeStart,
-		YGEdgeEnd,
-		YGEdgeHorizontal,
-		YGEdgeVertical,
-		YGEdgeAll 
+		EdgeLeft,
+		EdgeTop,
+		EdgeRight,
+		EdgeBottom,
+		EdgeStart,
+		EdgeEnd,
+		EdgeHorizontal,
+		EdgeVertical,
+		EdgeAll 
 	};
 
 	ENJON_ENUM()
@@ -284,9 +284,9 @@ namespace Enjon
 	enum class UIElementFlexDirection
 	{
 		FlexDirectionColumn,
-		FlexDirectionColumnReverse,
+		//FlexDirectionColumnReverse,
 		FlexDirectionRow,
-		FlexDirectionRowReverse
+		//FlexDirectionRowReverse
 	};
 
 	ENJON_ENUM()
@@ -295,22 +295,22 @@ namespace Enjon
 		JustifyFlexStart,
 		JustifyCenter,
 		JustifyFlexEnd,
-		JustifySpaceBetween,
-		JustifySpaceAround,
-		JustifySpaceEvenly
+		//JustifySpaceBetween,
+		//JustifySpaceAround,
+		//JustifySpaceEvenly
 	};
 
 	ENJON_ENUM()
 	enum class UIElementAlignment
 	{ 
-		AlignAuto,
+		//AlignAuto,
 		AlignFlexStart,
 		AlignCenter,
 		AlignFlexEnd,
-		AlignStretch,
-		AlignBaseline,
-		AlignSpaceBetween,
-		AlignSpaceAround
+		//AlignStretch,
+		//AlignBaseline,
+		//AlignSpaceBetween,
+		//AlignSpaceAround
 	}; 
 
 	ENJON_ENUM()
@@ -334,13 +334,13 @@ namespace Enjon
 			UIElementJustification mJustification = UIElementJustification::JustifyFlexStart;
 
 			ENJON_PROPERTY()
-			UIElementAlignment mAlignContent = UIElementAlignment::AlignAuto;
+			UIElementAlignment mAlignContent = UIElementAlignment::AlignCenter;
 
 			ENJON_PROPERTY()
-			UIElementAlignment mAlignSelf = UIElementAlignment::AlignAuto;
+			UIElementAlignment mAlignSelf = UIElementAlignment::AlignCenter;
 
-			ENJON_PROPERTY()
-			UIElementAlignment mAlignItems = UIElementAlignment::AlignAuto;
+			//ENJON_PROPERTY()
+			//UIElementAlignment mAlignItems = UIElementAlignment::AlignAuto;
 
 			ENJON_PROPERTY()
 			UIElementDirection mDirection = UIElementDirection::DirectionInherit;

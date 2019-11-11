@@ -54,6 +54,11 @@ namespace Enjon
 			virtual void Init( const WindowParams& params ) override; 
 			virtual void Update() override;
 
+			void SetUI( const AssetHandle< UI >& ui ) 
+			{
+				mUI = ui;
+			}
+
 		protected:
 
 			void ConstructScene();

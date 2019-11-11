@@ -128,35 +128,10 @@ namespace Enjon
 		{
 			if ( wi->Class()->InstanceOf< EditorUICanvasWindow >() )
 			{
-				f32 w = wi->GetScreenWidth();
-				f32 h = wi->GetScreenHeight();
-
-				bool refreshSize = false;
-				if ( input->IsKeyPressed( KeyCode::Up ) ) {
-					h += 10.f;
-					refreshSize = true;
-				}
-				if ( input->IsKeyPressed( KeyCode::Down ) ) {
-					h -= 10.f;
-					refreshSize = true;
-				}
-				if ( input->IsKeyPressed( KeyCode::Left ) ) {
-					w -= 10.f;
-					refreshSize = true;
-				}
-				if ( input->IsKeyPressed( KeyCode::Right ) ) {
-					w += 10.f;
-					refreshSize = true;
-				} 
-
-				if ( refreshSize ) {
-					//printf( "Size: <%.2f, %.2f>\n", w, h ); 
-					wi->SetSize( iVec2( w, h ) );
-				}
+				wi->ConstCast< EditorUICanvasWindow >( )->SetUI( mUI );
 				break;
 			}
-		}
-
+		} 
 	}
 
 	//=================================================================================
@@ -166,9 +141,9 @@ namespace Enjon
 		static ImVec2 onClickPos = ImVec2( 0.f, 0.f );
 		static bool justClicked = false;
 		bool isHovered = ImGui::IsMouseHoveringWindow();
-		bool isMouseDown = ImGui::IsMouseDown( 0 );
-		bool isMouseClicked = ImGui::IsMouseClicked( 0 );
-		bool isMouseReleased = ImGui::IsMouseReleased( 0 );
+		bool isMouseDown = ImGui::IsMouseDown( 1 );
+		bool isMouseClicked = ImGui::IsMouseClicked( 1 );
+		bool isMouseReleased = ImGui::IsMouseReleased( 1 );
 		ImVec2 mp = ImGui::GetMousePos(); 
 		ImVec2 delta = ImVec2( 0.f, 0.f );
 
@@ -180,15 +155,11 @@ namespace Enjon
 		} 
 
 		// Drag
-		if ( justClicked && isMouseDown && !mSelectedElement )
+		if ( justClicked && isMouseDown )
 		{
 			delta = ImVec2( mp.x - onClickPos.x, mp.y - onClickPos.y ); 
 			onClickPos = mp;
-		}
-
-		//Utils::TempBuffer buffer = Utils::TransientBuffer( "Delta: <%.2f, %.2f>, MP: <%.2f, %.2f>, OCP: <%.2f, %.2f>", 
-		//										delta.x, delta.y, mp.x, mp.y, onClickPos.x, onClickPos.y );
-		//printf( "%s\n", buffer );
+		} 
 
 		// Reset
 		if ( isMouseReleased )
@@ -583,11 +554,10 @@ namespace Enjon
 					u32 sh = w->GetScreenHeight();
 					GraphicsSubsystemContext* ctx = w->GetWorld()->GetContext< GraphicsSubsystemContext >(); 
 					mCamera.SetAspectRatio( (f32 )sh / (f32 )sw ); 
-					//mCamera.SetAspectRatio( 1.f); 
 
 					bool win_hov = ImGui::IsMouseHoveringWindow(); 
 					
-					ImVec2 delta = HandleMousePan(); 
+					ImVec2 delta = HandleMousePan() * ImVec2( mCamera.GetAspectRatio(), 1.f ); 
 					
 					// Move camera
 					mCamera.SetPosition( mCamera.GetPosition() - Vec3( delta.x, delta.y, 0.f ) ); 
@@ -611,6 +581,13 @@ namespace Enjon
 					dl->AddImage( img, va, vb, ImVec2( 0, 1 ), ImVec2( 1, 0 ) );
 
 					DrawUIElementsRecursive( &mUI->mRoot ); 
+
+					if ( input->IsKeyPressed( KeyCode::Delete ) && mSelectedElement && ( mSelectedElement != &mUI->mRoot ) )
+					{ 
+						// Delete and deselect ui element
+						delete( mSelectedElement );
+						DeselectElement( );
+					}
 				} 
 				ImGui::ListBoxFooter();
 
@@ -623,14 +600,14 @@ namespace Enjon
 
 	void EditorUIEditWindow::ExplicitDestructor()
 	{ 
-		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
-		for ( auto& w : ws->GetWindows() )
-		{
-			if ( w->Class()->InstanceOf< EditorUICanvasWindow >() )
-			{ 
-				ws->DestroyWindow( w->GetWindowID() );
-			}
-		}
+		//WindowSubsystem* ws = EngineSubsystem( WindowSubsystem );
+		//for ( auto& w : ws->GetWindows() )
+		//{
+		//	if ( w->Class()->InstanceOf< EditorUICanvasWindow >() )
+		//	{ 
+		//		ws->DestroyWindow( w->GetWindowID() );
+		//	}
+		//}
 	}
 
 	//=================================================================================
@@ -682,26 +659,23 @@ namespace Enjon
 						{
 							UIElementButton* button = (UIElementButton*)mUI->mRoot.AddChild( new UIElementButton() );
 							//button->SetPosition( )
-							//button->mPosition = Vec2( 20.f, 20.f );
 							button->SetSize( Vec2( 20.f, 10.f ) );
-							button->mID = "Button";
+							button->mID = "#button";
 						}
 
 						if ( ImGui::Selectable( "Text Box" ) )
 						{
 							UIElementText* text = (UIElementText*)mUI->mRoot.AddChild( new UIElementText() );
-							//text->mPosition = Vec2( 20.f, 20.f );
 							text->SetSize( Vec2( 20.f, 10.f ) );
-							text->mID = "Text";
+							text->mID = "#text";
 							text->mText = "Text";
 						} 
 
 						if ( ImGui::Selectable( "Image" ) )
 						{
 							UIElementImage* image = (UIElementImage*)mUI->mRoot.AddChild( new UIElementImage() );
-							//image->mPosition = Vec2( 20.f, 20.f );
 							image->SetSize( Vec2( 20.f, 10.f ) );
-							image->mID = "Image"; 
+							image->mID = "#image"; 
 						}
 					} 
 				}
@@ -843,6 +817,24 @@ namespace Enjon
 
 		GUIContext* gCtx = GetGUIContext();
 		gCtx->SetUIStyleConfig( mUI->mStyleConfig ); 
+
+		mUI->CalculateLayout( GetScreenWidth( ), GetScreenHeight( ) );
+
+		WindowSubsystem* ws = EngineSubsystem( WindowSubsystem ); 
+		bool found = false;
+		for ( auto& wi : ws->GetWindows() )
+		{
+			if ( wi->Class()->InstanceOf< EditorUIEditWindow >() )
+			{
+				found = true;
+				break;
+			}
+		} 
+
+		if ( !found )
+		{
+			ws->DestroyWindow( GetWindowID( ) );
+		} 
 	}
 
 	//================================================================================= 

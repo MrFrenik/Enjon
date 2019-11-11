@@ -7,6 +7,7 @@
 #include "ImGui/imgui_dock.h"
 
 #include "Math/Vec2.h"
+#include "Math/Vec3.h"
 #include "Graphics/Color.h"
 #include "System/Types.h"
 #include "Asset/UIStyleConfigAssetLoader.h"
@@ -34,6 +35,79 @@ namespace Enjon
 	class MetaPropertyHashMapBase;
 	class MetaProperty;
 	class Engine; 
+
+	//==================================================================
+
+	// Helper ImGui math functions
+	static inline f32 ImVec2Length( const ImVec2& v )
+	{
+		return std::sqrt( v.x * v.x + v.y * v.y );
+	}
+
+	static inline ImVec2 operator+( const ImVec2& lhs, const ImVec2& rhs )
+	{
+		return ImVec2( lhs.x + rhs.x, lhs.y + rhs.y );
+	}
+
+	static inline ImVec2 operator+( const ImVec2& lhs, const Vec2& rhs )
+	{
+		return ImVec2( lhs.x + rhs.x, lhs.y + rhs.y );
+	}
+
+	static inline ImVec2 operator+=( const ImVec2& lhs, const ImVec2& rhs )
+	{
+		return ( lhs + rhs );
+	} 
+
+	static inline ImVec2 operator+=( const ImVec2& lhs, const Vec2& rhs )
+	{
+		return ( lhs + rhs );
+	} 
+
+	static inline ImVec2 operator-( const ImVec2& lhs, const ImVec2& rhs )
+	{
+		return ImVec2( lhs.x - rhs.x, lhs.y - rhs.y );
+	}
+
+	static inline ImVec2 operator-( const ImVec2& lhs, const Vec2& rhs )
+	{
+		return ImVec2( lhs.x - rhs.x, lhs.y - rhs.y ); 
+	}
+
+	static inline ImVec2 operator*( const ImVec2& lhs, const f32& scalar )
+	{
+		return ImVec2( lhs.x * scalar, lhs.y * scalar );
+	}
+
+	static inline ImVec2 operator*( const ImVec2& lhs, const ImVec2& rhs )
+	{
+		return ImVec2( lhs.x * rhs.x, lhs.y * rhs.y );
+	}
+
+	static inline ImVec2 operator/( const ImVec2& lhs, const f32& scalar )
+	{
+		return ImVec2( lhs.x / scalar, lhs.y / scalar );
+	}
+
+	static inline ImVec2 ImRotate( const ImVec2& v, const f32& cosA, const f32& sinA )
+	{
+		return ImVec2( v.x * cosA - v.y * sinA, v.x * sinA + v.y * cosA );
+	}
+
+	static inline ImColor ColorToImColor( const ColorRGBA32& color )
+	{
+		return ImColor( color.r, color.g, color.b, color.a );
+	}
+
+	static inline ImVec2 Vec2ToImVec2( const Vec2& v )
+	{
+		return ImVec2( v.x, v.y );
+	}
+
+	static inline ImVec2 Vec3ToImVec2( const Vec3& v )
+	{
+		return ImVec2( v.x, v.y );
+	}
 
 	using GUICallbackFunc = std::function<void( )>;
 

@@ -68,14 +68,28 @@ namespace Enjon
 
 	void UIElementText::OnUI()
 	{
-		// Just trying some ways to apply styles here ( want a unified way of doing this )
-		//YGNodeStyleSetWidthAuto( mYogaNode );
-		//YGNodeStyleSetFlexGrow( mYogaNode, 1 ); 
-		SetInlineStyles( mInlineStyles );
+		Vec2 pos = GetCalculatedLayoutPosition( );
+		Vec2 sz = GetCalculatedLayoutSize( );
+		ImVec2 textSz = ImGui::CalcTextSize( mText.c_str( ) );
 
-		Vec2 pos = GetCalculatedLayoutPosition();
-		Vec2 sz = GetCalculatedLayoutSize(); 
-		ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) );
+		ImVec2 cp;
+
+		// Calculate position based on alignment of text within box
+		switch ( mTextJustification )
+		{
+			case UIElementJustification::JustifyCenter:		cp.x = pos.x + ( sz.x - textSz.x ) / 2.f;	break; 
+			case UIElementJustification::JustifyFlexStart:	cp.x = pos.x;								break; 
+			case UIElementJustification::JustifyFlexEnd:	cp.x = pos.x + ( sz.x - textSz.x );			break;
+		}
+
+		switch ( mTextAlignment )
+		{ 
+			case UIElementAlignment::AlignCenter:		cp.y = pos.y + ( sz.y - textSz.y ) / 2.f;		break; 
+			case UIElementAlignment::AlignFlexStart:	cp.y = pos.y;									break;
+			case UIElementAlignment::AlignFlexEnd:		cp.y = pos.y + ( sz.y - textSz.y );				break;
+		}
+
+		ImGui::SetCursorScreenPos( cp );
 		ImGui::PushID( (usize)(intptr_t)this );
 		{
 			mOnSetText( this );
@@ -88,16 +102,11 @@ namespace Enjon
 
 	void UIElementButton::OnUI()
 	{ 
-		SetInlineStyles( mInlineStyles );
-		//ImVec2 cp = ImGui::GetCursorPos( );
-		//ImGui::SetCursorPos( ImVec2( cp.x + mPosition.x, cp.y + mPosition.y ) ); 
-		//YGNodeStyleSetWidthAuto( mYogaNode );
-		//YGNodeStyleSetFlexGrow( mYogaNode, 1 ); 
 		Vec2 pos = GetCalculatedLayoutPosition();
 		Vec2 sz = GetCalculatedLayoutSize(); 
-		ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) );
+		ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) ); 
 		ImGui::PushID( (usize )(intptr_t )this );
-		if ( ImGui::Button( mID.c_str(), ImVec2( sz.x, sz.y ) ) )
+		if ( ImGui::Button( mText.c_str(), ImVec2( sz.x, sz.y ) ) )
 		{
 			mOnClick( this );
 		}
@@ -108,11 +117,6 @@ namespace Enjon
 
 	void UIElementImage::OnUI()
 	{
-		SetInlineStyles( mInlineStyles );
-		//ImVec2 cp = ImGui::GetCursorPos( );
-		//ImGui::SetCursorPos( ImVec2( cp.x + mPosition.x, cp.y + mPosition.y ) );
-		//YGNodeStyleSetWidthAuto( mYogaNode );
-		//YGNodeStyleSetFlexGrow( mYogaNode, 1 ); 
 		Vec2 pos = GetCalculatedLayoutPosition();
 		Vec2 sz = GetCalculatedLayoutSize(); 
 		ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) );
@@ -126,8 +130,6 @@ namespace Enjon
 
 	void UIElementCanvas::OnUI()
 	{
-		SetInlineStyles( mInlineStyles );
-
 		Vec2 pos = GetCalculatedLayoutPosition();
 		Vec2 sz = GetCalculatedLayoutSize();
 		ImGui::SetNextWindowPos( ImVec2( pos.x, pos.y ) );
@@ -157,49 +159,27 @@ namespace Enjon
 
 	void UIElement::ExplicitConstructor()
 	{
-		//mYogaNode = YGNodeNew();
 	}
 
 	//=================================================================================
 
 	void UIElement::ExplicitDestructor()
 	{ 
+		for ( auto& c : mChildren )
+		{
+			RemoveChild( c );
+		}
+
+		RemoveFromParent( );
+
+		mChildren.clear( );
 	}
 
 	//================================================================================= 
 
 	void UIElement::SetInlineStyles( const UIStyleSettings& styles )
 	{
-		mInlineStyles = styles;
-
-		// Need to update sll yoga styles based on these
-		//YGNodeStyleSetFlexGrow( mYogaNode, mInlineStyles.mFlexGrow );
-		//YGNodeStyleSetFlexShrink( mYogaNode, mInlineStyles.mFlexShrink );
-		//YGNodeStyleSetFlexDirection( mYogaNode, (YGFlexDirection)mInlineStyles.mFlexDirection ); 
-
-		//YGNodeStyleSetJustifyContent( mYogaNode, (YGJustify)mInlineStyles.mJustification );
-		//YGNodeStyleSetAlignContent( mYogaNode, (YGAlign)mInlineStyles.mAlignContent );
-		//YGNodeStyleSetAlignItems( mYogaNode, (YGAlign)mInlineStyles.mAlignItems );
-		//YGNodeStyleSetAlignSelf( mYogaNode, (YGAlign)mInlineStyles.mAlignSelf ); 
-
-		//YGNodeStyleSetPadding( mYogaNode, YGEdgeLeft, mInlineStyles.mPadding.x );
-		//YGNodeStyleSetPadding( mYogaNode, YGEdgeTop, mInlineStyles.mPadding.y );
-		//YGNodeStyleSetPadding( mYogaNode, YGEdgeRight, mInlineStyles.mPadding.z );
-		//YGNodeStyleSetPadding( mYogaNode, YGEdgeBottom, mInlineStyles.mPadding.w );
-
-		//YGNodeStyleSetMargin( mYogaNode, YGEdgeLeft, mInlineStyles.mMargin.x );
-		//YGNodeStyleSetMargin( mYogaNode, YGEdgeTop, mInlineStyles.mMargin.y );
-		//YGNodeStyleSetMargin( mYogaNode, YGEdgeRight, mInlineStyles.mMargin.z );
-		//YGNodeStyleSetMargin( mYogaNode, YGEdgeBottom, mInlineStyles.mMargin.w );
-
-		//YGNodeStyleSetWidth( mYogaNode, mInlineStyles.mSize.x );
-		//YGNodeStyleSetHeight( mYogaNode, mInlineStyles.mSize.y ); 
-
-		//YGNodeStyleSetPositionType( mYogaNode, (YGPositionType)mInlineStyles.mPositionType );
-		//YGNodeStyleSetPosition( mYogaNode, YGEdgeLeft, mInlineStyles.mPosition.x );
-		//YGNodeStyleSetPosition( mYogaNode, YGEdgeTop, mInlineStyles.mPosition.y );
-		//YGNodeStyleSetPosition( mYogaNode, YGEdgeRight, mInlineStyles.mPosition.z );
-		//YGNodeStyleSetPosition( mYogaNode, YGEdgeBottom, mInlineStyles.mPosition.w ); 
+		mInlineStyles = styles; 
 	}
 
 	//=================================================================================
@@ -207,8 +187,6 @@ namespace Enjon
 	void UIElement::SetSize( const Vec2& size )
 	{
 		mInlineStyles.mSize = size; 
-		//YGNodeStyleSetWidth( mYogaNode, mInlineStyles.mSize.x );
-		//YGNodeStyleSetHeight( mYogaNode, mInlineStyles.mSize.y ); 
 	}
 
 	//=================================================================================
@@ -242,17 +220,6 @@ namespace Enjon
 		// Deserialize all properties first
 		ObjectArchiver::DeserializeObjectDataDefault( this, this->Class(), buffer ); 
 
-		// Construct yoga node
-		//mYogaNode = YGNodeNew();
-
-		// Set up random style stuff
-		//YGNodeStyleSetFlexDirection( mYogaNode, YGFlexDirectionColumn );
-		//YGNodeStyleSetPadding( mYogaNode, YGEdgeAll, 0 );
-		//YGNodeStyleSetMargin( mYogaNode, YGEdgeAll, 0 );
-
-		//YGNodeStyleSetWidth( mYogaNode, mSize.x );
-		//YGNodeStyleSetHeight( mYogaNode, mSize.y );
-
 		// Read in child count
 		u32 childCount = buffer->Read< u32 >(); 
 		mChildren.resize( childCount );
@@ -265,16 +232,7 @@ namespace Enjon
 
 			// Add child to list
 			mChildren.at( i ) = child; 
-
-			// Set up child's yoga parent 
-			//YGNodeInsertChild( mYogaNode, child->mYogaNode, i );
 		} 
-
-		if ( !childCount )
-		{
-			//YGNodeStyleSetWidthAuto( mYogaNode );
-			//YGNodeStyleSetFlexGrow( mYogaNode, 1 ); 
-		}
 
 		// Force inline styles to be set
 		SetInlineStyles( mInlineStyles ); 
@@ -286,10 +244,8 @@ namespace Enjon
 
 	UIElement* UIElement::AddChild( UIElement* element )
 	{
-		mChildren.push_back( element );
-
-		// Push back child into yoga node tree
-		//YGNodeInsertChild( mYogaNode, element->mYogaNode, YGNodeGetChildCount( mYogaNode ) );
+		mChildren.push_back( element ); 
+		element->mParent = this;
 
 		return element;
 	}
@@ -297,50 +253,270 @@ namespace Enjon
 	//=================================================================================
 	
 	UIElement* UIElement::RemoveChild( UIElement* element )
-	{
-		// Swap and pop? Not safe to do this operation during a GUI call
-		std::remove( mChildren.begin(), mChildren.end(), element );
+	{ 
+		if ( !element || element->mParent != this )
+		{
+			return element;
+		}
 
-		// Not sure how to remove this out of the tree just yet...
+		auto it = std::find( mChildren.begin( ), mChildren.end( ), element );
+		mChildren.erase( it ); 
+
+		// Set to this element's parent
+		element->mParent = mParent; 
 
 		return element;
 	}
 
 	//=================================================================================
 
+	void UIElement::RemoveFromParent( )
+	{
+		if ( mParent )
+		{
+			mParent->RemoveChild( this );
+		} 
+	}
+
+	//=================================================================================
+
 	Vec2 UIElement::GetCalculatedLayoutPosition()
 	{
-		return Vec2( mInlineStyles.mPosition.x, mInlineStyles.mPosition.y );
-		//f32 l  = YGNodeLayoutGetLeft( mYogaNode );
-		//f32 t  = YGNodeLayoutGetTop( mYogaNode ); 
-		//return Vec2( l, t );
+		return mCalculatedLayoutPosition;
 	}
 
 	//=================================================================================
 
 	Vec2 UIElement::GetCalculatedLayoutSize()
 	{
-		return Vec2( mInlineStyles.mSize.x, mInlineStyles.mSize.y );
-		//f32 w  = YGNodeLayoutGetWidth( mYogaNode );
-		//f32 h  = YGNodeLayoutGetHeight( mYogaNode ); 
-		//return Vec2( w, h );
+		return mCalculatedLayoutSize;
 	}
 
 	//=================================================================================
 
 	Vec4 UIElement::GetCalculatedLayoutRect()
 	{ 
-		//f32 l  = YGNodeLayoutGetLeft( mYogaNode );
-		//f32 t  = YGNodeLayoutGetTop( mYogaNode );
-		//f32 r  = YGNodeLayoutGetLeft( mYogaNode ) + YGNodeLayoutGetWidth( mYogaNode );
-		//f32 b  = YGNodeLayoutGetTop( mYogaNode ) + YGNodeLayoutGetHeight( mYogaNode ); 
-		//return Vec4( l, t, r, b );
 		Vec2 pos = GetCalculatedLayoutPosition( );
 		Vec2 sz = GetCalculatedLayoutSize( );
 		return Vec4( pos, pos + sz );
 	}
 
 	//=================================================================================
+
+	Vec4 UIElement::CalculateChildBounds( )
+	{
+		Vec4 bounds = Vec4( 0.f );
+
+		// This depends on how everything grows... want to know max width and max height
+		switch ( GetStyleFlexDirection( ) )
+		{
+			case UIElementFlexDirection::FlexDirectionRow:
+			{
+				// Bounds are total width with max height
+				f32 maxHeight = 0.f;
+				for ( auto& c : mChildren )
+				{
+					Vec4 padding = c->GetStylePadding( );
+					Vec4 margin = c->GetStyleMargin( );
+					f32 width = c->GetStyleWidth( );
+					f32 height = c->GetStyleHeight( );
+
+					maxHeight = height > maxHeight ? height : maxHeight;
+
+					bounds.z += width + margin.x + margin.z;
+				}
+
+				bounds.w = maxHeight;
+
+				// Set bounds position, based on justification and alignment ( set main axis alignment, which in this case is X axis )
+				switch ( GetStyleJustification( ) )
+				{
+					case UIElementJustification::JustifyCenter:
+					{
+						bounds.x = mCalculatedLayoutPosition.x + ( mCalculatedLayoutSize.x - bounds.z ) / 2.f;
+					} break;
+					case UIElementJustification::JustifyFlexStart:
+					{
+						bounds.x = mCalculatedLayoutPosition.x;
+					} break;
+					case UIElementJustification::JustifyFlexEnd:
+					{
+						bounds.x = mCalculatedLayoutPosition.x + mCalculatedLayoutSize.x - bounds.z;
+					} break;
+				}
+
+				switch ( GetStyleAlignContent( ) )
+				{
+					case UIElementAlignment::AlignCenter:
+					{
+						bounds.y = mCalculatedLayoutPosition.y + ( mCalculatedLayoutSize.y - bounds.w ) / 2.f;
+					} break;
+					case UIElementAlignment::AlignFlexStart:
+					{
+						bounds.y = mCalculatedLayoutPosition.y;
+					} break;
+					case UIElementAlignment::AlignFlexEnd:
+					{
+						bounds.y = mCalculatedLayoutPosition.y + ( mCalculatedLayoutSize.y - bounds.w );
+					} break;
+				} 
+			} break;
+
+			case UIElementFlexDirection::FlexDirectionColumn:
+			{
+				f32 maxWidth = 0.f;
+				for ( auto& c : mChildren )
+				{
+					Vec4 padding = c->GetStylePadding( );
+					Vec4 margin = c->GetStyleMargin( );
+					f32 width = c->GetStyleWidth( );
+					f32 height = c->GetStyleHeight( );
+
+					maxWidth = width > maxWidth ? width : maxWidth;
+
+					bounds.w += height + margin.y + margin.w;
+				}
+
+				bounds.z = maxWidth;
+
+				// Set bounds position, based on justification and alignment ( set main axis alignment, which in this case is Y axis )
+				switch ( GetStyleJustification( ) )
+				{
+					case UIElementJustification::JustifyCenter:
+					{
+						bounds.y = mCalculatedLayoutPosition.y + ( mCalculatedLayoutSize.y - bounds.w ) / 2.f;
+					} break;
+					case UIElementJustification::JustifyFlexStart:
+					{
+						bounds.y = mCalculatedLayoutPosition.y;
+					} break;
+					case UIElementJustification::JustifyFlexEnd:
+					{
+						bounds.y = mCalculatedLayoutPosition.y + ( mCalculatedLayoutSize.y - bounds.w );
+					} break;
+				}
+
+				switch ( GetStyleAlignContent( ) )
+				{
+					case UIElementAlignment::AlignCenter:
+					{
+						bounds.x = mCalculatedLayoutPosition.x + ( mCalculatedLayoutSize.x - bounds.z ) / 2.f;
+					} break;
+					case UIElementAlignment::AlignFlexStart:
+					{
+						bounds.x = mCalculatedLayoutPosition.x;
+					} break;
+					case UIElementAlignment::AlignFlexEnd:
+					{
+						bounds.x = mCalculatedLayoutPosition.x + ( mCalculatedLayoutSize.x - bounds.z );
+					} break;
+				}
+
+			} break;
+		}
+
+		return bounds;
+	}
+
+	//=================================================================================
+
+	void UIElement::CalculateLayout( )
+	{
+		if ( mParent == nullptr )
+		{
+			mCalculatedLayoutSize = Vec2( GetStyleWidth( ), GetStyleHeight( ) );
+		}
+
+		mChildBounds = CalculateChildBounds( );
+
+		switch ( GetStyleFlexDirection( ) )
+		{
+			case UIElementFlexDirection::FlexDirectionRow:
+			{
+				// Cursor position is the bounds starting position
+				Vec2 cp = Vec2( mChildBounds.x, mChildBounds.y );
+
+				// Want to set the calculated layout position and size for each child now
+				for ( auto& c : mChildren )
+				{
+					Vec4 padding = c->GetStylePadding( );
+					Vec4 margin = c->GetStyleMargin( );
+					f32 width = c->GetStyleWidth( );
+					f32 height = c->GetStyleHeight( );
+
+					c->mCalculatedLayoutSize = Vec2( width, height );
+
+					// Position element based on alignment and justification rules of parent element
+					c->mCalculatedLayoutPosition.x = cp.x + margin.x;
+
+					switch ( GetStyleAlignContent( ) )
+					{
+						case UIElementAlignment::AlignCenter:
+						{
+							c->mCalculatedLayoutPosition.y = cp.y + ( mChildBounds.w - c->mCalculatedLayoutSize.y ) / 2.f;
+						} break;
+						case UIElementAlignment::AlignFlexStart:
+						{
+							c->mCalculatedLayoutPosition.y = cp.y;
+						} break;
+						case UIElementAlignment::AlignFlexEnd:
+						{
+							c->mCalculatedLayoutPosition.y = cp.y + ( mChildBounds.w - c->mCalculatedLayoutSize.y );
+						} break;
+					}
+
+					c->CalculateLayout( );
+
+					// Increment cp in row direction
+					cp.x += c->mCalculatedLayoutSize.x + margin.x + margin.z;
+				}
+
+			} break;
+
+			case UIElementFlexDirection::FlexDirectionColumn:
+			{
+				Vec2 cp = Vec2( mChildBounds.x, mChildBounds.y );
+
+				for ( auto& c : mChildren )
+				{
+					Vec4 padding = c->GetStylePadding( );
+					Vec4 margin = c->GetStyleMargin( );
+					f32 width = c->GetStyleWidth( );
+					f32 height = c->GetStyleHeight( );
+
+					c->mCalculatedLayoutSize = Vec2( width, height );
+
+					// Position element based on alignment and justification rules of parent element
+					c->mCalculatedLayoutPosition.y = cp.y + margin.y;
+
+					switch ( GetStyleAlignContent( ) )
+					{
+						case UIElementAlignment::AlignCenter:
+						{
+							c->mCalculatedLayoutPosition.x = cp.x + ( mChildBounds.z - c->mCalculatedLayoutSize.x ) / 2.f;
+						} break;
+						case UIElementAlignment::AlignFlexStart:
+						{
+							c->mCalculatedLayoutPosition.x = cp.x;
+						} break;
+						case UIElementAlignment::AlignFlexEnd:
+						{
+							c->mCalculatedLayoutPosition.x = cp.x + ( mChildBounds.z - c->mCalculatedLayoutSize.x );
+						} break;
+					}
+
+					c->CalculateLayout( );
+
+					// Increment cp in column direction
+					cp.y += c->mCalculatedLayoutSize.y + margin.y + margin.w;
+				}
+
+			} break;
+		}
+	}
+
+	//=================================================================================
+
 
 	Result UI::OnEditorUI()
 	{
@@ -368,8 +544,23 @@ namespace Enjon
 
 	void UI::CalculateLayout( const u32& width, const u32& height )
 	{
-		// Just set direction for now of canvas ( need to serialize out styles eventually, but just want something up and running for now )
-		//YGNodeCalculateLayout( mRoot.mYogaNode, width, height, YGDirectionLTR );
+		mRoot.SetStyleWidth( width );
+		mRoot.SetStyleHeight( height ); 
+
+		mRoot.CalculateLayout( );
+	}
+
+	//=================================================================================
+
+	void UI::ExplicitDestructor( )
+	{
+		// Destroy all children, release children
+		u32 c = mRoot.mChildren.size( );
+		while ( c )
+		{
+			delete( mRoot.mChildren.back( ) );
+			c = mRoot.mChildren.size( );
+		}
 	}
 
 	//=================================================================================

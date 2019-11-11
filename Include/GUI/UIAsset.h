@@ -170,6 +170,85 @@ namespace Enjon
 			virtual Result SerializeData( ByteBuffer* buffer ) const override; 
 			virtual Result DeserializeData( ByteBuffer* buffer ) override;
 
+			void SetStyleWidth( const f32& width ) {
+				mInlineStyles.mSize.x = width;
+			}
+
+			f32 GetStyleWidth( ) const {
+				return mInlineStyles.mSize.x;
+			}
+
+			void SetStyleHeight( const f32& height ) {
+				mInlineStyles.mSize.y = height;
+			}
+
+			f32 GetStyleHeight( ) const {
+				return mInlineStyles.mSize.y;
+			}
+
+			void SetStylePadding( const Vec4& padding ) {
+				mInlineStyles.mPadding = padding;
+			}
+
+			Vec4 GetStylePadding( ) const {
+				return mInlineStyles.mPadding;
+			}
+
+			void SetStyleMargin( const Vec4& margin ) {
+				mInlineStyles.mMargin = margin;
+			}
+
+			Vec4 GetStyleMargin( ) const {
+				return mInlineStyles.mMargin;
+			}
+
+			void SetStyleFlexGrow( const f32& grow ) {
+				mInlineStyles.mFlexGrow = grow;
+			}
+
+			void SetStyleFlexShrink( const f32& shrink ) {
+				mInlineStyles.mFlexShrink = shrink;
+			}
+
+			void SetStylePositionType( const UIElementPositionType& type ) {
+				mInlineStyles.mPositionType = type;
+			}
+
+			void SetStyleAlignContent( const UIElementAlignment& alignment ) {
+				mInlineStyles.mAlignContent = alignment;
+			}
+
+			UIElementAlignment GetStyleAlignContent( ) const {
+				return mInlineStyles.mAlignContent;
+			}
+
+			void SetStyleAlignSelf( const UIElementAlignment& alignment ) {
+				mInlineStyles.mAlignSelf = alignment;
+			}
+
+			void SetStyleFlexDirection( const UIElementFlexDirection& direction ) {
+				mInlineStyles.mFlexDirection = direction;
+			}
+
+			UIElementFlexDirection GetStyleFlexDirection( ) const {
+				return mInlineStyles.mFlexDirection;
+			}
+
+			void SetStyleJustification( const UIElementJustification& justification ) {
+				mInlineStyles.mJustification = justification;
+			}
+
+			UIElementJustification GetStyleJustification( ) const {
+				return mInlineStyles.mJustification;
+			}
+
+			f32 GetStyleFlexGrow( ) const {
+				return mInlineStyles.mFlexGrow;
+			}
+
+			Vec4 CalculateChildBounds( );
+			void CalculateLayout( );
+
 			/*
 			* @brief
 			*/
@@ -179,6 +258,11 @@ namespace Enjon
 			* @brief
 			*/
 			UIElement* RemoveChild( UIElement* element );
+
+			/*
+			* @brief
+			*/
+			void RemoveFromParent( );
 
 			ENJON_FUNCTION()
 			void SetSize( const Vec2& size );
@@ -198,9 +282,13 @@ namespace Enjon
 
 			ENJON_PROPERTY( HideInEditor, NonSerializeable )
 			UIElement* mParent = nullptr; 
-
+ 
 			ENJON_PROPERTY( HideInEditor, Delegates[ Mutator = SetInlineStyles ] )
 			UIStyleSettings mInlineStyles; 
+
+			Vec2 mCalculatedLayoutPosition;
+			Vec2 mCalculatedLayoutSize;
+			Vec4 mChildBounds;
 	}; 
 
 	// Not sure if I like this here...need a way to be able to view this in the editor and set the function
@@ -242,6 +330,10 @@ namespace Enjon
 			virtual void OnUI() override;
 
 		public:
+
+			ENJON_PROPERTY( )
+			String mText = "";
+
 			// Can I serialize this somehow? 
 			UICallback mOnClick;
 	}; 
@@ -259,6 +351,12 @@ namespace Enjon
 
 			ENJON_PROPERTY()
 			String mText = "";
+
+			ENJON_PROPERTY()
+			UIElementJustification mTextJustification = UIElementJustification::JustifyCenter;
+
+			ENJON_PROPERTY()
+			UIElementAlignment mTextAlignment = UIElementAlignment::AlignCenter;
 
 			UICallback mOnSetText;
 	 };
@@ -306,6 +404,12 @@ namespace Enjon
 		ENJON_CLASS_BODY( UI ) 
 
 		public:
+
+			/*
+			* @brief
+			*/
+			virtual void ExplicitDestructor( ) override;
+
 			/*
 			* @brief
 			*/
@@ -319,7 +423,7 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual Result OnEditorUI() override;
+			virtual Result OnEditorUI() override; 
 
 			/*
 			* @brief

@@ -100,7 +100,14 @@ namespace Enjon
 
 			// Turn on the physics simulation
 			PhysicsSubsystem* physx = EngineSubsystem( PhysicsSubsystem );
-			physx->PauseSystem( false ); 
+			physx->PauseSystem( true ); 
+
+			GUIContext* gCtx = EngineSubsystem( WindowSubsystem )->GetWindows( ).at( 0 )->GetGUIContext( );
+			gCtx->ClearContext( );
+			GUIContextParams params;
+			params.mUseRootDock = false;
+			gCtx->SetGUIContextParams( params );
+			gCtx->Finalize( );
 
 			// Initialize the app
 			app->Initialize( ); 
@@ -237,13 +244,21 @@ namespace Enjon
 
 	Result SandboxApp::Update( f32 dt )
 	{ 
+		Result res = Result::PROCESS_RUNNING;
+
 		if ( mApp )
 		{
 			// Process application input
-			mApp->ProcessInput( dt );
+			res = mApp->ProcessInput( dt );
+			if ( res != Result::PROCESS_RUNNING ) {
+				return res;
+			}
 
 			// Update application ( ^ Could be called in the same tick )
-			mApp->Update( dt ); 
+			res = mApp->Update( dt ); 
+			if ( res != Result::PROCESS_RUNNING ) {
+				return res;
+			}
 		}
 
 		if ( mNeedsDLLReload )

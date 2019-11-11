@@ -270,8 +270,8 @@ namespace Enjon
 		assert( guiContext->GetContext( ) != nullptr );
 
 		// Register graphics options with main window menus ( still hate the way this looks, but it's better than before )
-		guiContext->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
-		guiContext->RegisterWindow("Graphics", showGraphicsViewportFunc);
+		//guiContext->RegisterMenuOption("View", "Graphics##Options", graphicsMenuOption);
+		//guiContext->RegisterWindow("Graphics", showGraphicsViewportFunc);
 		//guiContext->RegisterMenuOption("View", "Styles##Options", stylesMenuOption);
 		//guiContext->RegisterWindow("Styles", showStylesWindowFunc); 
 
@@ -348,9 +348,10 @@ namespace Enjon
 		glDisable( GL_CULL_FACE );
 
 		Enjon::String rootPath = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( );
-		Enjon::String hdrFilePath = "Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
+		//Enjon::String hdrFilePath = "Textures/HDR/GCanyon_C_YumaPoint_3k.hdr";
+		//Enjon::String hdrFilePath = "Textures/black.png";
 		//Enjon::String hdrFilePath = "Textures/HDR/WinterForest_Ref.hdr";
-		//Enjon::String hdrFilePath = "Textures/HDR/03-Ueno-Shrine_3k.hdr";
+		Enjon::String hdrFilePath = "Textures/HDR/03-Ueno-Shrine_3k.hdr";
 		//Enjon::String hdrFilePath = "Textures/HDR/Newport_Loft_Ref.hdr";
 		//Enjon::String hdrFilePath = rootPath + "IsoARPG/Assets/Textures/HDR/Factory_Catwalk_2k.hdr";
 		//Enjon::String hdrFilePath = rootPath + "IsoARPG/Assets/Textures/HDR/WinterForest_Ref.hdr";
@@ -2045,7 +2046,7 @@ namespace Enjon
 		mLargeBlurVertical 			= new FrameBuffer(width / 16, height / 16);
 		mCompositeTarget 			= new FrameBuffer(width, height);
 		mLightingBuffer 			= new FrameBuffer(width, height);
-		mLuminanceTarget 			= new FrameBuffer(width / 4, height / 4);
+		mLuminanceTarget 			= new FrameBuffer(width / 8, height / 8);
 		mFXAATarget 				= new FrameBuffer(width, height);
 		mShadowDepth 				= new FrameBuffer(2048, 2048);
 		mFinalTarget				= new FrameBuffer( width, height );

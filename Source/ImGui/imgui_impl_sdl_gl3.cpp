@@ -97,11 +97,11 @@ DeviceData* GetDeviceData( ImGuiContext* ctx )
 
 void ScaleWindow(ImGuiWindow* window, float scale)
 {
-    ImVec2 origin = ImVec2(0.f, 0.f);
-    window->Pos = ImFloor((window->Pos - origin) * scale + origin);
-    window->Size = ImFloor(window->Size * scale);
-    window->SizeFull = ImFloor(window->SizeFull * scale);
-    window->SizeContents = ImFloor(window->SizeContents * scale);
+    //ImVec2 origin = ImVec2(0.f, 0.f);
+    //window->Pos = ImFloor((window->Pos - origin) * scale + origin);
+    //window->Size = ImFloor(window->Size * scale);
+    //window->SizeFull = ImFloor(window->SizeFull * scale);
+    //window->SizeContents = ImFloor(window->SizeContents * scale);
 }
 
 void ScaleWindows(ImGuiContext* ctx, float scale)
