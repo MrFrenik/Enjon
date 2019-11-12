@@ -48,6 +48,7 @@ void main()
 vec4 albedoMap_sampler = texture( albedoMap, fs_in.TexCoords );
 	AlbedoOut = vec4(albedoMap_sampler.rgb, 1.0);
 
+	// Opacity
 	// Normal
 	vec4 normalMap_sampler = texture( normalMap, fs_in.TexCoords );
 	vec3 normal = normalize( normalMap_sampler.rgb * 2.0 - 1.0 );

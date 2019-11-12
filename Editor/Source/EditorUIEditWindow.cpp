@@ -716,8 +716,8 @@ namespace Enjon
 							igm->InspectObject( mSelectedElement ); 
 
 							// Show inline styles
-							Utils::TempBuffer tmp = Utils::TransientBuffer( "Inline Styles##%d", (usize)(intptr_t)mSelectedElement );
-							if ( ImGui::CollapsingHeader( tmp.buffer ) )
+							auto tmp = Utils::format( "Inline Styles##%d", (usize)(intptr_t)mSelectedElement );
+							if ( ImGui::CollapsingHeader( tmp.c_str() ) )
 							{ 
 								igm->InspectObject( &mSelectedElement->mInlineStyles );
 							}

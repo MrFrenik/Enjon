@@ -199,6 +199,11 @@ namespace Enjon
 		// Register and bind all application specific meta classes
 		mApp->BindApplicationMetaClasses( ); 
 
+		// Default setting for assets directory
+		mAssetManager		= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent 
+		mAssetManager->SetAssetsDirectoryPath( mConfig.GetRoot( ) + "Assets/" );
+		mAssetManager->Initialize( );
+
 		// Register imgui manager and initialize
 		mImGuiManager = mSubsystemCatalog->Register< ImGuiManager >( false ); 
 
@@ -212,7 +217,6 @@ namespace Enjon
 			mWindowSubsystem->ForceInitWindows( );
 		}
 
-		mAssetManager		= mSubsystemCatalog->Register< AssetManager >( false );		// Will do manual initialization of asset management system, since it's project dependent 
 		mGraphics			= mSubsystemCatalog->Register< GraphicsSubsystem >( ); 
 		mInput				= mSubsystemCatalog->Register< Input >( ); 
 		mEntities			= mSubsystemCatalog->Register< EntityManager >( );
@@ -227,10 +231,6 @@ namespace Enjon
 
 		// Set main window world
 		mGraphics->GetMainWindow( )->SetWorld( mWorld );
-
-		// Default setting for assets directory
-		mAssetManager->SetAssetsDirectoryPath( mConfig.GetRoot( ) + "Assets/" );
-		mAssetManager->Initialize( );
 
 		// Initialize application if one is registered
 		if ( mApp )

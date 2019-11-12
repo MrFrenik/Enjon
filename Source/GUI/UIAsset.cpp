@@ -64,10 +64,20 @@ namespace Enjon
 	}
 
 	//=================================================================================
-
-
-	void UIElementText::OnUI()
+ 
+	void UIElementText::ExplicitConstructor()
 	{
+		// Set font to default font asset
+		mFont = EngineSubsystem( AssetManager )->GetDefaultAsset< UIFont >();
+	}
+
+	//=================================================================================
+	void UIElementText::OnUI()
+	{ 
+		// Push font at particular size for text
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
+		igm->PushFont( mFont, mFontSize );
+
 		Vec2 pos = GetCalculatedLayoutPosition( );
 		Vec2 sz = GetCalculatedLayoutSize( );
 		ImVec2 textSz = ImGui::CalcTextSize( mText.c_str( ) );
@@ -87,7 +97,7 @@ namespace Enjon
 			case UIElementAlignment::AlignCenter:		cp.y = pos.y + ( sz.y - textSz.y ) / 2.f;		break; 
 			case UIElementAlignment::AlignFlexStart:	cp.y = pos.y;									break;
 			case UIElementAlignment::AlignFlexEnd:		cp.y = pos.y + ( sz.y - textSz.y );				break;
-		}
+		} 
 
 		ImGui::SetCursorScreenPos( cp );
 		ImGui::PushID( (usize)(intptr_t)this );
@@ -96,12 +106,25 @@ namespace Enjon
 		}
 		ImGui::Text( "%s", mText.c_str() );
 		ImGui::PopID();
+
+		igm->PopFont();
 	}
 	
 	//=================================================================================
 
+	void UIElementButton::ExplicitConstructor()
+	{
+		mFont = EngineSubsystem( AssetManager )->GetDefaultAsset< UIFont >();
+	}
+
+	//=================================================================================
+
 	void UIElementButton::OnUI()
 	{ 
+		// Push font at particular size for text
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
+		igm->PushFont( mFont, mFontSize );
+
 		Vec2 pos = GetCalculatedLayoutPosition();
 		Vec2 sz = GetCalculatedLayoutSize(); 
 		ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) ); 
@@ -111,6 +134,8 @@ namespace Enjon
 			mOnClick( this );
 		}
 		ImGui::PopID(); 
+
+		igm->PopFont();
 	}
 
 	//=================================================================================

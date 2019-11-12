@@ -1633,6 +1633,56 @@ namespace Enjon
 
 	//============================================================================================ 
 
+	void ImGuiManager::AddFont( const AssetHandle< UIFont >& font, const u32& pointSize, GUIContext* ctx )
+	{
+		const UIFont* fnt = font.Get();
+		if ( pointSize <= 0 || fnt == nullptr )
+		{
+			return;
+		} 
+
+		// Cache previous context, set context
+		ImGuiContext* prevContext = ImGui::GetCurrentContext(); 
+		ImGuiContext* currContext = ctx ? ctx->GetContext() : ImGui::GetCurrentContext();
+		ImGui::SetCurrentContext( currContext ); 
+
+		ImGuiIO& io = ImGui::GetIO(); 
+		ImFontConfig fontCfg;
+	    fontCfg.FontDataOwnedByAtlas = true;
+	    int fs = 1; 
+
+		// Don't want to clear any of the previous fonts. That's not the point, doggo.
+		String font_name = fnt->GetName() + "_" + std::to_string( pointSize );
+
+		// Already exists, so don't add font
+		if ( mFonts.find( font_name ) != mFonts.end() )
+		{
+			return;
+		}
+
+		// Set name of font config
+		memcpy( fontCfg.Name, font_name.c_str(), 32 );
+
+		// How do, obi wan? Do I iterate through all the fonts in the map after adding? 
+		mFonts[font_name] = io.Fonts->AddFontFromMemoryTTF( fnt->GetFontData().mData, fnt->GetFontData().mSize, pointSize, &fontCfg );
+
+		// Not sure if this is what I want to do...
+		io.Fonts->Build();
+
+		// Recreate font texture
+		ImGui_ImplSdlGL3_CreateFontsTexture( currContext );
+
+		ImGuiStyle& style = ImGui::GetStyle(); 
+
+		// Set default font
+		io.FontDefault = mFonts[ "WeblySleek_16" ];
+
+		// Restore context
+		ImGui::SetCurrentContext( prevContext ); 
+	}
+
+	//============================================================================================ 
+
 	void ImGuiManager::AddFont( const String& filePath, const u32& size, GUIContext* ctx, const char* fontName )
 	{ 
 		// Cache previous context, set context
@@ -1644,8 +1694,6 @@ namespace Enjon
 		ImGuiIO& io = ImGui::GetIO(); 
 		ImFontConfig fontCfg;
 	    fontCfg.FontDataOwnedByAtlas = true;
-	    //fontCfg.OversampleH = 7;
-	    //fontCfg.OversampleV = 7; 
 	    int fs = 1; 
 
 		io.Fonts->Clear();
@@ -1656,7 +1704,6 @@ namespace Enjon
 			mFonts["WeblySleek_20"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 20 * fs, &fontCfg );
 			mFonts["WeblySleek_24"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 24 * fs, &fontCfg );
 			mFonts["WeblySleek_32"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 32 * fs, &fontCfg );
-			mFonts["WeblySleek_100"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 100 * fs, &fontCfg );
 			mFonts["Roboto-MediumItalic_14"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 14 * fs, &fontCfg );
 			mFonts["Roboto-MediumItalic_12"] = io.Fonts->AddFontFromFileTTF( (fp + "Roboto/Roboto-MediumItalic.ttf").c_str(), 12 * fs, &fontCfg );
 			char buffer[1024];
@@ -1693,7 +1740,11 @@ namespace Enjon
 	    // Font scale
 	    int fs = 1; 
 
-		io.Fonts->Clear();
+		io.Fonts->Clear(); 
+
+		// Try and add fonts WITHOUT clearing in between 
+		AssetHandle< UIFont > defaultFont = EngineSubsystem( AssetManager )->GetDefaultAsset< UIFont >();
+		mFonts["DefaultFont_12"] = io.Fonts->AddFontFromMemoryTTF( defaultFont->GetFontData().mData, defaultFont->GetFontData().mSize, 12.f, &fontCfg );
 
 		mFonts["WeblySleek_10"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 10 * fs, &fontCfg );
 		mFonts["WeblySleek_14"] = io.Fonts->AddFontFromFileTTF( (fp + "WeblySleek/weblysleekuisb.ttf").c_str(), 14 * fs, &fontCfg );
@@ -1859,8 +1910,20 @@ namespace Enjon
 	//=====================================================================
 
 	void ImGuiManager::PushFont( const AssetHandle< UIFont >& font, u32 ptSize )
-	{
-		// Not sure how I want to structure this quite yet, actually...
+	{ 
+		if ( ptSize < 0 || ptSize > 120 ) 
+		{
+			ptSize = 16;
+		}
+
+		auto fontName = Utils::TransientBuffer( "%s_%zu", font.Get()->GetName().c_str(), ptSize ); 
+		if ( mFonts.find( fontName.buffer ) == mFonts.end() )
+		{
+			AddFont( font, ptSize );
+		}
+
+		// Push font after the fact
+		ImGui::PushFont( mFonts[ fontName.buffer ] );
 	}
 
 	//=====================================================================

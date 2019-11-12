@@ -210,6 +210,8 @@ namespace Enjon
 			Result SerializeData( ByteBuffer* buffer ) const override;
 			Result DeserializeData( ByteBuffer* buffer ) override;
 
+			const FontData& GetFontData() const;
+
 		private: 
 			FontData mFontData;
 	};

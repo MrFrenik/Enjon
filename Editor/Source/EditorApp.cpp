@@ -1705,8 +1705,8 @@ static f32 dts = 72.f;
 				ImGui::Text( "SDF Parameters:" );
 				ImGui::DragFloat( "Gamma", &EngineSubsystem( ImGuiManager )->mGamma, 0.001f, 0.f, 1.f );
 				ImGui::DragFloat( "Buffer", &EngineSubsystem( ImGuiManager )->mBuffer, 0.001f, 0.f, 1.f );
-				ImGui::EndDock();
 			}
+			ImGui::EndDock();
 	 	}; 
 
 		static bool mShowGraphicsOptions = false;
@@ -2047,6 +2047,18 @@ static f32 dts = 72.f;
 		mProjectSourceFileTemplates.mProjectMainTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectAppMain.cpp" ).c_str( ) ); 
 		mProjectSourceFileTemplates.mProjectBuildAndRunCompileTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/BuildAndRunCompile.bat" ).c_str( ) ); 
 		mProjectSourceFileTemplates.mProjectEnjonDefinesTemplate = Enjon::Utils::read_file_sstream( ( mAssetsDirectoryPath + "ProjectTemplates/ProjectEnjonDefines.h" ).c_str( ) ); 
+
+		// Add in a font to the asset database
+		String fontPath	= String( "Fonts/Code/CodeBold.otf" ); 
+		AssetManager* am = EngineSubsystem( AssetManager ); 
+		am->AddToDatabase( fontPath, false, true, AssetLocationType::EngineAsset );
+
+		// Add in particular usable fonts for the atlas to be used at runtime ( does bother me that the font atlas will be potentially HUGE depending on font sizes users choose )
+		// Need to make sure to abuse the shit out of this for testing...
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		igm->AddFont( am->GetAsset< UIFont >( "fonts.code.codebold" ), 16, EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetGUIContext() );
+		igm->AddFont( am->GetAsset< UIFont >( "fonts.code.codebold" ), 24, EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetGUIContext() );
+		igm->AddFont( am->GetAsset< UIFont >( "fonts.code.codebold" ), 32, EngineSubsystem( WindowSubsystem )->GetWindows().at( 0 )->GetGUIContext() );
 
 		// Set up copy directory for project dll
 		//copyDir = Enjon::Engine::GetInstance( )->GetConfig( ).GetRoot( ) + projectName + "/"; 
@@ -2581,25 +2593,25 @@ static f32 dts = 72.f;
 	void EditorApp::LoadResources( )
 	{
 		// Paths to resources
-		Enjon::String greenPath				= Enjon::String("Textures/green.png"); 
-		Enjon::String redPath				= Enjon::String("Textures/red.png"); 
-		Enjon::String bluePath				= Enjon::String("Textures/blue.png"); 
-		Enjon::String blackPath				= Enjon::String("Textures/black.png"); 
-		Enjon::String midGreyPath			= Enjon::String("Textures/grey.png"); 
-		Enjon::String lightGreyPath			= Enjon::String("Textures/light_grey.png"); 
-		Enjon::String whitePath				= Enjon::String("Textures/white.png"); 
-		Enjon::String yellowPath			= Enjon::String("Textures/yellow.png"); 
-		Enjon::String axisBoxDiffusePath	= Enjon::String("Textures/axisBoxDiffuse.png"); 
-		Enjon::String hdrPath				= Enjon::String("Textures/HDR/03-ueno-shrine_3k.hdr"); 
-		Enjon::String hdrPath2				= Enjon::String("Textures/HDR/GCanyon_C_YumaPoint_3k.hdr"); 
-		Enjon::String hdrPath3				= Enjon::String("Textures/HDR/WinterForest_Ref.hdr"); 
-		Enjon::String cubePath				= Enjon::String("Models/unit_cube.obj"); 
-		Enjon::String spherePath			= Enjon::String("Models/unit_sphere.obj"); 
-		Enjon::String conePath				= Enjon::String("Models/unit_cone.obj"); 
-		Enjon::String cylinderPath			= Enjon::String("Models/unit_cylinder.obj"); 
-		Enjon::String ringPath				= Enjon::String("Models/unit_ring.obj"); 
-		Enjon::String axisBoxPath			= Enjon::String("Models/axisBox.obj"); 
-		Enjon::String shaderGraphPath		= Enjon::String("Shaders/ShaderGraphs/DefaultStaticGeom.sg"); 
+		String greenPath			= String("Textures/green.png"); 
+		String redPath				= String("Textures/red.png"); 
+		String bluePath				= String("Textures/blue.png"); 
+		String blackPath			= String("Textures/black.png"); 
+		String midGreyPath			= String("Textures/grey.png"); 
+		String lightGreyPath		= String("Textures/light_grey.png"); 
+		String whitePath			= String("Textures/white.png"); 
+		String yellowPath			= String("Textures/yellow.png"); 
+		String axisBoxDiffusePath	= String("Textures/axisBoxDiffuse.png"); 
+		String hdrPath				= String("Textures/HDR/03-ueno-shrine_3k.hdr"); 
+		String cubePath				= String("Models/unit_cube.obj"); 
+		String spherePath			= String("Models/unit_sphere.obj"); 
+		String conePath				= String("Models/unit_cone.obj"); 
+		String cylinderPath			= String("Models/unit_cylinder.obj"); 
+		String ringPath				= String("Models/unit_ring.obj"); 
+		String axisBoxPath			= String("Models/axisBox.obj"); 
+		String shaderGraphPath		= String("Shaders/ShaderGraphs/DefaultStaticGeom.sg"); 
+		String wsFontPath			= String( "Fonts/WeblySleek/weblysleekuisb.ttf" );
+		String rbFontPath			= String( "Fonts/Roboto/Roboto-MediumItalic.ttf" ); 
 
 		AssetManager* mAssetManager = EngineSubsystem( AssetManager );
 		
@@ -2614,13 +2626,13 @@ static f32 dts = 72.f;
 		mAssetManager->AddToDatabase( whitePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( yellowPath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( hdrPath, true, true, AssetLocationType::EngineAsset );
-		mAssetManager->AddToDatabase( hdrPath2, true, true, AssetLocationType::EngineAsset );
-		mAssetManager->AddToDatabase( hdrPath3, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( cubePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( spherePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( conePath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( cylinderPath, true, true, AssetLocationType::EngineAsset );
 		mAssetManager->AddToDatabase( ringPath, true, true, AssetLocationType::EngineAsset );
+		mAssetManager->AddToDatabase( wsFontPath, true, true, AssetLocationType::EngineAsset );
+		mAssetManager->AddToDatabase( rbFontPath, true, true, AssetLocationType::EngineAsset );
 
 		mAssetManager->AddToDatabase( shaderGraphPath, true, true, AssetLocationType::EngineAsset );
 

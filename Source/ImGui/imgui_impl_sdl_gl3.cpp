@@ -63,7 +63,7 @@ struct DeviceData
 	Uint64       mTime = 0;
 	bool         mMousePressed[ 3 ] = { false, false, false };
 	GLuint       mFontTexture = 0;
-	int			 mBufferLocation = 0, mGammaLocation = 0, mUseSDFLocation = 0;
+	//int			 mBufferLocation = 0, mGammaLocation = 0, mUseSDFLocation = 0;
 	int          mShaderHandle = 0, mVertHandle = 0, mFragHandle = 0;
 	int          mAttribLocationTex = 0, mAttribLocationProjMtx = 0;
 	int          mAttribLocationPosition = 0, mAttribLocationUV = 0, mAttribLocationColor = 0;
@@ -211,8 +211,8 @@ void ImGui_ImplSdlGL3_RenderDrawData( ImDrawData* draw_data )
 	glUseProgram( data->mShaderHandle );
 	glUniform1i( data->mAttribLocationTex, 0 );
 	glUniformMatrix4fv( data->mAttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[ 0 ][ 0 ] );
-	glUniform1f( data->mBufferLocation, EngineSubsystem( ImGuiManager )->mBuffer );
-	glUniform1f( data->mGammaLocation, EngineSubsystem( ImGuiManager )->mGamma );
+	//glUniform1f( data->mBufferLocation, EngineSubsystem( ImGuiManager )->mBuffer );
+	//glUniform1f( data->mGammaLocation, EngineSubsystem( ImGuiManager )->mGamma );
 	glBindVertexArray( data->mVaoHandle );
 	glBindSampler( 0, 0 ); // Rely on combined texture/sampler state.
 
@@ -242,7 +242,7 @@ void ImGui_ImplSdlGL3_RenderDrawData( ImDrawData* draw_data )
 		for ( int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++ )
 		{
 			const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[ cmd_i ];
-			glUniform1f( data->mUseSDFLocation, ( ( GLuint )( intptr_t )pcmd->TextureId == ( GLuint )( intptr_t )io.Fonts->TexID ) ? 1.f : 0.f );
+			//glUniform1f( data->mUseSDFLocation, ( ( GLuint )( intptr_t )pcmd->TextureId == ( GLuint )( intptr_t )io.Fonts->TexID ) ? 1.f : 0.f );
 			if ( pcmd->UserCallback )
 			{
 				pcmd->UserCallback( cmd_list, pcmd );
@@ -377,6 +377,13 @@ void ImGui_ImplSdlGL3_CreateFontsTexture( ImGuiContext* ctx )
 	// Can probably keep this global
 	DeviceData* data = mGraphicsDeviceData[ ctx ];
 
+	// Not sure what to do here...
+	if ( data == nullptr )
+	{
+		ImGui_ImplSdlGL3_CreateDeviceObjects( ctx );
+		data = mGraphicsDeviceData[ ctx ];
+	}
+
 	GLint last_texture;
 	glGetIntegerv( GL_TEXTURE_BINDING_2D, &last_texture );
 	glGenTextures( 1, &data->mFontTexture );
@@ -443,9 +450,9 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects( ImGuiContext* ctx )
 	const GLchar* fragment_shader =
 		"#version 150\n"
 		"uniform sampler2D Texture;\n"
-		"uniform float u_gamma;\n"
-		"uniform float u_buffer;\n"
-		"uniform float u_sdf;\n"
+		//"uniform float u_gamma;\n"
+		//"uniform float u_buffer;\n"
+		//"uniform float u_sdf;\n"
 		"in vec2 Frag_UV;\n"
 		"in vec4 Frag_Color;\n"
 		"out vec4 Out_Color;\n"
@@ -482,9 +489,9 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects( ImGuiContext* ctx )
 	//glAttachShader( g_ShaderHandle, g_FragHandle );
 	//glLinkProgram( g_ShaderHandle );
 
-	data->mBufferLocation = glGetUniformLocation( data->mShaderHandle, "u_buffer" );
-	data->mGammaLocation = glGetUniformLocation( data->mShaderHandle, "u_gamma" );
-	data->mUseSDFLocation = glGetUniformLocation( data->mShaderHandle, "u_sdf" );
+	//data->mBufferLocation = glGetUniformLocation( data->mShaderHandle, "u_buffer" );
+	//data->mGammaLocation = glGetUniformLocation( data->mShaderHandle, "u_gamma" );
+	//data->mUseSDFLocation = glGetUniformLocation( data->mShaderHandle, "u_sdf" );
 	data->mAttribLocationTex = glGetUniformLocation( data->mShaderHandle, "Texture" ); 
 	data->mAttribLocationProjMtx = glGetUniformLocation( data->mShaderHandle, "ProjMtx" );
 	data->mAttribLocationPosition = glGetAttribLocation( data->mShaderHandle, "Position" );

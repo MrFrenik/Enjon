@@ -6,6 +6,7 @@
 #include "Math/Maths.h"
 #include "Asset/Asset.h"
 #include "Graphics/Texture.h"
+#include "Graphics/Font.h"
 #include "Asset/UIStyleConfigAssetLoader.h" 
 
 namespace Enjon
@@ -329,10 +330,18 @@ namespace Enjon
 			*/
 			virtual void OnUI() override;
 
+			virtual void ExplicitConstructor() override;
+
 		public:
 
 			ENJON_PROPERTY( )
 			String mText = "";
+
+			ENJON_PROPERTY()
+			AssetHandle< UIFont > mFont;
+
+			ENJON_PROPERTY()
+			u32 mFontSize = 16;
 
 			// Can I serialize this somehow? 
 			UICallback mOnClick;
@@ -347,6 +356,8 @@ namespace Enjon
 
 			virtual void OnUI() override; 
 
+			virtual void ExplicitConstructor() override;
+
 		 public:
 
 			ENJON_PROPERTY()
@@ -357,6 +368,13 @@ namespace Enjon
 
 			ENJON_PROPERTY()
 			UIElementAlignment mTextAlignment = UIElementAlignment::AlignCenter;
+
+			// This could entirely be left up to the inline styles instead...
+			ENJON_PROPERTY()
+			AssetHandle< UIFont > mFont;
+
+			ENJON_PROPERTY()
+			u32 mFontSize = 16;
 
 			UICallback mOnSetText;
 	 };

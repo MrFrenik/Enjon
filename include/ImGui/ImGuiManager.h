@@ -515,6 +515,8 @@ namespace Enjon
 
 			void AddFont( const String& filePath, const u32& size, GUIContext* ctx, const char* fontName );
 
+			void AddFont( const AssetHandle< UIFont >& ui, const u32& pointSize, GUIContext* ctx = nullptr );
+
 			ImGuiContext* GetContextByWindow( Window* window );
 
 		public:
