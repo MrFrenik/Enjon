@@ -1858,6 +1858,13 @@ namespace Enjon
 	
 	//=====================================================================
 
+	void ImGuiManager::PushFont( const AssetHandle< UIFont >& font, u32 ptSize )
+	{
+		// Not sure how I want to structure this quite yet, actually...
+	}
+
+	//=====================================================================
+
 	void ImGuiManager::PopFont( )
 	{
 		ImGui::PopFont( );

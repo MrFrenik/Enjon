@@ -21,6 +21,11 @@ namespace Enjon
 			*/
 			virtual void RegisterDefaultAsset( ) override; 
 
+			/**
+			* @brief
+			*/
+			String GetAssetFileExtension( ) const;
+
 		private:
 			Asset* LoadResourceFromFile( const String& filePath ) override;
 	};

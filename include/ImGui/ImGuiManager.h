@@ -11,6 +11,7 @@
 #include "Graphics/Color.h"
 #include "System/Types.h"
 #include "Asset/UIStyleConfigAssetLoader.h"
+#include "Graphics/Font.h"
 #include "Subsystem.h"
 #include "Defines.h"
 
@@ -552,6 +553,11 @@ namespace Enjon
 			* @brief
 			*/
 			void PushFont( const String& fontName );
+
+			/**
+			* @brief
+			*/
+			void PushFont( const AssetHandle< UIFont >& font, u32 ptSize = 16 );
 
 			/**
 			* @brief
