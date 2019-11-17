@@ -1,3 +1,4 @@
+
 #include "GUI/UIAsset.h"
 #include "Serialize/ObjectArchiver.h"
 #include "ImGui/imgui.h"
@@ -14,55 +15,6 @@
 
 namespace Enjon
 { 
-	//=================================================================================
-
-	Result UI::SerializeData( ByteBuffer* buffer ) const
-	{ 
-		// Write out root canvas to buffer
-		ObjectArchiver::Serialize( &mRoot, buffer ); 
-		return Result::INCOMPLETE;
-	}
-
-	//=================================================================================
-		
-	Result UI::DeserializeData( ByteBuffer* buffer )
-	{ 
-		// Read in canvas from buffer
-		ObjectArchiver::Deserialize( buffer, &mRoot );
-		return Result::INCOMPLETE;
-	} 
-
-	//=================================================================================
-	
-	void UI::OnUI() const
-	{
-		// Load ui style, if possible
-		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
-		igm->LoadStyle( mStyleConfig );
-		const_cast< UI* >( this )->mRoot.OnUI();
-	}
-
-	//=================================================================================
-
-	UIElement* UI::FindElement( const char* label ) const
-	{
-		if ( strcmp( label, mRoot.mID.c_str() )  == 0 )
-		{
-			return (UIElement*)&mRoot;
-		}
-
-		// Not recursive for now...
-		for ( auto& c : mRoot.mChildren )
-		{
-			if ( strcmp( c->mID.c_str(), label ) == 0 )
-			{
-				return c;
-			}
-		}
-
-		return nullptr;
-	}
-
 	//=================================================================================
  
 	void UIElementText::ExplicitConstructor()
@@ -119,21 +71,82 @@ namespace Enjon
 
 	//=================================================================================
 
+#define ColorRGBA8ToImVec4( color )\
+	ImVec4( (f32)color.r / 255.f, (f32)color.g / 255.f, (f32)color.b / 255.f, (f32)color.a / 255.f )
+
+	ImVec2 TextAlignJustifyValue( const UIElementJustification& justification, const UIElementAlignment& alignment )
+	{ 
+		ImVec2 val = ImVec2( 0.f, 0.f );
+		switch ( justification )
+		{
+			case UIElementJustification::JustifyCenter: { 
+				val.x = 0.5f;
+			} break;
+			case UIElementJustification::JustifyFlexStart: { 
+				val.x = 0.0f;
+			} break;
+			case UIElementJustification::JustifyFlexEnd: { 
+				val.x = 1.f;
+			} break;
+		}
+		switch ( alignment )
+		{
+			case UIElementAlignment::AlignCenter: {
+				val.y = 0.5f;
+			} break;
+			case UIElementAlignment::AlignFlexStart: {
+				val.y = 0.0f;
+			} break;
+			case UIElementAlignment::AlignFlexEnd: {
+				val.y = 1.0f;
+			} break;
+		}
+
+		return val;
+	}
+
 	void UIElementButton::OnUI()
 	{ 
 		// Push font at particular size for text
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
 		igm->PushFont( mFont, mFontSize );
 
+		// Wait, how would this actually work?... 
+		ImGui::PushStyleColor( ImGuiCol_Button, ColorRGBA8ToImVec4( mStyleConfiguration.mBackgroundColor ) );
+		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ColorRGBA8ToImVec4( mHoverStyleConfiguration.mBackgroundColor ) );
+		ImGui::PushStyleColor( ImGuiCol_ButtonActive, ColorRGBA8ToImVec4( mActiveStyleConfiguration.mBackgroundColor ) );
+
+		switch ( mState ) {
+			default:
+			case UIStyleState::Default: 
+				ImGui::PushStyleVar( ImGuiStyleVar_ButtonTextAlign, TextAlignJustifyValue( mStyleConfiguration.mTextJustification, mStyleConfiguration.mTextAlignment ) ); 
+				break;
+			case UIStyleState::Hovered: 
+				ImGui::PushStyleVar( ImGuiStyleVar_ButtonTextAlign, TextAlignJustifyValue( mHoverStyleConfiguration.mTextJustification, mHoverStyleConfiguration.mTextAlignment ) ); 
+				break;
+			case UIStyleState::Active: 
+				ImGui::PushStyleVar( ImGuiStyleVar_ButtonTextAlign, TextAlignJustifyValue( mActiveStyleConfiguration.mTextJustification, mActiveStyleConfiguration.mTextAlignment ) ); 
+				break; 
+		}
+
 		Vec2 pos = GetCalculatedLayoutPosition();
 		Vec2 sz = GetCalculatedLayoutSize(); 
 		ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) ); 
+
 		ImGui::PushID( (usize )(intptr_t )this );
 		if ( ImGui::Button( mText.c_str(), ImVec2( sz.x, sz.y ) ) )
 		{
 			mOnClick( this );
 		}
+
+		bool active = ImGui::IsItemActive( );
+		bool hovered = ImGui::IsItemHovered( );
+		mState = active ? UIStyleState::Active : hovered ? UIStyleState::Hovered : UIStyleState::Default;
+
 		ImGui::PopID(); 
+
+		ImGui::PopStyleColor( 3 );
+		ImGui::PopStyleVar( 1 );
 
 		igm->PopFont();
 	}
@@ -328,7 +341,7 @@ namespace Enjon
 
 	//=================================================================================
 
-	Vec4 UIElement::CalculateChildBounds( )
+	Vec4 UIElement::CalculateChildBounds( const AssetHandle< UI >& ui )
 	{
 		Vec4 bounds = Vec4( 0.f );
 
@@ -341,6 +354,9 @@ namespace Enjon
 				f32 maxHeight = 0.f;
 				for ( auto& c : mChildren )
 				{
+					// Calculate style of the given element
+					c->CalculateStyle( ui );
+
 					Vec4 padding = c->GetStylePadding( );
 					Vec4 margin = c->GetStyleMargin( );
 					f32 width = c->GetStyleWidth( );
@@ -392,6 +408,8 @@ namespace Enjon
 				f32 maxWidth = 0.f;
 				for ( auto& c : mChildren )
 				{
+					c->CalculateStyle( ui );
+
 					Vec4 padding = c->GetStylePadding( );
 					Vec4 margin = c->GetStyleMargin( );
 					f32 width = c->GetStyleWidth( );
@@ -445,14 +463,15 @@ namespace Enjon
 
 	//=================================================================================
 
-	void UIElement::CalculateLayout( )
+	void UIElement::CalculateLayout( const AssetHandle< UI >& ui )
 	{
 		if ( mParent == nullptr )
 		{
+			CalculateStyle( ui );
 			mCalculatedLayoutSize = Vec2( GetStyleWidth( ), GetStyleHeight( ) );
 		}
 
-		mChildBounds = CalculateChildBounds( );
+		mChildBounds = CalculateChildBounds( ui );
 
 		switch ( GetStyleFlexDirection( ) )
 		{
@@ -490,7 +509,7 @@ namespace Enjon
 						} break;
 					}
 
-					c->CalculateLayout( );
+					c->CalculateLayout( ui );
 
 					// Increment cp in row direction
 					cp.x += c->mCalculatedLayoutSize.x + margin.x + margin.z;
@@ -530,7 +549,7 @@ namespace Enjon
 						} break;
 					}
 
-					c->CalculateLayout( );
+					c->CalculateLayout( ui );
 
 					// Increment cp in column direction
 					cp.y += c->mCalculatedLayoutSize.y + margin.y + margin.w;
@@ -542,6 +561,250 @@ namespace Enjon
 
 	//=================================================================================
 
+	void UIElement::CalculateStyle( const AssetHandle<UI>& uiAsset )
+	{
+		const UI* ui = uiAsset.Get( );
+		if ( !ui ) {
+			return;
+		}
+
+		AssetHandle< UIStyleSheet > styleSheet = ui->GetStyleSheet();
+		const UIStyleSheet* ss = styleSheet.Get( );
+		if ( !ss ) {
+			return;
+		}
+
+		// Get tag for this particular element type ( just the meta class name )
+		String tag = Class( )->GetName( );
+
+		//switch( mState )
+		{
+			// Get default style configuration for this element type
+			UIStyleConfiguration config = UIStyleConfiguration::GetDefaultStyleConfiguration( ); 
+
+			const UIStyleRule* defaultTagStyleRule = ss->GetStyleRuleFromSelector( tag, UIStyleState::Default );
+			if ( defaultTagStyleRule ) {
+				config.MergeRuleIntoStyle( defaultTagStyleRule );
+				
+			}
+
+			//case UIStyleState::Default:
+			{
+				const UIStyleRule* tagStyleRule = ss->GetStyleRuleFromSelector( tag, UIStyleState::Default );
+				if ( tagStyleRule ) {
+					config.MergeRuleIntoStyle( tagStyleRule );
+				}
+
+				for ( auto& s : mStyleSelectors )
+				{
+					const UIStyleRule* classStyleRule = ss->GetStyleRuleFromSelector( s, UIStyleState::Default );
+					if ( classStyleRule ) {
+						config.MergeRuleIntoStyle( classStyleRule );
+					}
+				}
+
+				// Then Id
+				const UIStyleRule* idStyleRule = ss->GetStyleRuleFromSelector( mID, UIStyleState::Default );
+				if ( idStyleRule ) {
+					config.MergeRuleIntoStyle( idStyleRule );
+				}
+
+				// Finally apply any overrides
+				//config.MergeRuleIntoStyle( mStyleOverrides );
+
+				// Set style
+				mStyleConfiguration = config;
+			}
+
+			//} break;
+
+			//case UIStyleState::Hovered:
+			{
+				// Get default style configuration for this element type
+				UIStyleConfiguration hoverConfig = config;
+
+				const UIStyleRule* tagStyleRule = ss->GetStyleRuleFromSelector( tag, UIStyleState::Hovered );
+				if ( tagStyleRule ) {
+					hoverConfig.MergeRuleIntoStyle( tagStyleRule );
+				}
+
+				for ( auto& s : mStyleSelectors )
+				{
+					const UIStyleRule* classStyleRule = ss->GetStyleRuleFromSelector( s, UIStyleState::Hovered );
+					if ( classStyleRule ) {
+						hoverConfig.MergeRuleIntoStyle( classStyleRule );
+					}
+				}
+
+				// Then Id
+				const UIStyleRule* idStyleRule = ss->GetStyleRuleFromSelector( mID, UIStyleState::Hovered );
+				if ( idStyleRule ) {
+					hoverConfig.MergeRuleIntoStyle( idStyleRule );
+				}
+
+				// Finally apply any overrides
+				//config.MergeRuleIntoStyle( mStyleOverrides );
+
+				// Set style
+				mHoverStyleConfiguration = hoverConfig;
+			}
+			//} break;
+
+			//case UIStyleState::Focused:
+			//{ 
+			//} break;
+
+			//case UIStyleState::Active:
+			{
+				// Get default style configuration for this element type
+				UIStyleConfiguration activeConfig = config; 
+				
+				const UIStyleRule* tagStyleRule = ss->GetStyleRuleFromSelector( tag, UIStyleState::Active );
+				if ( tagStyleRule ) {
+					activeConfig.MergeRuleIntoStyle( tagStyleRule );
+				}
+
+				for ( auto& s : mStyleSelectors )
+				{
+					const UIStyleRule* classStyleRule = ss->GetStyleRuleFromSelector( s, UIStyleState::Active );
+					if ( classStyleRule ) {
+						activeConfig.MergeRuleIntoStyle( classStyleRule );
+					}
+				}
+
+				// Then Id
+				const UIStyleRule* idStyleRule = ss->GetStyleRuleFromSelector( mID, UIStyleState::Active );
+				if ( idStyleRule ) {
+					activeConfig.MergeRuleIntoStyle( idStyleRule );
+				}
+
+				// Finally apply any overrides
+				//config.MergeRuleIntoStyle( mStyleOverrides );
+
+				// Set style
+				mActiveStyleConfiguration = activeConfig;
+			}
+			//} break;
+		}
+	}
+
+	//================================================================================= 
+
+	bool UIStyleSheet::StyleRuleExists( const String& selector )
+	{
+		return ( mUIStyleRules.find( selector.c_str( ) ) != mUIStyleRules.end( ) );
+	}
+
+	//================================================================================= 
+
+	void UIStyleSheet::AddStyleRule( const String& selector, const UIStyleRule& rule, const UIStyleState& state )
+	{
+		// Add new rule
+		if ( !StyleRuleExists( selector ) )
+		{
+			mUIStyleRules[ selector.c_str() ] = UIStyleRuleGroup( );
+		}
+
+		// Add rule to state
+		mUIStyleRules[ selector.c_str( ) ][ ( u32 )state ] = rule;
+	}
+
+	//================================================================================= 
+
+	const UIStyleRuleGroup* UIStyleSheet::GetStyleGroup( const String& selector ) const
+	{
+		if ( mUIStyleRules.find( selector.c_str( ) ) != mUIStyleRules.end( ) )
+		{
+			return &mUIStyleRules.at( selector.c_str( ) );
+		}
+
+		return nullptr;
+	}
+
+	//================================================================================= 
+
+	const UIStyleRule* UIStyleSheet::GetStyleRuleFromSelector( const String& selector, const UIStyleState& state ) const
+	{ 
+		// Get group from selector
+		const UIStyleRuleGroup* sg = GetStyleGroup( selector );
+		if ( !sg ) {
+			return nullptr;
+		}
+
+		// Need to determine if style rule exists for given state as well	
+		if ( sg->find( ( u32 )state ) != sg->end( ) )
+		{
+			// Don't know if this is going to just return a pointer to the local iterator instead
+			return ( &sg->at( u32( state ) ) );
+		}
+
+		return nullptr; 
+	}
+
+	//================================================================================= 
+
+	UIStyleConfiguration UIStyleConfiguration::GetDefaultStyleConfiguration( )
+	{ 
+		return UIStyleConfiguration( );
+	}
+
+	//================================================================================= 
+
+#define MERGE_RULE_INTERNAL( field, type )\
+	do {\
+		field = *( type* )( p.mData );\
+	} while ( 0 )
+
+	void UIStyleConfiguration::MergeRuleIntoStyle( const UIStyleRule* rule )
+	{
+		// Iterate through all the rules, then set the style on the configuration
+		for ( auto& p : rule->mStylePropertyDataSet )
+		{ 
+			switch ( p.mType )
+			{
+				case UIStylePropertyType::AlignmentContent:		MERGE_RULE_INTERNAL( mAlignContent, UIElementAlignment );			break; 
+				case UIStylePropertyType::BackgroundColor:		MERGE_RULE_INTERNAL( mBackgroundColor, ColorRGBA8 );				break;
+				case UIStylePropertyType::BorderColor:			MERGE_RULE_INTERNAL( mBorderColor, ColorRGBA8 );					break; 
+				case UIStylePropertyType::Font:					MERGE_RULE_INTERNAL( mFont, AssetHandle< UIFont > );				break;
+				case UIStylePropertyType::FontSize:				MERGE_RULE_INTERNAL( mFontSize, f32 );								break; 
+				case UIStylePropertyType::TextColor:			MERGE_RULE_INTERNAL( mTextColor, ColorRGBA8 );						break;
+				case UIStylePropertyType::TextAlignment:		MERGE_RULE_INTERNAL( mTextAlignment, UIElementAlignment );			break;
+				case UIStylePropertyType::TextJustification:	MERGE_RULE_INTERNAL( mTextJustification, UIElementJustification );	break;
+				case UIStylePropertyType::Height:				MERGE_RULE_INTERNAL( mSize.y, f32 );								break;
+				case UIStylePropertyType::Width:				MERGE_RULE_INTERNAL( mSize.x, f32 );								break;
+				case UIStylePropertyType::JustificationContent: MERGE_RULE_INTERNAL( mJustification, UIElementJustification );		break;
+				case UIStylePropertyType::MarginLeft:			MERGE_RULE_INTERNAL( mMargin.x, f32 );								break;
+				case UIStylePropertyType::MarginTop:			MERGE_RULE_INTERNAL( mMargin.y, f32 );								break;
+				case UIStylePropertyType::MarginRight:			MERGE_RULE_INTERNAL( mMargin.z, f32 );								break;
+				case UIStylePropertyType::MarginBottom:			MERGE_RULE_INTERNAL( mMargin.w, f32 );								break;
+				case UIStylePropertyType::PaddingLeft:			MERGE_RULE_INTERNAL( mPadding.x, f32 );								break;
+				case UIStylePropertyType::PaddingTop:			MERGE_RULE_INTERNAL( mPadding.y, f32 );								break;
+				case UIStylePropertyType::PaddingRight:			MERGE_RULE_INTERNAL( mPadding.z, f32 );								break;
+				case UIStylePropertyType::PaddingBottom:		MERGE_RULE_INTERNAL( mPadding.w, f32 );								break;
+				case UIStylePropertyType::PositionType:			MERGE_RULE_INTERNAL( mPositionType, UIElementPositionType );		break;
+				case UIStylePropertyType::FlexGrow:				MERGE_RULE_INTERNAL( mFlexGrow, f32 );								break;
+				case UIStylePropertyType::FlexShrink:			MERGE_RULE_INTERNAL( mFlexShrink, f32 );							break;
+				case UIStylePropertyType::FlexDirection:		MERGE_RULE_INTERNAL( mFlexDirection, UIElementFlexDirection );		break;
+				case UIStylePropertyType::BorderRadiusTL:		MERGE_RULE_INTERNAL( mBorderRadius.x, f32 );						break;
+				case UIStylePropertyType::BorderRadiusTR:		MERGE_RULE_INTERNAL( mBorderRadius.y, f32 );						break;
+				case UIStylePropertyType::BorderRadiusBR:		MERGE_RULE_INTERNAL( mBorderRadius.z, f32 );						break;
+				case UIStylePropertyType::BorderRadiusBL:		MERGE_RULE_INTERNAL( mBorderRadius.w, f32 );						break;
+				case UIStylePropertyType::AnchorLeft:			MERGE_RULE_INTERNAL( mPosition.x, f32 );							break;
+				case UIStylePropertyType::AnchorTop:			MERGE_RULE_INTERNAL( mPosition.y, f32 );							break;
+				case UIStylePropertyType::AnchorRight:			MERGE_RULE_INTERNAL( mPosition.z, f32 );							break;
+				case UIStylePropertyType::AnchorBottom:			MERGE_RULE_INTERNAL( mPosition.w, f32 );							break;
+			}
+		}
+	}
+
+	//================================================================================= 
+
+	AssetHandle< UIStyleSheet > UI::GetStyleSheet( ) const
+	{
+		return mStyleSheet;
+	}
+
+	//================================================================================= 
 
 	Result UI::OnEditorUI()
 	{
@@ -572,7 +835,7 @@ namespace Enjon
 		mRoot.SetStyleWidth( width );
 		mRoot.SetStyleHeight( height ); 
 
-		mRoot.CalculateLayout( );
+		mRoot.CalculateLayout( this );
 	}
 
 	//=================================================================================
@@ -588,7 +851,56 @@ namespace Enjon
 		}
 	}
 
+	//================================================================================= 
+
+	Result UI::SerializeData( ByteBuffer* buffer ) const
+	{ 
+		// Write out root canvas to buffer
+		ObjectArchiver::Serialize( &mRoot, buffer ); 
+		return Result::INCOMPLETE;
+	}
+
 	//=================================================================================
+		
+	Result UI::DeserializeData( ByteBuffer* buffer )
+	{ 
+		// Read in canvas from buffer
+		ObjectArchiver::Deserialize( buffer, &mRoot );
+		return Result::INCOMPLETE;
+	} 
+
+	//=================================================================================
+	
+	void UI::OnUI() const
+	{
+		// Load ui style, if possible
+		ImGuiManager* igm = EngineSubsystem( ImGuiManager );
+		igm->LoadStyle( mStyleConfig );
+		const_cast< UI* >( this )->mRoot.OnUI();
+	}
+
+	//=================================================================================
+
+	UIElement* UI::FindElement( const char* label ) const
+	{
+		if ( strcmp( label, mRoot.mID.c_str() )  == 0 )
+		{
+			return (UIElement*)&mRoot;
+		}
+
+		// Not recursive for now...
+		for ( auto& c : mRoot.mChildren )
+		{
+			if ( strcmp( c->mID.c_str(), label ) == 0 )
+			{
+				return c;
+			}
+		}
+
+		return nullptr;
+	}
+
+	//================================================================================= 
 }
 
 

@@ -19,56 +19,8 @@ namespace Enjon
 		}\
 	} while ( 0 )
 
-//YG_ENUM_SEQ_DECL(
-//    YGAlign,
-//    YGAlignAuto,
-//    YGAlignFlexStart,
-//    YGAlignCenter,
-//    YGAlignFlexEnd,
-//    YGAlignStretch,
-//    YGAlignBaseline,
-//    YGAlignSpaceBetween,
-//    YGAlignSpaceAround);
-//
-//YG_ENUM_SEQ_DECL(YGDimension, YGDimensionWidth, YGDimensionHeight)
-//
-//YG_ENUM_SEQ_DECL(
-//    YGDirection,
-//    YGDirectionInherit,
-//    YGDirectionLTR,
-//    YGDirectionRTL)
-//
-//YG_ENUM_SEQ_DECL(YGDisplay, YGDisplayFlex, YGDisplayNone)
-//
-//YG_ENUM_SEQ_DECL(
-//    YGEdge,
-//    YGEdgeLeft,
-//    YGEdgeTop,
-//    YGEdgeRight,
-//    YGEdgeBottom,
-//    YGEdgeStart,
-//    YGEdgeEnd,
-//    YGEdgeHorizontal,
-//    YGEdgeVertical,
-//    YGEdgeAll)
-//
-//YG_ENUM_SEQ_DECL(YGExperimentalFeature, YGExperimentalFeatureWebFlexBasis)
-//
-//YG_ENUM_SEQ_DECL(
-//    YGFlexDirection,
-//    YGFlexDirectionColumn,
-//    YGFlexDirectionColumnReverse,
-//    YGFlexDirectionRow,
-//    YGFlexDirectionRowReverse)
-//
-//YG_ENUM_SEQ_DECL(
-//    YGJustify,
-//    YGJustifyFlexStart,
-//    YGJustifyCenter,
-//    YGJustifyFlexEnd,
-//    YGJustifySpaceBetween,
-//    YGJustifySpaceAround,
-//    YGJustifySpaceEvenly)
+	// Forward Decls.
+	class UI;
 
 /*
 	// A UI should be able to be associated with a given 'style sheet'
@@ -172,83 +124,114 @@ namespace Enjon
 			virtual Result DeserializeData( ByteBuffer* buffer ) override;
 
 			void SetStyleWidth( const f32& width ) {
-				mInlineStyles.mSize.x = width;
+				mStyleConfiguration.mSize.x = width;
 			}
 
 			f32 GetStyleWidth( ) const {
-				return mInlineStyles.mSize.x;
+				switch ( mState )
+				{
+					default:
+					case UIStyleState::Default: 
+					{ 
+						return mStyleConfiguration.mSize.x;
+					} break;
+					case UIStyleState::Hovered: 
+					{ 
+						return mHoverStyleConfiguration.mSize.x;
+					} break;
+					case UIStyleState::Active: 
+					{ 
+						return mActiveStyleConfiguration.mSize.x;
+					} break;
+				}
 			}
 
 			void SetStyleHeight( const f32& height ) {
-				mInlineStyles.mSize.y = height;
+				mStyleConfiguration.mSize.y = height;
 			}
 
 			f32 GetStyleHeight( ) const {
-				return mInlineStyles.mSize.y;
+				switch ( mState )
+				{
+					default:
+					case UIStyleState::Default: 
+					{ 
+						return mStyleConfiguration.mSize.y;
+					} break;
+					case UIStyleState::Hovered: 
+					{ 
+						return mHoverStyleConfiguration.mSize.y;
+					} break;
+					case UIStyleState::Active: 
+					{ 
+						return mActiveStyleConfiguration.mSize.y;
+					} break;
+				}
 			}
 
 			void SetStylePadding( const Vec4& padding ) {
-				mInlineStyles.mPadding = padding;
+				mStyleConfiguration.mPadding = padding;
 			}
 
 			Vec4 GetStylePadding( ) const {
-				return mInlineStyles.mPadding;
+				return mStyleConfiguration.mPadding;
 			}
 
 			void SetStyleMargin( const Vec4& margin ) {
-				mInlineStyles.mMargin = margin;
+				mStyleConfiguration.mMargin = margin;
 			}
 
 			Vec4 GetStyleMargin( ) const {
-				return mInlineStyles.mMargin;
+				return mStyleConfiguration.mMargin;
 			}
 
 			void SetStyleFlexGrow( const f32& grow ) {
-				mInlineStyles.mFlexGrow = grow;
+				mStyleConfiguration.mFlexGrow = grow;
 			}
 
 			void SetStyleFlexShrink( const f32& shrink ) {
-				mInlineStyles.mFlexShrink = shrink;
+				mStyleConfiguration.mFlexShrink = shrink;
 			}
 
 			void SetStylePositionType( const UIElementPositionType& type ) {
-				mInlineStyles.mPositionType = type;
+				mStyleConfiguration.mPositionType = type;
 			}
 
 			void SetStyleAlignContent( const UIElementAlignment& alignment ) {
-				mInlineStyles.mAlignContent = alignment;
+				mStyleConfiguration.mAlignContent = alignment;
 			}
 
 			UIElementAlignment GetStyleAlignContent( ) const {
-				return mInlineStyles.mAlignContent;
+				return mStyleConfiguration.mAlignContent;
 			}
 
 			void SetStyleAlignSelf( const UIElementAlignment& alignment ) {
-				mInlineStyles.mAlignSelf = alignment;
+				mStyleConfiguration.mAlignSelf = alignment;
 			}
 
 			void SetStyleFlexDirection( const UIElementFlexDirection& direction ) {
-				mInlineStyles.mFlexDirection = direction;
+				mStyleConfiguration.mFlexDirection = direction;
 			}
 
 			UIElementFlexDirection GetStyleFlexDirection( ) const {
-				return mInlineStyles.mFlexDirection;
+				return mStyleConfiguration.mFlexDirection;
 			}
 
 			void SetStyleJustification( const UIElementJustification& justification ) {
-				mInlineStyles.mJustification = justification;
+				mStyleConfiguration.mJustification = justification;
 			}
 
 			UIElementJustification GetStyleJustification( ) const {
-				return mInlineStyles.mJustification;
+				return mStyleConfiguration.mJustification;
 			}
 
 			f32 GetStyleFlexGrow( ) const {
-				return mInlineStyles.mFlexGrow;
+				return mStyleConfiguration.mFlexGrow;
 			}
 
-			Vec4 CalculateChildBounds( );
-			void CalculateLayout( );
+			Vec4 CalculateChildBounds( const AssetHandle< UI >& ui );
+			void CalculateLayout( const AssetHandle< UI >& ui ); 
+			void CalculateStyle( const AssetHandle< UI >& ui );
 
 			/*
 			* @brief
@@ -287,6 +270,22 @@ namespace Enjon
 			ENJON_PROPERTY( HideInEditor, Delegates[ Mutator = SetInlineStyles ] )
 			UIStyleSettings mInlineStyles; 
 
+			ENJON_PROPERTY( HideInEditor, NonSerializeable )
+			UIStyleConfiguration mStyleConfiguration;
+
+			ENJON_PROPERTY( HideInEditor, NonSerializeable )
+			UIStyleConfiguration mHoverStyleConfiguration;
+
+			ENJON_PROPERTY( HideInEditor, NonSerializeable )
+			UIStyleConfiguration mActiveStyleConfiguration;
+
+			ENJON_PROPERTY( HideInEditor )
+			Vector< String > mStyleSelectors;
+
+			ENJON_PROPERTY( HideInEditor, NonSerializeable ) 
+			UIStyleState mState = UIStyleState::Default; 
+
+			public:
 			Vec2 mCalculatedLayoutPosition;
 			Vec2 mCalculatedLayoutSize;
 			Vec4 mChildBounds;
@@ -454,6 +453,8 @@ namespace Enjon
 			UIElement* FindElement( const char* label ) const;
 
 			void CalculateLayout( const u32& width, const u32& height );
+
+			AssetHandle< UIStyleSheet > GetStyleSheet( ) const;
 
 		public: 
 

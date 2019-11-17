@@ -1,4 +1,5 @@
 #include "Asset/UIStyleConfigAssetLoader.h"
+#include "Graphics/Font.h"
 
 namespace Enjon
 {

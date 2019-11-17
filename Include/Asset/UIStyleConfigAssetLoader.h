@@ -10,6 +10,126 @@ namespace Enjon
 {
 	class UIStyleConfigAssetLoader;
 	class UIStyleSheetAssetLoader;
+	class UIFont;
+
+	ENJON_ENUM()
+	enum class UIStylePropertyType
+	{
+		BackgroundColor,
+		TextColor,
+		Font,
+		FontSize,
+		PaddingLeft,
+		PaddingTop,
+		PaddingRight,
+		PaddingBottom,
+		MarginLeft,
+		MarginTop,
+		MarginRight,
+		MarginBottom,
+		BorderLeft,
+		BorderTop,
+		BorderRight,
+		BorderBottom,
+		BorderColor,
+		BorderRadiusTL,
+		BorderRadiusTR,
+		BorderRadiusBR,
+		BorderRadiusBL,
+		TextJustification,
+		TextAlignment,
+		JustificationSelf,
+		AlignmentSelf,
+		JustificationContent,
+		AlignmentContent,
+		FlexGrow,
+		FlexShrink,
+		FlexDirection,
+		PositionType,
+		AnchorLeft,
+		AnchorTop,
+		AnchorRight,
+		AnchorBottom,
+		Width,
+		Height
+	};
+
+	ENJON_ENUM()
+	enum class UIStyleState
+	{
+		Default,
+		Hovered,
+		Active,
+		Focused
+	};
+
+	class UIStylePropertyDataVariant
+	{
+		public:
+
+			UIStylePropertyDataVariant( ) = default;
+			UIStylePropertyDataVariant( const UIStylePropertyType& type )
+				: mType( type )
+			{ 
+			}
+
+			UIStylePropertyType mType;
+			u8 mData[ 8 ];
+	};
+
+	class UIStyleRule
+	{
+		public:
+
+			UIStyleRule( ) = default;
+
+			bool StyleExists( const UIStylePropertyType& type )
+			{
+				for ( auto& s : mStylePropertyDataSet )
+				{
+					if ( s.mType == type )
+					{
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			template < typename T >
+			void AddStyle( const UIStylePropertyType& type, const T& val )
+			{
+				// Search styles, verify does not already exist
+				if ( StyleExists( type ) ) {
+					return;
+				}
+
+				// Add to style list if does not exist
+				UIStylePropertyDataVariant variant;
+				variant.mType = type;
+				*( T* )( &variant.mData ) = val;
+				mStylePropertyDataSet.push_back( variant );
+			}
+
+			Vector< UIStylePropertyDataVariant > mStylePropertyDataSet;
+	};
+
+	// Mapping of UIStyleState -> UIStyleRule
+	/*
+		For instance: 
+			.button {
+				background_color: ( 255, 255, 255, 255 )
+			}
+			.button:active {
+				background_color: ( 255, 0, 0, 255 )
+			}
+			.button:hovered {
+				...
+			}
+			.button:focused { 
+			} 
+	*/
+	using UIStyleRuleGroup = HashMap< u32, UIStyleRule >;
 
 	ENJON_CLASS( Construct )
 	class UIStyleConfig : public Asset
@@ -314,6 +434,13 @@ namespace Enjon
 	}; 
 
 	ENJON_ENUM()
+	enum class UIElementFlexWrap
+	{
+		None,
+		Wrap
+	};
+
+	ENJON_ENUM()
 	enum class UIElementPositionType
 	{
 		Relative,
@@ -368,24 +495,103 @@ namespace Enjon
 	};
 
 	ENJON_CLASS( Construct )
+	class UIStyleConfiguration : public Object
+	{ 
+		ENJON_CLASS_BODY( UIStyleConfiguration )
+
+		public:
+			static UIStyleConfiguration GetDefaultStyleConfiguration( );
+
+			void MergeRuleIntoStyle( const UIStyleRule* rule );
+	
+		public: 
+
+			ENJON_PROPERTY( )
+			UIElementFlexDirection mFlexDirection = UIElementFlexDirection::FlexDirectionColumn;
+
+			ENJON_PROPERTY( )
+			UIElementJustification mJustification = UIElementJustification::JustifyFlexStart;
+
+			ENJON_PROPERTY( )
+			UIElementAlignment mAlignContent = UIElementAlignment::AlignCenter;
+
+			ENJON_PROPERTY( )
+			UIElementAlignment mAlignSelf = UIElementAlignment::AlignCenter;
+
+			//ENJON_PROPERTY()
+			//UIElementAlignment mAlignItems = UIElementAlignment::AlignAuto;
+
+			ENJON_PROPERTY( )
+			UIElementDirection mDirection = UIElementDirection::DirectionInherit;
+
+			ENJON_PROPERTY( )
+			UIElementPositionType mPositionType = UIElementPositionType::Relative;
+
+			ENJON_PROPERTY( UIMin = 0.f, UIMax = 1.f )
+			f32 mFlexGrow = 0.f;
+
+			ENJON_PROPERTY( UIMin = 0.f, UIMax = 1.f )
+			f32 mFlexShrink = 0.f;
+
+			ENJON_PROPERTY( UIMin = 0.f )
+			Vec4 mMargin = Vec4( 0.f );
+
+			ENJON_PROPERTY( UIMin = 0.f )
+			Vec4 mPadding = Vec4( 0.f );
+
+			ENJON_PROPERTY( UIMin = 0.f )
+			Vec4 mBorder = Vec4( 0.f ); 
+
+			ENJON_PROPERTY( UIMin = 0.f )
+			Vec4 mBorderRadius = Vec4( 0.f ); 
+
+			ENJON_PROPERTY( )
+			Vec4 mPosition = Vec4( 0.f );
+
+			ENJON_PROPERTY( )
+			Vec2 mSize = Vec2( 0.f );
+
+			ENJON_PROPERTY( )
+			ColorRGBA8 mBackgroundColor = RGBA8_Black();
+
+			ENJON_PROPERTY( )
+			ColorRGBA8 mBorderColor = RGBA8_Black();
+
+			ENJON_PROPERTY( )
+			ColorRGBA8 mTextColor = RGBA8_White();
+
+			ENJON_PROPERTY( )
+			UIElementAlignment mTextAlignment = UIElementAlignment::AlignCenter;
+
+			ENJON_PROPERTY( )
+			UIElementJustification mTextJustification = UIElementJustification::JustifyCenter;
+
+			ENJON_PROPERTY( )
+			AssetHandle< UIFont > mFont;
+
+			ENJON_PROPERTY( )
+			f32 mFontSize = 16.f; 
+	};
+
+	ENJON_CLASS( Construct )
 	class UIStyleSheet : public Asset
 	{ 
 		ENJON_CLASS_BODY( UIStyleSheet )
-
+ 
 		friend UIStyleSheetAssetLoader;
+ 
+		public: 
 
-		UIStyleSettings* GetStyleSettingRef( const String& str ) 
-		{
-			if ( mStyleSettings.find( str ) != mStyleSettings.end() ) {
-					return mStyleSettings[str];
-			}
+			bool StyleRuleExists( const String& name );
 
-			return nullptr;
-		}
+			void AddStyleRule( const String& name, const UIStyleRule& rule, const UIStyleState& state );
+
+			const UIStyleRuleGroup* GetStyleGroup( const String& selector ) const;
+
+			const UIStyleRule* GetStyleRuleFromSelector( const String& selector, const UIStyleState& state ) const;
 
 		public: 
-			ENJON_PROPERTY()
-			HashMap< String, UIStyleSettings* > mStyleSettings;
+			HashMap< String, UIStyleRuleGroup > mUIStyleRules; 
 	}; 
 
 	ENJON_CLASS( Construct )
