@@ -136,6 +136,9 @@ namespace Enjon
 		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ColorRGBA8ToImVec4( mHoverStyleConfiguration.mBackgroundColor ) );
 		ImGui::PushStyleColor( ImGuiCol_ButtonActive, ColorRGBA8ToImVec4( mActiveStyleConfiguration.mBackgroundColor ) );
 		ImGui::PushStyleColor( ImGuiCol_Text, ColorRGBA8ToImVec4( config.mTextColor ) );
+		ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, 0.f );
+		ImGui::PushStyleVar( ImGuiStyleVar_FrameRounding, 0.f );
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowBorderSize, 0.f );
 		ImGui::PushStyleVar( ImGuiStyleVar_ButtonTextAlign, TextAlignJustifyValue( config.mTextJustification, config.mTextAlignment ) ); 
 
 		Vec2 pos = GetCalculatedLayoutPosition();
@@ -143,10 +146,12 @@ namespace Enjon
 		ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) ); 
 
 		ImGui::PushID( (usize )(intptr_t )this );
-		if ( ImGui::Button( mText.c_str(), ImVec2( sz.x, sz.y ) ) )
+		if ( ImGui::InvisibleButton( std::to_string( (usize)(intptr_t)this ).c_str(), ImVec2( sz.x, sz.y ) ) )
 		{
 			mOnClick( this );
 		}
+		ImDrawList* dl = ImGui::GetWindowDrawList( );
+		dl->AddRectFilled( ImVec2( pos.x, pos.y ), ImVec2( pos.x + sz.x, pos.y + sz.y ), ImColor( ColorRGBA8ToImVec4( config.mBackgroundColor ) ), 0.f );
 
 		bool active = ImGui::IsItemActive( );
 		bool hovered = ImGui::IsItemHovered( );
@@ -155,7 +160,7 @@ namespace Enjon
 		ImGui::PopID(); 
 
 		ImGui::PopStyleColor( 4 );
-		ImGui::PopStyleVar( 1 );
+		ImGui::PopStyleVar( 4 );
 
 		igm->PopFont();
 	}

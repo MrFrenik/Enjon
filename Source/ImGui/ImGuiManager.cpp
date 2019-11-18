@@ -1781,6 +1781,8 @@ namespace Enjon
 		style.Alpha					= 1.0f;
 		style.FrameBorderSize		= 1.0f;
 		style.WindowBorderSize		= 1.0f; 
+		style.AntiAliasedFill		= true;
+		style.AntiAliasedLines		= true;
 
 		ImVec4* colors = ImGui::GetStyle( ).Colors;
 		colors[ ImGuiCol_Text ] = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
