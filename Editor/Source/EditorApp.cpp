@@ -1746,6 +1746,10 @@ static f32 dts = 72.f;
 						gfxScene->SetActiveCamera( c );
 					}
 				} 
+
+				static f32 col[ 4 ] = { 1.f, 1.f, 1.f, 1.f };
+				ImGui::ColorEdit4( "##color", col );
+
 			}
 			ImGui::EndDock( );
 		});

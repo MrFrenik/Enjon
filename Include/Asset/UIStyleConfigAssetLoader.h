@@ -77,38 +77,49 @@ namespace Enjon
 			u8 mData[ 8 ];
 	};
 
-	class UIStyleRule
+	ENJON_CLASS( Construct )
+	class UIStyleRule : public Object
 	{
-		public:
+		ENJON_CLASS_BODY( UIStyleRule )
 
-			UIStyleRule( ) = default;
+		public: 
 
-			bool StyleExists( const UIStylePropertyType& type )
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+			virtual Result DeserializeData( ByteBuffer* buffer ) override;
+
+			s32 StyleExists( const UIStylePropertyType& type )
 			{
+				s32 i = 0;
 				for ( auto& s : mStylePropertyDataSet )
 				{
 					if ( s.mType == type )
 					{
-						return true;
+						return i;
 					}
+					++i;
 				}
 
-				return false;
+				return -1;
 			}
 
 			template < typename T >
 			void AddStyle( const UIStylePropertyType& type, const T& val )
 			{
 				// Search styles, verify does not already exist
-				if ( StyleExists( type ) ) {
-					return;
+				// I don't want this. Just want to update if existing.
+				s32 idx = StyleExists( type );
+				if ( idx != -1 ) {
+					UIStylePropertyDataVariant& var = mStylePropertyDataSet.at( idx );
+					var.mType = type;
+					*( T* )( &var.mData ) = val;
 				}
-
-				// Add to style list if does not exist
-				UIStylePropertyDataVariant variant;
-				variant.mType = type;
-				*( T* )( &variant.mData ) = val;
-				mStylePropertyDataSet.push_back( variant );
+				else {
+					// Add to style list if does not exist
+					UIStylePropertyDataVariant var;
+					var.mType = type;
+					*( T* )( &var.mData ) = val;
+					mStylePropertyDataSet.push_back( var ); 
+				} 
 			}
 
 			Vector< UIStylePropertyDataVariant > mStylePropertyDataSet;
@@ -500,6 +511,9 @@ namespace Enjon
 		ENJON_CLASS_BODY( UIStyleConfiguration )
 
 		public:
+
+			void ExplicitConstructor( ) override;
+
 			static UIStyleConfiguration GetDefaultStyleConfiguration( );
 
 			void MergeRuleIntoStyle( const UIStyleRule* rule );
@@ -549,7 +563,7 @@ namespace Enjon
 			Vec4 mPosition = Vec4( 0.f );
 
 			ENJON_PROPERTY( )
-			Vec2 mSize = Vec2( 0.f );
+			Vec2 mSize = Vec2( 30.f );
 
 			ENJON_PROPERTY( )
 			ColorRGBA8 mBackgroundColor = RGBA8_Black();
@@ -581,6 +595,10 @@ namespace Enjon
 		friend UIStyleSheetAssetLoader;
  
 		public: 
+
+			virtual Result SerializeData( ByteBuffer* buffer ) const override;
+
+			virtual Result DeserializeData( ByteBuffer* buffer ) override;
 
 			bool StyleRuleExists( const String& name );
 

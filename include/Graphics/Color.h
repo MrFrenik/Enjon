@@ -17,7 +17,7 @@ namespace Enjon
 	};
 
 	// Initializer
-	inline ColorRGBA8 RGBA8(GLubyte r, GLubyte g, GLubyte b, GLubyte a)
+	static inline ColorRGBA8 RGBA8(GLubyte r, GLubyte g, GLubyte b, GLubyte a)
 	{
 		ColorRGBA8 color;
 		color.r = r;
@@ -29,7 +29,7 @@ namespace Enjon
 	}
 	
 	// Initializer
-	inline ColorRGBA8 RGBA8(GLubyte val)
+	static inline ColorRGBA8 RGBA8(GLubyte val)
 	{
 		ColorRGBA8 color;
 		color.r = val;
@@ -41,7 +41,7 @@ namespace Enjon
 	}
 
 	// Initializer
-	inline ColorRGBA8 RGBA8(GLubyte val, float a)
+	static inline ColorRGBA8 RGBA8(GLubyte val, float a)
 	{
 		ColorRGBA8 color;
 		color.r = val;

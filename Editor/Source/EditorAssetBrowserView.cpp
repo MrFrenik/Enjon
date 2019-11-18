@@ -345,9 +345,22 @@ namespace Enjon
 										params.mData = ( void* )asset;
 										EngineSubsystem( WindowSubsystem )->AddNewWindow( params );
 									}
+									else if ( assetCls->InstanceOf< UIStyleSheet >( ) )
+									{
+										const Asset* asset = mSelectedAssetInfo->GetAsset();
+										// Open new params
+										WindowParams params;
+										params.mMetaClassFunc = [ & ] () -> const MetaClass * { return Object::GetClass< EditorUIStyleSheetEditWindow >(); };
+										params.mName = asset->GetName();
+										params.mWidth = 800;
+										params.mHeight = 400;
+										params.mFlags = WindowFlagsMask( (u32 )WindowFlags::RESIZABLE );
+										params.mData = ( void* )asset;
+										EngineSubsystem( WindowSubsystem )->AddNewWindow( params ); 
+
+									} 
 									else if ( 
-										assetCls->InstanceOf< UIStyleConfig >() || 
-										assetCls->InstanceOf< UIStyleSheet >() 
+										assetCls->InstanceOf< UIStyleConfig >() 
 									)
 									{
 										const Asset* asset = mSelectedAssetInfo->GetAsset();

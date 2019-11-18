@@ -1,5 +1,6 @@
 
 
+
 #include "EditorUIEditWindow.h"
 #include "EditorMaterialEditWindow.h"
 #include "EditorApp.h"
@@ -349,6 +350,9 @@ namespace Enjon
 		// Scale widget
 		bool usedHandle = false;
 		if ( selected ) { 
+
+			printf( "Size: %.2f, %.2f\n", element->GetStyleWidth(), element->GetStyleHeight() );
+
 			// Top Left
 			if ( DrawRectHandle( a, 0, &delta ) ) { 
 				__TransformElementInternalByHandle( Vec2( a.x + delta.x, a.y + delta.y ), Vec2( b.x, b.y ), element, mCamera );
@@ -658,15 +662,12 @@ namespace Enjon
 						if ( ImGui::Selectable( "Button" ) )
 						{
 							UIElementButton* button = (UIElementButton*)mUI->mRoot.AddChild( new UIElementButton() );
-							//button->SetPosition( )
-							button->SetSize( Vec2( 20.f, 10.f ) );
 							button->mID = "#button";
 						}
 
 						if ( ImGui::Selectable( "Text Box" ) )
 						{
 							UIElementText* text = (UIElementText*)mUI->mRoot.AddChild( new UIElementText() );
-							text->SetSize( Vec2( 20.f, 10.f ) );
 							text->mID = "#text";
 							text->mText = "Text";
 						} 
@@ -674,7 +675,6 @@ namespace Enjon
 						if ( ImGui::Selectable( "Image" ) )
 						{
 							UIElementImage* image = (UIElementImage*)mUI->mRoot.AddChild( new UIElementImage() );
-							image->SetSize( Vec2( 20.f, 10.f ) );
 							image->mID = "#image"; 
 						}
 					} 
@@ -716,11 +716,11 @@ namespace Enjon
 							igm->InspectObject( mSelectedElement ); 
 
 							// Show inline styles
-							auto tmp = Utils::format( "Inline Styles##%d", (usize)(intptr_t)mSelectedElement );
-							if ( ImGui::CollapsingHeader( tmp.c_str() ) )
-							{ 
-								igm->InspectObject( &mSelectedElement->mInlineStyles );
-							}
+							//auto tmp = Utils::format( "Inline Styles##%d", (usize)(intptr_t)mSelectedElement );
+							//if ( ImGui::CollapsingHeader( tmp.c_str() ) )
+							//{ 
+							//	//igm->InspectObject( &mSelectedElement->mInlineStyles );
+							//}
 						} 
 					} 
 				}
@@ -880,6 +880,503 @@ class Test
 		guiContext->SetActiveDock( "Canvas" );
 		guiContext->SetGUIContextParams( ctxParams );
 		guiContext->Finalize( );
+	}
+
+	//================================================================================= 
+
+	void EditorUIStyleSheetEditWindow::Init( const WindowParams& params )
+	{
+		// Construct scene in world
+		if ( !mWorld )
+		{ 
+			// Initialize new world 
+			mWorld = new World( );
+			// Register contexts with world
+			mWorld->RegisterContext< GraphicsSubsystemContext >( );
+			// Set asset from data 
+			mStyleSheet = ( UIStyleSheet* )( params.mData );
+			// Construct Scene 
+			ConstructScene( );
+		} 
+	}
+
+	//================================================================================= 
+
+	void EditorUIStyleSheetEditWindow::Update( )
+	{
+	}
+
+	//================================================================================= 
+
+	void EditorUIStyleSheetEditWindow::EditStyleRulePopup( const String& ruleName, UIStyleState state, UIStyleRule* rule ) 
+	{ 
+
+	}
+
+	//================================================================================= 
+
+#define RULE_SELECTABLE( name, type, val )\
+	if ( ImGui::Selectable( name ) ) {\
+		if ( true )\
+		{\
+			rule->AddStyle( type, val );\
+		}\
+		return true;\
+	}
+
+	bool UIPropertyTypeList( UIStyleRule* rule )
+	{ 
+		// List all the available property types
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::BackgroundColor ), UIStylePropertyType::BackgroundColor, RGBA8_White( ) ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::TextColor ), UIStylePropertyType::TextColor, RGBA8_White( ) ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::Width ), UIStylePropertyType::Width, 10.f ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::Height ), UIStylePropertyType::Height, 10.f ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::MarginLeft ), UIStylePropertyType::MarginLeft, 0.f ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::MarginRight ), UIStylePropertyType::MarginRight, 0.f ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::MarginTop ), UIStylePropertyType::MarginTop, 0.f ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::MarginBottom ), UIStylePropertyType::MarginBottom, 0.f ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::FlexDirection ), UIStylePropertyType::FlexDirection, UIElementFlexDirection::FlexDirectionColumn ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::AlignmentContent ), UIStylePropertyType::AlignmentContent, UIElementAlignment::AlignCenter ); 
+		RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::JustificationContent ), UIStylePropertyType::JustificationContent, UIElementJustification::JustifyCenter ); 
+		//RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::TextAlignment ), UIStylePropertyType::TextAlignment, UIElementAlignment::AlignCenter ); 
+		//RULE_SELECTABLE( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::TextJustification ), UIStylePropertyType::TextJustification, UIElementJustification::JustifyCenter ); 
+
+		if ( ImGui::Selectable( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::TextAlignment ) ) ) { 
+			rule->AddStyle( UIStylePropertyType::TextAlignment, UIElementAlignment::AlignCenter );
+			return true;
+		}
+		if ( ImGui::Selectable( EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( UIStylePropertyType::TextJustification ) ) ) { 
+			rule->AddStyle( UIStylePropertyType::TextJustification, UIElementJustification::JustifyCenter );
+			return true;
+		}
+		return false;
+	}
+
+	void UIStyleRulePopupEdit::Update( )
+	{ 
+		ImGui::SetNextWindowPos( ImVec2( mPosition.x, mPosition.y ) );
+		ImGui::SetNextWindowSize( ImVec2( 200.f, 300.f ) );
+		ImGui::Begin( "", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar );
+		{ 
+			// Add a new style rule
+			bool hovered = false;
+			if ( ImGui::BeginMenu( "Add Property##menu" ) )
+			{ 
+				hovered |= ImGui::IsMouseHoveringWindow( );
+				UIStyleRule* rule = const_cast< UIStyleRule* >( mStyleSheet->GetStyleRuleFromSelector( mRuleName, mState ) );
+				if ( UIPropertyTypeList( rule ) ) {
+					mActive = false;
+				}
+				ImGui::EndMenu( );
+			} 
+
+			if ( ImGui::Selectable( "Clear Properties" ) )
+			{ 
+				UIStyleRule* rule = const_cast< UIStyleRule* >( mStyleSheet->GetStyleRuleFromSelector( mRuleName, mState ) ); 
+				if ( rule ) {
+					rule->mStylePropertyDataSet.clear( );
+				}
+				mActive = false;
+			}
+
+			hovered |= ImGui::IsMouseHoveringWindow( );
+
+			if ( ImGui::IsMouseClicked( 0 ) && !hovered ) {
+				mActive = false;
+			}
+		}
+		ImGui::End( );
+	}
+
+	//================================================================================= 
+
+	const char* EditorUIStyleSheetEditWindow::GetLabelFromStylePropertyType( const UIStylePropertyType& type )
+	{
+		switch ( type )
+		{
+			case UIStylePropertyType::FlexDirection:		return "flex-direction"; break;
+			case UIStylePropertyType::AlignmentContent:		return "align-content"; break;
+			case UIStylePropertyType::AlignmentSelf:		return "align-self"; break;
+			case UIStylePropertyType::AnchorBottom:			return "anchor-bottom"; break;
+			case UIStylePropertyType::AnchorLeft:			return "anchor-left"; break;
+			case UIStylePropertyType::AnchorRight:			return "anchor-right"; break;
+			case UIStylePropertyType::AnchorTop:			return "anchor-top"; break;
+			case UIStylePropertyType::BackgroundColor:		return "background-color"; break;
+			case UIStylePropertyType::JustificationContent: return "justify-content"; break;
+			case UIStylePropertyType::Width:				return "width"; break;
+			case UIStylePropertyType::Height:				return "height"; break;
+			case UIStylePropertyType::MarginLeft:			return "margin-left"; break;
+			case UIStylePropertyType::MarginTop:			return "margin-top"; break;
+			case UIStylePropertyType::MarginRight:			return "margin-right"; break;
+			case UIStylePropertyType::MarginBottom:			return "margin-bottom"; break;
+			case UIStylePropertyType::TextColor:			return "text-color"; break;
+			case UIStylePropertyType::TextAlignment:		return "align-text"; break;
+			case UIStylePropertyType::TextJustification:	return "justify-text"; break;
+			default:										return "invalid"; break;
+		}
+	}
+
+#define RULE_EDIT_COLOR( data )\
+	do {\
+		ColorRGBA8 color = *( ColorRGBA8* )data;\
+		f32 col[ 4 ] = { (f32)color.r / 255.f, (f32)color.g / 255.f, (f32)color.b / 255.f, (f32)color.a / 255.f };\
+		String colLabel = Utils::format( "##%d", ( usize )( intptr_t )data );\
+		ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 0.f, 0.f ) );\
+		if ( ImGui::ColorEdit4( colLabel.c_str(), col, ImGuiColorEditFlags_NoInputs ) )\
+		{\
+			color.r = col[ 0 ] * 255;\
+			color.g = col[ 1 ] * 255;\
+			color.b = col[ 2 ] * 255;\
+			color.a = col[ 3 ] * 255;\
+			*( ColorRGBA8* )data = color;\
+		}\
+		ImGui::PopStyleVar();\
+		ImGui::SameLine();\
+		ImGui::Text( "rgba(%d, %d, %d, %d)", color.r, color.g, color.b, color.a );\
+	} while ( 0 )
+
+#define RULE_EDIT_FLOAT( data )\
+	do {\
+		f32 val = *( f32* )data;\
+		String label = Utils::format( "##%d", (usize)(intptr_t)data);\
+		ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 0.f, 0.f ) );\
+		ImGui::PushItemWidth( 50.f);\
+		if ( ImGui::DragFloat( label.c_str(), &val, 1.f, 0.f, 0.f, "%.1f" ) )\
+		{\
+			*( f32* )data = val;\
+		}\
+		ImGui::PopItemWidth();\
+		ImGui::PopStyleVar();\
+	} while ( 0 ) 
+
+	void EditorUIStyleSheetEditWindow::DisplayRule( const String& ruleName, UIStyleState state, UIStyleRule* rule )
+	{ 
+		const char* stateText = state == UIStyleState::Active ? ":active" : state == UIStyleState::Hovered ? ":hover" : "";
+		String label = Utils::format( "%s%s", ruleName.c_str(), stateText );
+		ImVec2 ts = ImGui::CalcTextSize( label.c_str( ) );
+		ImVec2 a = ImGui::GetCursorScreenPos( );
+		ImVec2 b = a + ts;
+		bool ruleHovered = ImGui::IsMouseHoveringRect( a, b );
+		ImGui::PushStyleColor( ImGuiCol_Text, ruleHovered ? ImVec4( 1.f, 0.58f, 0.11f, 1.f ) : ImVec4( 1.f, 0.67f, 0.29f, 1.f ) );
+		ImGui::Text( "%s", label.c_str() );
+		ImGui::PopStyleColor( );
+		ImGui::SameLine( ); ImGui::Text( " {" );
+		{
+			// Display all the properties of this particular rule
+			for ( auto& p : rule->mStylePropertyDataSet )
+			{ 
+				// Indent cursor position
+				ImGui::SetCursorPosX( ImGui::GetCursorPosX( ) + 5.f );
+
+				ImVec4 defaultCol = ImVec4( 59.f / 255.f, 133.f / 255.f, 249.f / 255.f, 1.f );
+
+				ImGui::PushStyleColor( ImGuiCol_Text, defaultCol );
+				ImGui::Text( "%s: ", GetLabelFromStylePropertyType( p.mType ) );
+				ImGui::PopStyleColor();
+				ImGui::SameLine();
+
+				switch ( p.mType ) 
+				{ 
+					case UIStylePropertyType::BackgroundColor:	RULE_EDIT_COLOR( p.mData ); break; 
+					case UIStylePropertyType::TextColor:		RULE_EDIT_COLOR( p.mData ); break; 
+					case UIStylePropertyType::Width:			RULE_EDIT_FLOAT( p.mData ); break; 
+					case UIStylePropertyType::Height:			RULE_EDIT_FLOAT( p.mData ); break;
+					case UIStylePropertyType::MarginLeft:		RULE_EDIT_FLOAT( p.mData ); break;
+					case UIStylePropertyType::MarginTop:		RULE_EDIT_FLOAT( p.mData ); break;
+					case UIStylePropertyType::MarginRight:		RULE_EDIT_FLOAT( p.mData ); break;
+					case UIStylePropertyType::MarginBottom:		RULE_EDIT_FLOAT( p.mData ); break;
+
+					case UIStylePropertyType::TextAlignment:
+					case UIStylePropertyType::AlignmentContent:
+					{ 
+						const char* list[] = { "flex-start", "center", "flex-end" }; 
+						UIElementAlignment val = *( UIElementAlignment* )( p.mData );
+						String label = Utils::format( "##%d", ( usize )( intptr_t )p.mData );
+						const char* preview = val == UIElementAlignment::AlignCenter ? "center" : val == UIElementAlignment::AlignFlexStart ? "flex-start" : "flex-end";
+						ImGui::PushItemWidth( 100.f );
+						ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 5.f, 0.f ) );
+						if ( ImGui::BeginCombo( label.c_str( ), preview ) )
+						{ 
+							for ( u32 i = 0; i < sizeof( list ) / sizeof( const char* ); ++i )
+							{
+								if ( ImGui::Selectable( list[ i ] ) )
+								{
+									const char* li = list[ i ];
+									val = ( strcmp( li, "center" ) == 0 ) ? UIElementAlignment::AlignCenter : ( strcmp( li, "flex-start" ) == 0 ) ? UIElementAlignment::AlignFlexStart : UIElementAlignment::AlignFlexEnd;
+									*( UIElementAlignment* )p.mData = val;
+								}
+							}
+							ImGui::EndCombo( );
+						}
+						ImGui::PopItemWidth( );
+						ImGui::PopStyleVar( );
+					} break;
+
+					case UIStylePropertyType::TextJustification:
+					case UIStylePropertyType::JustificationContent:
+					{ 
+						const char* justList[] = { "flex-start", "center", "flex-end" }; 
+						UIElementJustification just = *( UIElementJustification* )( p.mData );
+						String label = Utils::format( "##%d", ( usize )( intptr_t )p.mData );
+						const char* preview = just == UIElementJustification::JustifyCenter ? "center" : just == UIElementJustification::JustifyFlexStart ? "flex-start" : "flex-end";
+						ImGui::PushItemWidth( 100.f );
+						ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 5.f, 0.f ) );
+						if ( ImGui::BeginCombo( label.c_str( ), preview ) )
+						{ 
+							for ( u32 i = 0; i < sizeof( justList ) / sizeof( const char* ); ++i )
+							{
+								if ( ImGui::Selectable( justList[ i ] ) )
+								{
+									const char* jli = justList[ i ];
+									just = ( strcmp( jli, "center" ) == 0 ) ? UIElementJustification::JustifyCenter : ( strcmp( jli, "flex-start" ) == 0 ) ? UIElementJustification::JustifyFlexStart : UIElementJustification::JustifyFlexEnd;
+									*( UIElementJustification* )p.mData = just;
+								}
+							}
+							ImGui::EndCombo( );
+						}
+						ImGui::PopItemWidth( );
+						ImGui::PopStyleVar( );
+					} break;
+
+					case UIStylePropertyType::FlexDirection: 
+					{ 
+						const char* dirList[] = { "column", "row" }; 
+						UIElementFlexDirection dir = *( UIElementFlexDirection* )( p.mData );
+						String dirLabel = Utils::format( "##%d", ( usize )( intptr_t )p.mData );
+						const char* preview = dir == UIElementFlexDirection::FlexDirectionColumn ? "column" : "row";
+						ImGui::PushItemWidth( 100.f );
+						ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 5.f, 0.f ) );
+						if ( ImGui::BeginCombo( dirLabel.c_str( ), preview ) )
+						{ 
+							for ( u32 i = 0; i < sizeof( dirList ) / sizeof( const char* ); ++i )
+							{
+								if ( ImGui::Selectable( dirList[ i ] ) )
+								{
+									dir = ( strcmp( dirList[ i ], "column" ) == 0 ) ? UIElementFlexDirection::FlexDirectionColumn : UIElementFlexDirection::FlexDirectionRow;
+									*( UIElementFlexDirection* )p.mData = dir;
+								}
+							}
+							ImGui::EndCombo( );
+						}
+						ImGui::PopItemWidth( );
+						ImGui::PopStyleVar( );
+
+					} break;
+				}
+			}
+		}
+		ImGui::Text( "}" );
+
+		// Right click on that mofo
+		if ( ruleHovered && ( ImGui::IsMouseClicked( 1 ) || ImGui::IsMouseClicked( 0 ) || ImGui::IsMouseClicked( 2 ) ) )
+		{ 
+			mPopupEdit = UIStyleRulePopupEdit( ruleName, state, Vec2( ImGui::GetMousePos().x, ImGui::GetMousePos().y ) - Vec2( 5.f, 5.f ), mStyleSheet );
+		}
+	}
+
+	void EditorUIStyleSheetEditWindow::DisplayRuleGroup( const String& ruleName, UIStyleRuleGroup* ruleGroup )
+	{
+		// Display things with stuff
+		for ( auto& r : *ruleGroup )
+		{
+			DisplayRule( ruleName, (UIStyleState)r.first, &r.second );
+		}
+	}
+
+	//================================================================================= 
+
+	void RandomPopupWindow::Update( )
+	{
+		mActive = mUpdateFunc( );
+	}
+
+	//================================================================================= 
+
+	bool EditorUIStyleSheetEditWindow::RightClickCanvasPopupFunction( RandomPopupWindow* popupWindow )
+	{
+		bool active = true;
+		ImGui::SetNextWindowPos( popupWindow->mPosition );
+		ImGui::Begin( "##popup_window", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize );
+		{ 
+			bool hovered = ImGui::IsMouseHoveringWindow( ); 
+
+			// Want to add new rules here, yo...
+			if ( ImGui::Selectable( "New Tag" ) )
+			{ 
+				mCreateTagPopupWindow = true;
+				active = false;
+			} 
+
+			if ( !hovered && ImGui::IsMouseClicked( 0 ) )
+			{
+				active = false;
+			}
+		}
+		ImGui::End( );
+
+		return active;
+	}
+
+	//================================================================================= 
+
+	void EditorUIStyleSheetEditWindow::ConstructScene( )
+	{	
+		GUIContext* guiContext = GetGUIContext( );
+
+		// Add main menu options
+		guiContext->RegisterMainMenu( "File" ); 
+		guiContext->RegisterMainMenu( "Edit" ); 
+
+		World* world = GetWorld( ); 
+
+		static bool mCreatePropertyPopupWindow = false;
+
+		guiContext->RegisterWindow( "Style Sheet", [ & ]
+		{ 
+			if ( mPopupEdit.mActive ) {
+				mPopupEdit.Update( );
+			} 
+
+			if ( mPopupWindow.mActive ) {
+				mPopupWindow.Update( );
+			}
+
+			Input* input = EngineSubsystem( Input );
+			if ( input->IsKeyDown( KeyCode::LeftCtrl ) && input->IsKeyPressed( KeyCode::S ) )
+			{
+				mStyleSheet->Save( );
+				printf( "Saved!\n" );
+			}
+
+			if ( ImGui::BeginDock( "Style Sheet" ) )
+			{
+				ImVec2 vp = ImVec2( ImGui::GetWindowWidth( ) - 20.f, ImGui::GetWindowHeight( ) - 15.f );
+				ImGui::ListBoxHeader( "##style_sheet", vp );
+				{ 
+					// Want to display all of the styles in a clean, easy to read order.
+					for ( auto& rg : mStyleSheet->mUIStyleRules )
+					{ 
+						DisplayRuleGroup( rg.first, &rg.second );
+					}
+
+					if ( ImGui::IsMouseClicked( 1 ) && ImGui::IsMouseHoveringWindow( ) )
+					{ 
+						mPopupWindow = RandomPopupWindow( ImGui::GetMousePos(), [ & ] ( ) -> bool {
+							return RightClickCanvasPopupFunction( &mPopupWindow );
+						});
+					}
+				}
+				ImGui::ListBoxFooter();
+				ImGui::EndDock( );
+			}
+
+			if ( mCreatePropertyPopupWindow )
+			{
+				if ( !ImGui::IsPopupOpen( "Create Property" ) )
+				{
+					ImGui::OpenPopup( "Create Property" );
+				} 
+			}
+
+			if ( mCreateTagPopupWindow )
+			{
+				if ( !ImGui::IsPopupOpen( "Create New Tag Rule" ) )
+				{
+					ImGui::OpenPopup( "Create New Tag Rule" );
+				}
+
+				static const MetaClass* tag = nullptr;
+				static const char* state = "default";
+				std::array< const MetaClass*, 4 > tag_list = {
+					Object::GetClass< UIElementButton >( ),
+					Object::GetClass< UIElementCanvas >( ),
+					Object::GetClass< UIElementText >( ),
+					Object::GetClass< UIElementImage >( )
+				};
+
+				const char* state_list[ ] = {
+					"default",
+					"active",
+					"hover"
+				};
+
+				ImGui::SetNextWindowSize( ImVec2( 400.f, 300.f ) );
+				if ( ImGui::BeginPopupModal( "Create New Tag Rule", NULL, ImGuiWindowFlags_NoResize ) )
+				{
+					//if ( ImGui::Button( "Cancel" ) )
+					{
+						// Grab all classes that derive from UI element 
+						if ( ImGui::BeginCombo( "Tags", tag ? tag->GetName().c_str() : "..." ) )
+						{
+							for ( auto& t : tag_list )
+							{
+								if ( ImGui::Selectable( t->GetName().c_str() ) )
+								{
+									tag = t;
+								}
+							} 
+							ImGui::EndCombo( );
+						}
+
+						// States 
+						if ( ImGui::BeginCombo( "States", state ) )
+						{
+							for ( u32 i = 0; i < sizeof( state_list ) / sizeof( const char* ); ++i )
+							{
+								if ( ImGui::Selectable( state_list[ i ] ) )
+								{
+									state = state_list[ i ];
+								}
+							} 
+							ImGui::EndCombo( );
+						} 
+					} 
+
+					if ( ImGui::Button( "Create" ) && tag )
+					{ 
+						// Verify then create tag rule
+						UIStyleRule emptyRule;
+						UIStyleState styleState = ( strcmp( state, "active" ) == 0 ) ? UIStyleState::Active : strcmp( state, "hover" ) == 0 ? UIStyleState::Hovered : UIStyleState::Default;
+						mStyleSheet->AddStyleRule( tag->GetName( ), emptyRule, styleState );
+
+						ImGui::CloseCurrentPopup( );
+						mCreateTagPopupWindow = false; 
+					} 
+					ImGui::SameLine( );
+					if ( ImGui::Button( "Cancel" ) )
+					{
+						ImGui::CloseCurrentPopup( );
+						mCreateTagPopupWindow = false; 
+					}
+
+					ImGui::EndPopup( );
+				}
+			} 
+		} );
+
+		auto saveAssetOption = [ & ] ( )
+		{
+			if ( ImGui::MenuItem( "Save##save_asset_option", NULL ) )
+			{
+				mStyleSheet->Save();
+			}
+		};
+
+		auto createOption = [ & ] ( )
+		{
+			if ( ImGui::MenuItem( "New Tag Rule##tag_rule_option", NULL ) )
+			{ 
+				mCreateTagPopupWindow = true;
+			}
+		};
+
+		// Register menu options
+		guiContext->RegisterMenuOption( "File", "Save##save_asset_option", saveAssetOption ); 
+		guiContext->RegisterMenuOption( "Edit", "New Tag Rule##tag_rule_option", createOption ); 
+		guiContext->RegisterDockingLayout( GUIDockingLayout( "Style Sheet", nullptr, GUIDockSlotType::Slot_Tab, 0.45f ) );
+		guiContext->SetActiveDock( "Style Sheet" );
+		guiContext->Finalize( ); 
+
 	}
 
 	//================================================================================= 

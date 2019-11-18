@@ -118,13 +118,16 @@ namespace Enjon
 			*/
 			static inline void DefaultFunc( UIElement* elem ) {
 				// Do nothing...
-			}
+			} 
+
+			const UIStyleConfiguration& GetCurrentStyleConfiguration( ) const;
 
 			virtual Result SerializeData( ByteBuffer* buffer ) const override; 
 			virtual Result DeserializeData( ByteBuffer* buffer ) override;
 
 			void SetStyleWidth( const f32& width ) {
-				mStyleConfiguration.mSize.x = width;
+				//mStyleConfiguration.mSize.x = width;
+				mStyleOverrides.AddStyle( UIStylePropertyType::Width, width );
 			}
 
 			f32 GetStyleWidth( ) const {
@@ -147,7 +150,8 @@ namespace Enjon
 			}
 
 			void SetStyleHeight( const f32& height ) {
-				mStyleConfiguration.mSize.y = height;
+				//mStyleConfiguration.mSize.y = height;
+				mStyleOverrides.AddStyle( UIStylePropertyType::Height, height );
 			}
 
 			f32 GetStyleHeight( ) const {
@@ -248,11 +252,11 @@ namespace Enjon
 			*/
 			void RemoveFromParent( );
 
-			ENJON_FUNCTION()
+			//ENJON_FUNCTION()
 			void SetSize( const Vec2& size );
 
-			ENJON_FUNCTION()
-			void SetInlineStyles( const UIStyleSettings& styles );
+			//ENJON_FUNCTION()
+			//void SetInlineStyles( const UIStyleSettings& styles );
 
 			Vec4 GetCalculatedLayoutRect(); 
 			Vec2 GetCalculatedLayoutPosition();
@@ -266,9 +270,6 @@ namespace Enjon
 
 			ENJON_PROPERTY( HideInEditor, NonSerializeable )
 			UIElement* mParent = nullptr; 
- 
-			ENJON_PROPERTY( HideInEditor, Delegates[ Mutator = SetInlineStyles ] )
-			UIStyleSettings mInlineStyles; 
 
 			ENJON_PROPERTY( HideInEditor, NonSerializeable )
 			UIStyleConfiguration mStyleConfiguration;
@@ -284,6 +285,9 @@ namespace Enjon
 
 			ENJON_PROPERTY( HideInEditor, NonSerializeable ) 
 			UIStyleState mState = UIStyleState::Default; 
+
+			ENJON_PROPERTY( HideInEditor, NonSerializeable )
+			UIStyleRule mStyleOverrides;
 
 			public:
 			Vec2 mCalculatedLayoutPosition;
@@ -327,20 +331,12 @@ namespace Enjon
 			/*
 			* @brief
 			*/
-			virtual void OnUI() override;
-
-			virtual void ExplicitConstructor() override;
+			virtual void OnUI() override; 
 
 		public:
 
 			ENJON_PROPERTY( )
-			String mText = "";
-
-			ENJON_PROPERTY()
-			AssetHandle< UIFont > mFont;
-
-			ENJON_PROPERTY()
-			u32 mFontSize = 16;
+			String mText = ""; 
 
 			// Can I serialize this somehow? 
 			UICallback mOnClick;
@@ -355,25 +351,10 @@ namespace Enjon
 
 			virtual void OnUI() override; 
 
-			virtual void ExplicitConstructor() override;
-
 		 public:
 
 			ENJON_PROPERTY()
-			String mText = "";
-
-			ENJON_PROPERTY()
-			UIElementJustification mTextJustification = UIElementJustification::JustifyCenter;
-
-			ENJON_PROPERTY()
-			UIElementAlignment mTextAlignment = UIElementAlignment::AlignCenter;
-
-			// This could entirely be left up to the inline styles instead...
-			ENJON_PROPERTY()
-			AssetHandle< UIFont > mFont;
-
-			ENJON_PROPERTY()
-			u32 mFontSize = 16;
+			String mText = ""; 
 
 			UICallback mOnSetText;
 	 };
@@ -421,6 +402,8 @@ namespace Enjon
 		ENJON_CLASS_BODY( UI ) 
 
 		public:
+
+			virtual void ExplicitConstructor( ) override;
 
 			/*
 			* @brief

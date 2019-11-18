@@ -15,36 +15,61 @@
 
 namespace Enjon
 { 
-	//=================================================================================
- 
-	void UIElementText::ExplicitConstructor()
+	//================================================================================= 
+
+	const UIStyleConfiguration& UIElement::GetCurrentStyleConfiguration( ) const
 	{
-		// Set font to default font asset
-		mFont = EngineSubsystem( AssetManager )->GetDefaultAsset< UIFont >();
-	}
+		switch ( mState )
+		{
+			default:
+			case UIStyleState::Default: 
+			{ 
+				return mStyleConfiguration;
+			} break;
+			case UIStyleState::Hovered: 
+			{ 
+				return mHoverStyleConfiguration;
+			} break;
+			case UIStyleState::Active: 
+			{ 
+				return mActiveStyleConfiguration;
+			} break;
+		}
+
+	} 
+
+	#define ColorRGBA8ToImVec4( color )\
+		ImVec4( (f32)color.r / 255.f, (f32)color.g / 255.f, (f32)color.b / 255.f, (f32)color.a / 255.f )
 
 	//=================================================================================
 	void UIElementText::OnUI()
 	{ 
 		// Push font at particular size for text
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
-		igm->PushFont( mFont, mFontSize );
 
 		Vec2 pos = GetCalculatedLayoutPosition( );
 		Vec2 sz = GetCalculatedLayoutSize( );
 		ImVec2 textSz = ImGui::CalcTextSize( mText.c_str( ) );
+		ImVec2 cp; 
+		const UIStyleConfiguration& config = GetCurrentStyleConfiguration( );
 
-		ImVec2 cp;
+		ImDrawList* dl = ImGui::GetWindowDrawList( );
+
+		// Draw color rect behind text
+		dl->AddRectFilled( ImVec2( pos.x, pos.y ), ImVec2( pos.x + sz.x, pos.y + sz.y ), ImColor( ColorRGBA8ToImVec4( config.mBackgroundColor ) ) );
+
+		// Push font
+		igm->PushFont( config.mFont, config.mFontSize );
 
 		// Calculate position based on alignment of text within box
-		switch ( mTextJustification )
+		switch ( config.mTextJustification )
 		{
 			case UIElementJustification::JustifyCenter:		cp.x = pos.x + ( sz.x - textSz.x ) / 2.f;	break; 
 			case UIElementJustification::JustifyFlexStart:	cp.x = pos.x;								break; 
 			case UIElementJustification::JustifyFlexEnd:	cp.x = pos.x + ( sz.x - textSz.x );			break;
 		}
 
-		switch ( mTextAlignment )
+		switch ( config.mTextAlignment )
 		{ 
 			case UIElementAlignment::AlignCenter:		cp.y = pos.y + ( sz.y - textSz.y ) / 2.f;		break; 
 			case UIElementAlignment::AlignFlexStart:	cp.y = pos.y;									break;
@@ -56,18 +81,11 @@ namespace Enjon
 		{
 			mOnSetText( this );
 		}
-		ImGui::Text( "%s", mText.c_str() );
+		ImGui::TextColored( ColorRGBA8ToImVec4( config.mTextColor ), "%s", mText.c_str() );
 		ImGui::PopID();
 
 		igm->PopFont();
-	}
-	
-	//=================================================================================
-
-	void UIElementButton::ExplicitConstructor()
-	{
-		mFont = EngineSubsystem( AssetManager )->GetDefaultAsset< UIFont >();
-	}
+	} 
 
 	//=================================================================================
 
@@ -109,25 +127,16 @@ namespace Enjon
 	{ 
 		// Push font at particular size for text
 		ImGuiManager* igm = EngineSubsystem( ImGuiManager ); 
-		igm->PushFont( mFont, mFontSize );
+		const UIStyleConfiguration& config = GetCurrentStyleConfiguration( );
+
+		igm->PushFont( config.mFont, config.mFontSize );
 
 		// Wait, how would this actually work?... 
 		ImGui::PushStyleColor( ImGuiCol_Button, ColorRGBA8ToImVec4( mStyleConfiguration.mBackgroundColor ) );
 		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ColorRGBA8ToImVec4( mHoverStyleConfiguration.mBackgroundColor ) );
 		ImGui::PushStyleColor( ImGuiCol_ButtonActive, ColorRGBA8ToImVec4( mActiveStyleConfiguration.mBackgroundColor ) );
-
-		switch ( mState ) {
-			default:
-			case UIStyleState::Default: 
-				ImGui::PushStyleVar( ImGuiStyleVar_ButtonTextAlign, TextAlignJustifyValue( mStyleConfiguration.mTextJustification, mStyleConfiguration.mTextAlignment ) ); 
-				break;
-			case UIStyleState::Hovered: 
-				ImGui::PushStyleVar( ImGuiStyleVar_ButtonTextAlign, TextAlignJustifyValue( mHoverStyleConfiguration.mTextJustification, mHoverStyleConfiguration.mTextAlignment ) ); 
-				break;
-			case UIStyleState::Active: 
-				ImGui::PushStyleVar( ImGuiStyleVar_ButtonTextAlign, TextAlignJustifyValue( mActiveStyleConfiguration.mTextJustification, mActiveStyleConfiguration.mTextAlignment ) ); 
-				break; 
-		}
+		ImGui::PushStyleColor( ImGuiCol_Text, ColorRGBA8ToImVec4( config.mTextColor ) );
+		ImGui::PushStyleVar( ImGuiStyleVar_ButtonTextAlign, TextAlignJustifyValue( config.mTextJustification, config.mTextAlignment ) ); 
 
 		Vec2 pos = GetCalculatedLayoutPosition();
 		Vec2 sz = GetCalculatedLayoutSize(); 
@@ -145,7 +154,7 @@ namespace Enjon
 
 		ImGui::PopID(); 
 
-		ImGui::PopStyleColor( 3 );
+		ImGui::PopStyleColor( 4 );
 		ImGui::PopStyleVar( 1 );
 
 		igm->PopFont();
@@ -157,6 +166,7 @@ namespace Enjon
 	{
 		Vec2 pos = GetCalculatedLayoutPosition();
 		Vec2 sz = GetCalculatedLayoutSize(); 
+		const UIStyleConfiguration& config = GetCurrentStyleConfiguration( );
 		ImGui::SetCursorScreenPos( ImVec2( pos.x, pos.y ) );
 		ImGui::PushID( ( usize )( intptr_t )this );
 		ImTextureID img = mImage ? ( ImTextureID )Int2VoidP( mImage->GetTextureId( ) ) : ( ImTextureID )Int2VoidP( EngineSubsystem( AssetManager )->GetDefaultAsset< Texture >( )->GetTextureId( ) );
@@ -215,16 +225,17 @@ namespace Enjon
 
 	//================================================================================= 
 
-	void UIElement::SetInlineStyles( const UIStyleSettings& styles )
-	{
-		mInlineStyles = styles; 
-	}
+	//void UIElement::SetInlineStyles( const UIStyleSettings& styles )
+	//{
+	//	mInlineStyles = styles; 
+	//}
 
 	//=================================================================================
 
 	void UIElement::SetSize( const Vec2& size )
 	{
-		mInlineStyles.mSize = size; 
+		SetStyleWidth( size.x );
+		SetStyleHeight( size.y );
 	}
 
 	//=================================================================================
@@ -272,8 +283,8 @@ namespace Enjon
 			mChildren.at( i ) = child; 
 		} 
 
-		// Force inline styles to be set
-		SetInlineStyles( mInlineStyles ); 
+		//// Force inline styles to be set
+		//SetInlineStyles( mInlineStyles ); 
 
 		return Result::SUCCESS;
 	}
@@ -610,7 +621,7 @@ namespace Enjon
 				}
 
 				// Finally apply any overrides
-				//config.MergeRuleIntoStyle( mStyleOverrides );
+				config.MergeRuleIntoStyle( &mStyleOverrides );
 
 				// Set style
 				mStyleConfiguration = config;
@@ -643,7 +654,7 @@ namespace Enjon
 				}
 
 				// Finally apply any overrides
-				//config.MergeRuleIntoStyle( mStyleOverrides );
+				hoverConfig.MergeRuleIntoStyle( &mStyleOverrides );
 
 				// Set style
 				mHoverStyleConfiguration = hoverConfig;
@@ -679,7 +690,7 @@ namespace Enjon
 				}
 
 				// Finally apply any overrides
-				//config.MergeRuleIntoStyle( mStyleOverrides );
+				activeConfig.MergeRuleIntoStyle( &mStyleOverrides );
 
 				// Set style
 				mActiveStyleConfiguration = activeConfig;
@@ -692,7 +703,7 @@ namespace Enjon
 
 	bool UIStyleSheet::StyleRuleExists( const String& selector )
 	{
-		return ( mUIStyleRules.find( selector.c_str( ) ) != mUIStyleRules.end( ) );
+		return ( mUIStyleRules.find( selector ) != mUIStyleRules.end( ) );
 	}
 
 	//================================================================================= 
@@ -702,20 +713,20 @@ namespace Enjon
 		// Add new rule
 		if ( !StyleRuleExists( selector ) )
 		{
-			mUIStyleRules[ selector.c_str() ] = UIStyleRuleGroup( );
+			mUIStyleRules[ selector ] = UIStyleRuleGroup( );
 		}
 
 		// Add rule to state
-		mUIStyleRules[ selector.c_str( ) ][ ( u32 )state ] = rule;
+		mUIStyleRules[ selector ][ ( u32 )state ] = rule;
 	}
 
 	//================================================================================= 
 
 	const UIStyleRuleGroup* UIStyleSheet::GetStyleGroup( const String& selector ) const
 	{
-		if ( mUIStyleRules.find( selector.c_str( ) ) != mUIStyleRules.end( ) )
+		if ( mUIStyleRules.find( selector ) != mUIStyleRules.end( ) )
 		{
-			return &mUIStyleRules.at( selector.c_str( ) );
+			return &mUIStyleRules.at( selector );
 		}
 
 		return nullptr;
@@ -832,10 +843,17 @@ namespace Enjon
 
 	void UI::CalculateLayout( const u32& width, const u32& height )
 	{
+		// I want to set the override style for this...
 		mRoot.SetStyleWidth( width );
 		mRoot.SetStyleHeight( height ); 
-
 		mRoot.CalculateLayout( this );
+	}
+
+	//=================================================================================
+
+	void UI::ExplicitConstructor( )
+	{
+		mStyleSheet = EngineSubsystem( AssetManager )->GetDefaultAsset< UIStyleSheet >( );
 	}
 
 	//=================================================================================
